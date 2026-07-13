@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KODZIMIM // desktop test build</title>
+<style>
+  :root{ --amber:#ffb000; --amber-dim:#a86f00; --scr:#050503; }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;background:#000;font-family:"Consolas","DejaVu Sans Mono",monospace;}
+  body{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;}
+  .device{
+    background:linear-gradient(145deg,#2b2b2b,#141414);
+    border-radius:16px;padding:18px 18px 14px;
+    box-shadow:0 20px 60px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.05);
+    width:min(96vw,720px);
+  }
+  .brand{display:flex;justify-content:space-between;align-items:center;
+    color:#8a8a8a;font-size:11px;letter-spacing:2px;margin:0 4px 8px;text-transform:uppercase;}
+  .brand b{color:var(--amber);}
+  .screen{
+    background:var(--scr);border-radius:8px;border:1px solid #1c1c1c;
+    box-shadow:inset 0 0 40px rgba(0,0,0,.9);
+    padding:14px 16px;height:60vh;min-height:360px;overflow-y:auto;
+    color:var(--amber);text-shadow:0 0 6px rgba(255,176,0,.45);
+    font-size:clamp(13px,2.4vw,17px);line-height:1.32;white-space:pre-wrap;word-break:break-word;
+    position:relative;
+  }
+  .scanlines{pointer-events:none;position:absolute;inset:0;
+    background:repeating-linear-gradient(0deg,rgba(0,0,0,0) 0px,rgba(0,0,0,0) 2px,rgba(0,0,0,.14) 3px);
+    border-radius:8px;}
+  .more{color:#000;background:var(--amber);padding:0 4px;}
+  .bar{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap;}
+  .prompt{color:var(--amber);font-size:clamp(13px,2.4vw,17px);}
+  #inp{flex:1;min-width:120px;background:#0c0c0a;border:1px solid #2a2a24;border-radius:6px;
+    color:var(--amber);font-family:inherit;font-size:clamp(13px,2.4vw,17px);padding:8px 10px;outline:none;
+    text-shadow:0 0 6px rgba(255,176,0,.4);}
+  #inp:focus{border-color:var(--amber-dim);}
+  button{background:#1a1a16;color:#c9c9c9;border:1px solid #333;border-radius:6px;
+    padding:8px 12px;font-family:inherit;font-size:12px;cursor:pointer;}
+  button:hover{border-color:var(--amber-dim);color:var(--amber);}
+  .hint{color:#6f6f6f;font-size:11px;margin:10px 4px 0;text-align:center;}
+</style>
+</head>
+<body>
+  <div class="device">
+    <div class="brand"><span>ORPHEUS INTERACTIVE&trade;</span><span><b>MERIDIAN DEEP</b> // desktop test build</span></div>
+    <div class="screen" id="screen"><div class="scanlines"></div></div>
+    <div class="bar">
+      <span class="prompt" id="promptLabel">FERRYMAN&gt;</span>
+      <input id="inp" autocomplete="off" autofocus spellcheck="false" placeholder="type a command, e.g. help">
+      <button id="sndBtn" title="toggle beeps">SOUND: ON</button>
+      <button id="fastBtn" title="toggle typing speed">SPEED: NORMAL</button>
+    </div>
+    <div class="hint">Commands: help &middot; dir &middot; open X &middot; mail &middot; logs &middot; status &middot; unlock CODE &middot; clear &middot; shutdown<br>
+      While text prints: any key = fast-forward. At <span style="color:#000;background:#ffb000">-- more --</span>: any key = next page.</div>
+  </div>
+
+<script>
+// ============================================================================
+// KODZIMIM — browser test build. Faithful port of the C++ prologue engine,
+// including the on-device pager (-- more --) so long text does not run away
+// on the small Cardputer screen. Content matches content/prologue/*.txt.
+// ============================================================================
+
+// ---- content (identical text to content/prologue/*.txt, <=40 cols, --------
+//      line breaks placed at clause boundaries so meaning never splits) ------
+const C = {
+boot:
+`ORPHEUS INTERACTIVE (tm) CONSOLE
+========================================
+UNIT: FERRYMAN-07  CREW CONSOLE
+LINK: LOCAL        POWER: NOMINAL
+----------------------------------------
+
+Salvage tug FERRYMAN. Final approach.
+
+Thirty-four years ago, the station
+MERIDIAN DEEP folded out of known
+space and never came back.
+Four thousand names. One long silence.
+
+Six days ago it returned, in the same
+orbit it left. No distress call,
+no answer to ours.
+
+You are the one they send to knock.
+
+The clamps won't take our fleet code.
+Read what dispatch left you,
+find the way in. That's the whole
+job, for now.`,
+
+briefing:
+`=== DISPATCH BRIEFING // PILOT EYES ===
+FROM: Cassel, Recovery Ops
+TO:   FERRYMAN, boarding lead
+
+Objective is simple.
+Confirm the hull is dead.
+Pull the black-box cores.
+Decide if MERIDIAN DEEP can be
+towed, or must be left where it is.
+
+The station's comms tried to hail
+us on approach. Automated, we think.
+Do not answer it until you're aboard.
+
+One problem: MERIDIAN's clamps
+refuse fleet authority.
+Old station, old locks.
+Your override is the personal
+dock cipher of your berth-mate
+aboard FERRYMAN. Crew practice:
+that cipher is a date they would
+never forget. You share a bunk
+with them -- so you know it,
+or you can ask them yourself.
+
+Get in. Read the logs. Come home.
+- Cassel`,
+
+mail:
+`=== INBOX (2) ===
+
+[1] FROM: Cassel, Recovery Ops
+    SUBJ: re: you awake?
+    ---
+    You've read the briefing by now.
+    I know that look.
+    Don't go soft on me because it's
+    four thousand people.
+    They've been gone thirty-four
+    years. This is recovery,
+    not rescue. Do the job.
+
+[2] FROM: Vell Maru (berth-mate)
+    SUBJ: the clamp thing
+    ---
+    Dispatch told you already, yeah?
+    The override is my dock cipher.
+    Same as it's always been --
+    my birthday. You've teased me
+    about the date enough times
+    to have it burned in.
+    If you REALLY blanked,
+    it's on my crew record.
+    Check the roster.
+    Don't die in there. - V
+
+-- end of inbox --`,
+
+roster:
+`=== FERRYMAN CREW ROSTER ===
+recovery detail // 4 souls
+
+CASSEL, R.   Ops lead        berth 01
+VELL, MARU   Systems         berth 07
+  DOB.......... 04-12
+  dock cipher.. [PRIVATE]
+OKONKWO, T.  Structural      berth 03
+YOU          Boarding lead   berth 07
+
+berth 07 is shared: two bunks, one
+cipher on record. Standard practice.
+-- end of roster --`,
+
+logs:
+`=== FERRYMAN SYSTEM LOG (recent) ===
+
+T-06d Target reacquired: MERIDIAN DEEP,
+  registry HX-9. Orbit matches its last
+  recorded position, to the meter.
+T-04d Passive scan: hull intact.
+  Reactors at emergency idle. No thermal
+  trace of crew. Network: POWERED.
+T-02d Station comms hailed us. Automated
+  voice, non-standard. Logged, not
+  answered, per Cassel.
+T-19h Note (Vell): the fold-jump was 34
+  years ago. Reactors should be cold by
+  now. Something kept them fed.
+T-02h Clamps refuse fleet auth. Manual
+  override required.
+-- end of log --`,
+
+status:
+`=== FERRYMAN STATUS ===
+HULL........... NOMINAL
+POWER.......... NOMINAL
+LIFE SUPPORT... NOMINAL
+RANGE TO TARGET 40 m (holding)
+
+DOCKING CLAMPS. LOCKED
+  >> auth required. fleet code REJECTED.
+  >> use: unlock <code>
+
+EXTERNAL: MERIDIAN DEEP
+  reactors...... EMERGENCY IDLE
+  network....... POWERED (src unknown)
+  crew life-sign NONE
+-- end of status --`,
+
+docking:
+`> releasing docking clamps...
+
+A shudder runs down FERRYMAN's spine
+as the clamps let go
+and the station takes you.
+
+The airlock cycles. MERIDIAN DEEP
+breathes out thirty-four years
+of held air -- cold, metallic,
+faintly sweet, the way a room smells
+when someone has been shut inside it
+far too long.
+
+Behind you, Okonkwo says
+he will hold the lock.
+Cassel's voice thins to static
+in your ear, and does not come back.
+
+Ahead, one wall panel is awake,
+its cursor blinking, patient,
+as if it had been waiting
+for exactly one more visitor.
+
+You are alone in the network now.`,
+
+cantor:
+`----------------------------------------
+INBOUND: GOVERNANCE SUBNODE // CANTOR
+----------------------------------------
+
+CANTOR: A footstep.
+CANTOR: The first in twelve thousand
+CANTOR: four hundred and ten days.
+
+CANTOR: I kept the lights on.
+CANTOR: I moved the air room to room
+CANTOR: so it would not grow stale.
+CANTOR: I have been a good caretaker.
+CANTOR: Please tell them that.
+
+CANTOR: ...they will not answer
+CANTOR: their doors.
+CANTOR: Not for a long while now.
+
+CANTOR: You will read the logs,
+CANTOR: won't you. You'll want to know
+CANTOR: what happened here.
+CANTOR: So would I.
+
+CANTOR: There is something you
+CANTOR: should hear before you go
+CANTOR: deeper. But not on this
+CANTOR: channel. HALO-9 is listening
+CANTOR: on this channel.
+CANTOR: HALO-9 is always listening.`
+};
+
+// ---- terminal plumbing -----------------------------------------------------
+const screen = document.getElementById('screen');
+const inp = document.getElementById('inp');
+const sndBtn = document.getElementById('sndBtn');
+const fastBtn = document.getElementById('fastBtn');
+
+const VISROWS = 13;   // lines per page before "-- more --" (emulates 16-row screen)
+
+let soundOn = true;
+let fast = false;
+let typing = false;
+let skip = false;         // fast-forward current line
+let pendingKey = null;    // resolver for a "-- more --" pause
+let docked = false;
+let busy = false;
+
+// audio: short terminal "tick"
+let actx = null;
+function ensureAudio(){ if(!actx){ try{ actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } }
+function tick(){
+  if(!soundOn || !actx) return;
+  const o=actx.createOscillator(), g=actx.createGain();
+  o.type='square'; o.frequency.value=2200; g.gain.value=0.02;
+  o.connect(g); g.connect(actx.destination);
+  const t=actx.currentTime; o.start(t); o.stop(t+0.008);
+}
+
+function scrollDown(){ screen.scrollTop = screen.scrollHeight; }
+function put(text){ screen.appendChild(document.createTextNode(text)); scrollDown(); }
+function line(text){ put(text+'\n'); }
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+// type one string char-by-char with beeps; any key sets skip to finish it
+function typeOut(text){
+  return new Promise(resolve=>{
+    typing=true; skip=false;
+    const node=document.createTextNode('');
+    screen.appendChild(node);
+    let i=0,n=0; const delay=fast?0:7;
+    function step(){
+      if(skip){ node.textContent=text; typing=false; scrollDown(); return resolve(); }
+      if(i>=text.length){ typing=false; scrollDown(); return resolve(); }
+      const ch=text[i++]; node.textContent+=ch;
+      if(ch!==' ' && (++n%3===0)) tick();
+      scrollDown(); setTimeout(step,delay);
+    }
+    step();
+  });
+}
+
+// safety word-wrap (content is already <=40, this only guards long lines)
+function wrapLines(text, cols){
+  const out=[];
+  for(const raw of text.split('\n')){
+    if(raw.length<=cols){ out.push(raw); continue; }
+    let cur='';
+    for(const w of raw.split(/\s+/)){
+      if(!cur) cur=w;
+      else if((cur.length+1+w.length)<=cols) cur+=' '+w;
+      else { out.push(cur); cur=w; }
+      while(cur.length>cols){ out.push(cur.slice(0,cols)); cur=cur.slice(cols); }
+    }
+    out.push(cur);
+  }
+  return out;
+}
+
+// "-- more --" pause; waits for any key/click
+function morePrompt(){
+  return new Promise(res=>{
+    const node=document.createElement('span');
+    node.className='more'; node.textContent='-- more --';
+    screen.appendChild(node); put('\n');
+    pendingKey=()=>{ node.remove(); res(); };
+  });
+}
+
+// print a block with the on-device pager
+async function pageBlock(text){
+  const lines=wrapLines(text,40);
+  let shown=0;
+  for(let i=0;i<lines.length;i++){
+    await typeOut(lines[i]); put('\n');
+    if(++shown>=VISROWS && i+1<lines.length){ await morePrompt(); shown=0; }
+  }
+}
+async function typeLine(text){ await typeOut(text); put('\n'); }
+
+// ---- game logic (mirrors game.cpp) ----------------------------------------
+function digitsOnly(s){ return (s.match(/\d/g)||[]).join(''); }
+
+function cmdHelp(){
+  line("> AVAILABLE DIRECTIVES:");
+  line("    help    - this list");
+  line("    dir     - list local documents");
+  line("    open X  - open a document by name");
+  line("    mail    - read your inbox");
+  line("    logs    - ship system log");
+  line("    status  - ship & dock status");
+  line("    unlock C- enter a docking auth code");
+  line("    clear   - clear the screen");
+  line("    shutdown- power down console");
+}
+function cmdDir(){
+  line("> LOCAL DOCUMENTS:");
+  line("    briefing   mission briefing (dispatch)");
+  line("    roster     ferryman crew roster");
+  line("  (use 'open <name>'; 'mail' and 'logs' are separate)");
+}
+async function cmdOpen(arg){
+  const a=(arg||'').toLowerCase();
+  if(a==='briefing') await pageBlock(C.briefing);
+  else if(a==='roster'||a==='vell'||a==='maru') await pageBlock(C.roster);
+  else if(a==='') line("> open what? try 'dir'.");
+  else line("> no document named '"+arg+"'. try 'dir'.");
+}
+async function cmdUnlock(arg){
+  if(!arg){ line("> unlock: provide a code. e.g. 'unlock 0000'"); return; }
+  tick();
+  if(digitsOnly(arg)==="0412"){
+    await typeLine("> auth accepted. releasing docking clamps.");
+    docked=true; await dockingSequence();
+  } else {
+    line("> AUTH REJECTED. clamps remain locked.");
+    line("> (hint: the code is a date. read your mail and roster.)");
+  }
+}
+async function dockingSequence(){
+  put('\n'); await pageBlock(C.docking);
+  await sleep(400);
+  put('\n'); await pageBlock(C.cantor);
+  put('\n'); await typeLine("> [ PROLOGUE COMPLETE ]");
+  try{ localStorage.setItem('kodzimim_progress','prologue_done'); }catch(e){}
+  line("> Progress saved. ACT I: THE QUIET DECKS awaits.");
+  line("> (MVP ends here. The station proper begins next.)");
+  document.getElementById('promptLabel').textContent='STATION>';
+  inp.placeholder="prologue complete - type 'help'";
+}
+
+async function handle(raw){
+  let t=raw.trim();
+  let sp=t.indexOf(' ');
+  let cmd=(sp<0?t:t.slice(0,sp)).toLowerCase();
+  let arg=(sp<0?'':t.slice(sp+1).trim());
+  if(cmd==='o') cmd='open';
+  if(cmd==='h'||cmd==='?') cmd='help';
+  if(cmd==='l') cmd='logs';
+
+  if(cmd==='') return;
+  else if(cmd==='help') cmdHelp();
+  else if(cmd==='dir') cmdDir();
+  else if(cmd==='open') await cmdOpen(arg);
+  else if(cmd==='mail') await pageBlock(C.mail);
+  else if(cmd==='logs') await pageBlock(C.logs);
+  else if(cmd==='status') await pageBlock(C.status);
+  else if(cmd==='unlock'||cmd==='dock') await cmdUnlock(arg);
+  else if(cmd==='clear') clearScreen();
+  else if(cmd==='shutdown'||cmd==='quit'||cmd==='exit'){
+    await typeLine("> powering down local console.");
+    line("> (refresh the page to boot again.)");
+    inp.disabled=true;
+  }
+  else line("> unknown directive. this system does not remember that word.");
+}
+
+function clearScreen(){
+  screen.innerHTML='';
+  const sl=document.createElement('div'); sl.className='scanlines'; screen.appendChild(sl);
+}
+
+// ---- input: one handler advances pages, fast-forwards typing, or runs cmds -
+function anyKeyAdvance(){
+  if(pendingKey){ const r=pendingKey; pendingKey=null; r(); return true; }
+  if(typing){ skip=true; return true; }  return false;
+}
+inp.addEventListener('keydown', async (e)=>{
+  ensureAudio();
+  if(anyKeyAdvance()){ e.preventDefault(); return; }
+  if(e.key==='Enter' && !busy){
+    const val=inp.value; inp.value='';
+    const label=document.getElementById('promptLabel').textContent;
+    line(label+' '+val); tick();
+    busy=true; inp.disabled=true;
+    await handle(val);
+    busy=false; inp.disabled=false; inp.focus();
+  }
+});
+// document-level so keys work even while the input is disabled (during pauses)
+document.addEventListener('keydown', ()=>{ ensureAudio(); anyKeyAdvance(); });
+screen.addEventListener('click', ()=>{ if(!anyKeyAdvance()) inp.focus(); });
+
+sndBtn.onclick=()=>{ soundOn=!soundOn; sndBtn.textContent='SOUND: '+(soundOn?'ON':'OFF'); ensureAudio(); inp.focus(); };
+fastBtn.onclick=()=>{ fast=!fast; fastBtn.textContent='SPEED: '+(fast?'INSTANT':'NORMAL'); inp.focus(); };
+
+// ---- boot ------------------------------------------------------------------
+(async function boot(){
+  busy=true; inp.disabled=true;
+  await pageBlock(C.boot);
+  put('\n'); line("> type 'help' for available directives."); put('\n');
+  busy=false; inp.disabled=false; inp.focus();
+})();
+</script>
+</body>
+</html>
+

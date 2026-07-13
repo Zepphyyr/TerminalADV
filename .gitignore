@@ -1,0 +1,8 @@
+﻿.pio/
+kodzimim
+kodzimim.exe
+*.o
+save.dat
+.vscode/
+.idea/
+Thumbs.db
