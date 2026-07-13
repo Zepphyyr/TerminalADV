@@ -64,6 +64,11 @@ public:
 
     void waitKey() override { std::string d; std::getline(std::cin, d); }
 
+    void reboot() override {
+        std::cout << "\x1b[0m\n";
+        std::exit(0);          // desktop has no launcher; just quit
+    }
+
     void delayMs(int ms) override {
         if (delayPerChar_ > 0)
             std::this_thread::sleep_for(std::chrono::milliseconds(ms));

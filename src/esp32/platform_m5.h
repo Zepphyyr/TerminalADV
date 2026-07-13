@@ -94,6 +94,13 @@ public:
         }
     }
 
+    // Hard reboot -> the bootloader / M5Launcher takes over again.
+    void reboot() override {
+        M5Cardputer.Display.fillScreen(0x0000);
+        delay(200);
+        ESP.restart();
+    }
+
     void delayMs(int ms) override { delay(ms); }
 
     bool loadFile(const std::string& path, std::string& out) override {

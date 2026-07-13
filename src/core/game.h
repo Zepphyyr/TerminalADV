@@ -27,29 +27,38 @@ public:
 
 private:
     IPlatform* p_;
-    std::vector<ScreenBuf> screens_;   // queue of screens waiting to be read
-    Color cur_       = pal::amber;     // current color while parsing content
-    bool  docked_    = false;
-    bool  running_   = true;
-    bool  cinematic_ = false;          // boot / finale: any input just advances
-    bool  finale_    = false;
-    bool  typeIt_    = true;           // animate this screen? (only on first show)
+    std::vector<ScreenBuf> screens_;    // queue of screens waiting to be read
+    Color cur_          = pal::amber;   // current color while parsing content
+    bool  docked_       = false;
+    bool  running_      = true;
+    bool  cinematic_    = false;        // boot / finale: any input just advances
+    bool  finale_       = false;
+    bool  prologueDone_ = false;        // after the prologue you stay playable
+    bool  typeIt_       = true;         // animate this screen? (first show only)
 
     // content -> screens
     void queueBeats(const std::string& text);
     void queueFile(const std::string& path);
     std::vector<std::string> wrap(const std::string& text, int cols);
 
-    void render();       // draw current screen + hint, leave cursor on prompt row
-    void advance();      // drop the current screen
+    void render();      // draw current screen + hint, leave cursor on prompt row
+    void advance();     // drop the current screen
 
     bool handleCommand(const std::string& raw);
+    bool handleStationCommand(const std::string& cmd, const std::string& arg);
+
     void cmdHelp();
     void cmdDir();
     void cmdOpen(const std::string& arg);
     void cmdUnlock(const std::string& arg);
+    void cmdShutdown();
+    void cmdSave();
+    void cmdReset();
+    void helpStation();
+
     void queueFinale();
     void finish();
+    void saveProgress(const std::string& value);
 };
 
 Color colorByName(const std::string& name);

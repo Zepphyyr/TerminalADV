@@ -186,9 +186,22 @@ void Game::advance() {
 void Game::run() {
     cur_ = pal::amber;
     p_->beep();
-    cinematic_ = true;
-    typeIt_    = true;
-    queueFile("prologue/boot.txt");
+    typeIt_ = true;
+
+    // Resume: progress is autosaved at every checkpoint.
+    if (p_->loadState("progress") == "prologue_done") {
+        prologueDone_ = true;
+        cinematic_    = false;
+        cur_ = pal::grey;
+        queueBeats("SAVE FOUND\nprologue complete.\n"
+                   "---\n"
+                   "@color amber\nYou are aboard\nMERIDIAN DEEP.\n"
+                   "@color grey\ntype 'help'\n'reset' starts over");
+        cur_ = pal::amber;
+    } else {
+        cinematic_ = true;
+        queueFile("prologue/boot.txt");
+    }
 
     while (running_) {
         render();
@@ -213,7 +226,7 @@ void Game::run() {
         typeIt_ = true;
         if (!handleCommand(cmd)) break;
 
-        if (docked_ && !finale_) queueFinale();
+        if (docked_ && !finale_ && !prologueDone_) queueFinale();
     }
 }
 
@@ -224,6 +237,14 @@ bool Game::handleCommand(const std::string& raw) {
     if (cmd == "h" || cmd == "?") cmd = "help";
     if (cmd == "l") cmd = "logs";
 
+    // Always available, in any state.
+    if (cmd == "shutdown" || cmd == "quit" || cmd == "exit") { cmdShutdown(); return true; }
+    if (cmd == "save")  { cmdSave();  return true; }
+    if (cmd == "reset") { cmdReset(); return true; }
+
+    // After the prologue you are on the station, not on the ship.
+    if (prologueDone_) return handleStationCommand(cmd, arg);
+
     if      (cmd == "help")   cmdHelp();
     else if (cmd == "dir")    cmdDir();
     else if (cmd == "open")   cmdOpen(arg);
@@ -232,15 +253,81 @@ bool Game::handleCommand(const std::string& raw) {
     else if (cmd == "status") queueFile("prologue/status.txt");
     else if (cmd == "unlock" || cmd == "dock") cmdUnlock(arg);
     else if (cmd == "clear")  { /* screens_ already cleared */ }
-    else if (cmd == "shutdown" || cmd == "quit" || cmd == "exit") {
-        running_ = false;
-        return false;
-    } else {
+    else {
         cur_ = pal::red;
         queueBeats("unknown directive.\nthis system does not\nremember that word.");
         cur_ = pal::amber;
     }
     return true;
+}
+
+// ---- station mode: the prologue is over, but you are never stuck ----------
+bool Game::handleStationCommand(const std::string& cmd, const std::string& arg) {
+    (void)arg;
+    if (cmd == "help") { helpStation(); return true; }
+    if (cmd == "status") {
+        cur_ = pal::grey;
+        queueBeats("MERIDIAN DEEP\n@color amber\nnetwork    ONLINE\ncrew       NONE\n"
+                   "CANTOR     LISTENING\nHALO-9     ?");
+        cur_ = pal::amber;
+        return true;
+    }
+    if (cmd == "logs" || cmd == "mail" || cmd == "dir" || cmd == "open") {
+        cur_ = pal::grey;
+        queueBeats("FERRYMAN is behind\nthe airlock now.\n"
+                   "---\nThe station's own\nterminals are not\nopen to you yet.\n"
+                   "---\n@color amber\nACT I:\nTHE QUIET DECKS\nis not built yet.");
+        cur_ = pal::amber;
+        return true;
+    }
+    cur_ = pal::red;
+    queueBeats("unknown directive.\nthis system does not\nremember that word.");
+    cur_ = pal::amber;
+    return true;
+}
+
+void Game::helpStation() {
+    queueBeats(
+        "@color grey\n"
+        "COMMANDS\n"
+        "@color amber\n"
+        "help     this list\n"
+        "status   the station\n"
+        "save     save now\n"
+        "reset    start over\n"
+        "shutdown reboot\n");
+    cur_ = pal::amber;
+}
+
+// ---- always-available commands -------------------------------------------
+void Game::cmdShutdown() {
+    p_->clear();
+    p_->setColor(pal::grey);
+    p_->print("\npowering down.\n");
+    p_->delayMs(700);
+    p_->reboot();          // on the Cardputer this drops you back to M5Launcher
+    running_ = false;      // desktop / safety net
+}
+
+void Game::cmdSave() {
+    saveProgress(prologueDone_ ? "prologue_done" : "prologue");
+    cur_ = pal::green;
+    queueBeats("PROGRESS SAVED.");
+    cur_ = pal::amber;
+}
+
+void Game::cmdReset() {
+    p_->saveState("progress", "");
+    p_->clear();
+    p_->setColor(pal::grey);
+    p_->print("\nsave erased.\nrebooting.\n");
+    p_->delayMs(900);
+    p_->reboot();
+    running_ = false;
+}
+
+void Game::saveProgress(const std::string& value) {
+    p_->saveState("progress", value);
 }
 
 void Game::cmdHelp() {
@@ -258,7 +345,8 @@ void Game::cmdHelp() {
         "@color amber\n"
         "status ship + dock\n"
         "unlock <code>\n"
-        "shutdown\n");
+        "save   save now\n"
+        "shutdown reboot\n");
     cur_ = pal::amber;
 }
 
@@ -311,15 +399,23 @@ void Game::queueFinale() {
     queueFile("prologue/docking.txt");
     queueFile("prologue/cantor.txt");
     cur_ = pal::grey;
-    queueBeats("[PROLOGUE COMPLETE]\n---\nprogress saved.\n---\nACT I:\nTHE QUIET DECKS\nawaits.");
+    queueBeats("[PROLOGUE COMPLETE]\n---\nACT I:\nTHE QUIET DECKS\nawaits.");
     cinematic_ = true;
     finale_    = true;
     typeIt_    = true;
 }
 
+// End of the prologue. Autosave, and drop the player into station mode —
+// they can still type commands, save, reset or reboot. Never a dead end.
 void Game::finish() {
-    p_->saveState("progress", "prologue_done");
-    running_ = false;
+    saveProgress("prologue_done");
+    prologueDone_ = true;
+    finale_       = false;
+    cinematic_    = false;
+    cur_ = pal::grey;
+    queueBeats("progress saved.\n@color amber\ntype 'help'\n'shutdown' reboots");
+    cur_ = pal::amber;
+    typeIt_ = true;
 }
 
 } // namespace kd

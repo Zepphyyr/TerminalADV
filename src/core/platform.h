@@ -43,6 +43,11 @@ public:
     virtual std::string readLine(const std::string& promptStr) = 0;
     virtual void waitKey() = 0;                 // advance one screen
     virtual void delayMs(int ms) = 0;
+
+    // Hard reboot the device. On the Cardputer this drops you back into
+    // M5Launcher, which is how you leave the game.
+    virtual void reboot() = 0;
+
     virtual bool loadFile(const std::string& path, std::string& out) = 0;
     virtual void saveState(const std::string& key, const std::string& value) = 0;
     virtual std::string loadState(const std::string& key) = 0;
