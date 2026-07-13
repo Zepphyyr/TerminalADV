@@ -1,7 +1,5 @@
 @color grey
 FERRYMAN STATUS
---------------------
----
 @color green
 HULL......... OK
 POWER........ OK
@@ -11,18 +9,13 @@ RANGE...... 40 m
 @color red
 DOCKING CLAMPS
 LOCKED
---------------------
 auth required
 fleet code REJECTED
----
-@color red
 use: unlock <code>
 ---
 @color grey
 EXTERNAL
 MERIDIAN DEEP
---------------------
----
 @color amber
 reactors   IDLE
 network    POWERED

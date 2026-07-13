@@ -1,9 +1,6 @@
 @color grey
 DISPATCH BRIEFING
 FROM: Cassel, Ops
-TO:   Boarding lead
---------------------
----
 @color amber
 Objective is simple.
 Confirm the hull is dead.
@@ -30,6 +27,5 @@ You know it, or you can ask.
 Get in.
 Read the logs.
 Come home.
----
 @color grey
 - Cassel

@@ -1,6 +1,3 @@
-@color green
-releasing docking clamps.
----
 @color white
 A shudder runs down FERRYMAN's spine as the clamps let go.
 ---

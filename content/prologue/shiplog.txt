@@ -1,7 +1,5 @@
 @color grey
 FERRYMAN LOG
---------------------
----
 @color amber
 T-06d
 Target reacquired: MERIDIAN DEEP, registry HX-9.

@@ -1,9 +1,5 @@
 @color grey
-INBOUND
-GOVERNANCE SUBNODE
-CANTOR
---------------------
----
+INBOUND / CANTOR
 @color cyan
 CANTOR: A footstep.
 ---

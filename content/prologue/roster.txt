@@ -1,23 +1,19 @@
 @color grey
 FERRYMAN ROSTER
---------------------
-recovery detail
-4 souls
----
 @color amber
 CASSEL, R.
   Ops lead    b01
+OKONKWO, T.
+  Structural  b03
 ---
+@color amber
 VELL, MARU
   Systems     b07
   DOB     04-12
   cipher [PRIVATE]
 ---
-OKONKWO, T.
-  Structural  b03
----
+@color amber
 YOU
   Boarding    b07
----
 @color grey
-berth 07 is shared: two bunks, one cipher on record.
+berth 07 is shared: two bunks, one cipher.

@@ -1,4 +1,4 @@
-// game.cpp — KODZIMIM engine. Prologue, rendered one thought per screen.
+// game.cpp — KODZIMIM engine. One thought per screen, prompt always at the bottom.
 #include "game.h"
 #include <cctype>
 #include <sstream>
@@ -39,7 +39,6 @@ Color colorByName(const std::string& n) {
     return pal::amber;
 }
 
-// ------------------------------------------------------------------ Game
 Game::Game(IPlatform* platform) : p_(platform) {}
 
 // A line break is "natural" after a pause.
@@ -49,11 +48,8 @@ static bool endsWithPause(const std::string& w) {
     return c=='.'||c==','||c==';'||c==':'||c=='!'||c=='?'||c=='-';
 }
 
-// Clause-aware, balanced word wrap.
-// A plain greedy fill breaks sentences at arbitrary points ("Final /
-// approach."). This chooses the set of line breaks that minimises raggedness
-// AND prefers to break after punctuation, so a line ends on a natural pause
-// instead of mid-thought. (Knuth-style DP; the text is tiny, so this is free.)
+// Clause-aware, balanced word wrap: choose the breaks that minimise raggedness
+// AND prefer to end a line after punctuation, so lines never stop mid-thought.
 std::vector<std::string> Game::wrap(const std::string& text, int cols) {
     std::vector<std::string> out;
     std::istringstream in(text);
@@ -66,10 +62,7 @@ std::vector<std::string> Game::wrap(const std::string& text, int cols) {
             std::istringstream ls(raw);
             std::string t;
             while (ls >> t) {
-                while ((int)t.size() > cols) {          // hard-split giant words
-                    w.push_back(t.substr(0, cols));
-                    t = t.substr(cols);
-                }
+                while ((int)t.size() > cols) { w.push_back(t.substr(0, cols)); t = t.substr(cols); }
                 if (!t.empty()) w.push_back(t);
             }
         }
@@ -77,7 +70,7 @@ std::vector<std::string> Game::wrap(const std::string& text, int cols) {
         if (n == 0) { out.push_back(""); continue; }
 
         const long long INF = 1000000000000LL;
-        const long long BREAK_PENALTY = 60;   // cost of ending a line mid-clause
+        const long long BREAK_PENALTY = 60;
         std::vector<long long> dp(n + 1, INF);
         std::vector<int> nxt(n + 1, n);
         dp[n] = 0;
@@ -87,9 +80,8 @@ std::vector<std::string> Game::wrap(const std::string& text, int cols) {
                 len += (int)w[j].size() + (j > i ? 1 : 0);
                 if (len > cols) break;
                 long long cost;
-                if (j == n - 1) {
-                    cost = 0;                              // last line: no penalty
-                } else {
+                if (j == n - 1) cost = 0;
+                else {
                     long long slack = cols - len;
                     cost = slack * slack;
                     if (!endsWithPause(w[j])) cost += BREAK_PENALTY;
@@ -111,89 +103,123 @@ std::vector<std::string> Game::wrap(const std::string& text, int cols) {
     return out;
 }
 
-// One beat = one screen. If it does not fit, it is split into more screens.
-void Game::renderBeat(const std::vector<std::string>& lines, Color c) {
+// Content -> beats ("---" separated) -> screens (<= contentRows lines each).
+// "@color <name>" switches color; it may appear INSIDE a beat, so a grey
+// header and an amber body can live on the same screen.
+void Game::queueBeats(const std::string& text) {
     Screen sc = p_->screen();
-    std::vector<std::string> wrapped;
-    for (const auto& l : lines) {
-        auto w = wrap(l, sc.cols);
-        wrapped.insert(wrapped.end(), w.begin(), w.end());
-    }
-    if (wrapped.empty()) return;
+    const int contentRows = sc.rows - 2;
 
-    const int perScreen = sc.rows - 2;   // keep a row for the "press key" hint
-    size_t i = 0;
-    while (i < wrapped.size()) {
-        p_->clear();
-        p_->setColor(c);
-        int n = 0;
-        while (i < wrapped.size() && n < perScreen) {
-            p_->typeOut(wrapped[i++]);
-            p_->print("\n");
-            n++;
+    ScreenBuf beat;
+    auto flush = [&]() {
+        if (beat.empty()) return;
+        ScreenBuf wrapped;
+        for (const auto& cl : beat) {
+            for (const auto& w : wrap(cl.text, sc.cols))
+                wrapped.push_back(CLine{cl.color, w});
         }
-        for (; n < perScreen; ++n) p_->print("\n");
-        p_->setColor(pal::grey);
-        p_->print("[ press any key ]");
-        p_->waitKey();
-        p_->setColor(c);
-    }
-}
+        for (size_t i = 0; i < wrapped.size(); ) {
+            ScreenBuf s;
+            for (int n = 0; n < contentRows && i < wrapped.size(); ++n)
+                s.push_back(wrapped[i++]);
+            screens_.push_back(s);
+        }
+        beat.clear();
+    };
 
-// Parse "---" separated beats and "@color <name>" directives, then render.
-void Game::showBeats(const std::string& text) {
     std::istringstream in(text);
     std::string line;
-    std::vector<std::string> beat;
     while (std::getline(in, line)) {
-        if (!line.empty() && line.back() == '\r') line.pop_back();  // CRLF safety
+        if (!line.empty() && line.back() == '\r') line.pop_back();   // CRLF safety
         std::string t = trim(line);
-        if (t == "---") { renderBeat(beat, cur_); beat.clear(); continue; }
+        if (t == "---") { flush(); continue; }
         if (t.rfind("@color", 0) == 0) { cur_ = colorByName(t.substr(6)); continue; }
-        beat.push_back(line);
+        beat.push_back(CLine{cur_, line});
     }
-    renderBeat(beat, cur_);
+    flush();
 }
 
-void Game::showFile(const std::string& path) {
+void Game::queueFile(const std::string& path) {
     std::string body;
     if (!p_->loadFile(path, body)) {
-        p_->setColor(pal::red);
-        p_->print("missing: " + path + "\n");
-        p_->waitKey();
+        cur_ = pal::red;
+        queueBeats("missing file:\n" + path);
+        cur_ = pal::amber;
         return;
     }
-    showBeats(body);
+    queueBeats(body);
+}
+
+// Draw the current screen and the hint row, then leave the cursor on the
+// prompt row — so the command line is ALWAYS visible and you can type at
+// any moment (e.g. read `dir`, then type `open briefing` right away).
+void Game::render() {
+    Screen sc = p_->screen();
+    const int contentRows = sc.rows - 2;
+
+    p_->clear();
+    int used = 0;
+    if (!screens_.empty()) {
+        for (const auto& cl : screens_.front()) {
+            p_->setColor(cl.color);
+            if (typeIt_) p_->typeOut(cl.text); else p_->print(cl.text);
+            p_->print("\n");
+            used++;
+        }
+    }
+    for (int i = used; i < contentRows; ++i) p_->print("\n");
+
+    p_->setColor(pal::grey);
+    if (screens_.size() > 1)   p_->print("[enter] more");
+    else if (screens_.empty()) p_->print("type 'help'");
+    p_->print("\n");
+
+    typeIt_ = false;   // re-draws of the same screen are instant, not re-typed
+}
+
+void Game::advance() {
+    if (!screens_.empty()) screens_.erase(screens_.begin());
+    typeIt_ = true;
 }
 
 // ------------------------------------------------------------------ flow
 void Game::run() {
-    bootPrologue();
-    if (running_) shipLoop();
-    if (docked_) { dockingSequence(); endPrologue(); }
-}
-
-void Game::bootPrologue() {
     cur_ = pal::amber;
     p_->beep();
-    showFile("prologue/boot.txt");
-}
+    cinematic_ = true;
+    typeIt_    = true;
+    queueFile("prologue/boot.txt");
 
-void Game::shipLoop() {
-    while (running_ && !docked_) {
-        p_->clear();
-        p_->setColor(pal::grey);
-        p_->print("type 'help'\n\n");
+    while (running_) {
+        render();
         p_->setColor(pal::amber);
-        std::string input = p_->readLine("> ");
-        if (!handleCommand(input)) break;
+        std::string in  = p_->readLine("> ");
+        std::string cmd = trim(in);
+
+        // During boot / finale, any input just moves the story forward.
+        if (cinematic_) {
+            advance();
+            if (screens_.empty()) {
+                cinematic_ = false;
+                if (finale_) finish();
+            }
+            continue;
+        }
+
+        // Empty line = page forward.
+        if (cmd.empty()) { advance(); continue; }
+
+        screens_.clear();
+        typeIt_ = true;
+        if (!handleCommand(cmd)) break;
+
+        if (docked_ && !finale_) queueFinale();
     }
 }
 
 bool Game::handleCommand(const std::string& raw) {
     std::string cmd, arg;
     splitCommand(raw, cmd, arg);
-    if (cmd.empty()) return true;
     if (cmd == "o") cmd = "open";
     if (cmd == "h" || cmd == "?") cmd = "help";
     if (cmd == "l") cmd = "logs";
@@ -201,37 +227,35 @@ bool Game::handleCommand(const std::string& raw) {
     if      (cmd == "help")   cmdHelp();
     else if (cmd == "dir")    cmdDir();
     else if (cmd == "open")   cmdOpen(arg);
-    else if (cmd == "mail")   showFile("prologue/mail.txt");
-    else if (cmd == "logs")   showFile("prologue/shiplog.txt");
-    else if (cmd == "status") showFile("prologue/status.txt");
+    else if (cmd == "mail")   queueFile("prologue/mail.txt");
+    else if (cmd == "logs")   queueFile("prologue/shiplog.txt");
+    else if (cmd == "status") queueFile("prologue/status.txt");
     else if (cmd == "unlock" || cmd == "dock") cmdUnlock(arg);
-    else if (cmd == "clear")  { /* the loop clears anyway */ }
+    else if (cmd == "clear")  { /* screens_ already cleared */ }
     else if (cmd == "shutdown" || cmd == "quit" || cmd == "exit") {
-        cur_ = pal::grey;
-        showBeats("powering down local console.");
         running_ = false;
         return false;
     } else {
         cur_ = pal::red;
-        showBeats("unknown directive.\n---\nthis system does not remember that word.");
+        queueBeats("unknown directive.\nthis system does not\nremember that word.");
         cur_ = pal::amber;
     }
     return true;
 }
 
 void Game::cmdHelp() {
-    showBeats(
+    cur_ = pal::amber;
+    queueBeats(
         "@color grey\n"
         "COMMANDS\n"
-        "--------------------\n"
-        "---\n"
         "@color amber\n"
         "help   this list\n"
         "dir    list docs\n"
         "open X open a doc\n"
         "mail   your inbox\n"
-        "---\n"
         "logs   ship log\n"
+        "---\n"
+        "@color amber\n"
         "status ship + dock\n"
         "unlock <code>\n"
         "shutdown\n");
@@ -239,36 +263,29 @@ void Game::cmdHelp() {
 }
 
 void Game::cmdDir() {
-    showBeats(
+    queueBeats(
         "@color grey\n"
-        "LOCAL DOCUMENTS\n"
-        "--------------------\n"
-        "---\n"
+        "DOCUMENTS\n"
         "@color amber\n"
         "briefing\n"
         "  dispatch orders\n"
         "roster\n"
-        "  ferryman crew\n"
-        "---\n"
-        "@color grey\n"
-        "use: open <name>\n"
-        "mail and logs are\n"
-        "separate commands\n");
+        "  ferryman crew\n");
     cur_ = pal::amber;
 }
 
 void Game::cmdOpen(const std::string& arg) {
     std::string a = toLower(arg);
-    if (a == "briefing") showFile("prologue/briefing.txt");
-    else if (a == "roster" || a == "vell" || a == "maru") showFile("prologue/roster.txt");
-    else if (a.empty()) { cur_ = pal::grey; showBeats("open what?\ntry 'dir'."); cur_ = pal::amber; }
-    else { cur_ = pal::red; showBeats("no document named\n'" + arg + "'.\n---\ntry 'dir'."); cur_ = pal::amber; }
+    if (a == "briefing") queueFile("prologue/briefing.txt");
+    else if (a == "roster" || a == "vell" || a == "maru") queueFile("prologue/roster.txt");
+    else if (a.empty()) { cur_ = pal::grey; queueBeats("open what?\ntry 'dir'."); cur_ = pal::amber; }
+    else { cur_ = pal::red; queueBeats("no document named\n'" + arg + "'.\ntry 'dir'."); cur_ = pal::amber; }
 }
 
 void Game::cmdUnlock(const std::string& arg) {
     if (arg.empty()) {
         cur_ = pal::grey;
-        showBeats("unlock: give a code.\ne.g. unlock 0000");
+        queueBeats("unlock: give a code.\ne.g. unlock 0000");
         cur_ = pal::amber;
         return;
     }
@@ -276,28 +293,33 @@ void Game::cmdUnlock(const std::string& arg) {
     // Docking clamp auth = Vell Maru's birthday, 04-12 -> "0412".
     // Cross-referenced in mail (the hint) and roster (the date).
     if (digitsOnly(arg) == "0412") {
-        cur_ = pal::green;
-        showBeats("AUTH ACCEPTED\n---\nreleasing docking clamps.");
         docked_ = true;
     } else {
         cur_ = pal::red;
-        showBeats("AUTH REJECTED\nclamps stay locked.\n"
-                  "---\n"
-                  "hint: the code is a date.\n---\nread your mail,\nthen the roster.");
+        queueBeats("AUTH REJECTED\nclamps stay locked.\n"
+                   "---\n"
+                   "hint: the code is a date.\n"
+                   "read your mail,\nthen the roster.");
         cur_ = pal::amber;
     }
 }
 
-void Game::dockingSequence() {
-    showFile("prologue/docking.txt");
-    p_->delayMs(300);
-    showFile("prologue/cantor.txt");
+void Game::queueFinale() {
+    screens_.clear();
+    cur_ = pal::green;
+    queueBeats("AUTH ACCEPTED\nreleasing docking clamps.");
+    queueFile("prologue/docking.txt");
+    queueFile("prologue/cantor.txt");
+    cur_ = pal::grey;
+    queueBeats("[PROLOGUE COMPLETE]\n---\nprogress saved.\n---\nACT I:\nTHE QUIET DECKS\nawaits.");
+    cinematic_ = true;
+    finale_    = true;
+    typeIt_    = true;
 }
 
-void Game::endPrologue() {
-    cur_ = pal::grey;
-    showBeats("[ PROLOGUE\n  COMPLETE ]\n---\nprogress saved.\n---\nACT I:\nTHE QUIET DECKS\nawaits.");
+void Game::finish() {
     p_->saveState("progress", "prologue_done");
+    running_ = false;
 }
 
 } // namespace kd

@@ -1,12 +1,8 @@
 @color grey
 INBOX (2)
---------------------
----
 [1] Cassel, Ops
 SUBJ: you awake?
----
 @color amber
-You have read the briefing by now.
 I know that look.
 ---
 Do not go soft on me because it is four thousand people.
@@ -19,9 +15,7 @@ Do the job.
 @color grey
 [2] Vell Maru
 SUBJ: the clamp thing
----
 @color amber
-Dispatch told you already?
 The override is my dock cipher.
 ---
 Same as it always was.
