@@ -1,62 +1,52 @@
-// platform.h
-// Platform abstraction for KODZIMIM.
-// The game core talks ONLY to this interface, so the same engine runs on
-// the desktop (for testing) and on the Cardputer-Adv (real hardware).
+// platform.h — platform abstraction for KODZIMIM.
 #ifndef KODZIMIM_PLATFORM_H
 #define KODZIMIM_PLATFORM_H
 
 #include <string>
+#include <cstdint>
 
 namespace kd {
 
-// Screen geometry the core assumes. Both frontends emulate this so the
-// text/pager layout looks identical on PC and on the device.
-// Cardputer-Adv: 240x135 px. At a ~6px mono font that is ~40 cols x ~16 rows.
+// Cardputer-Adv is 240x135 px. With the 6x8 base font at size 2 (12x16 px)
+// that is 20 columns x 8 rows. Small — so the whole presentation is built
+// around it: ONE THOUGHT PER SCREEN, press a key for the next.
 struct Screen {
-    int cols = 40;
-    int rows = 16;
+    int cols = 20;
+    int rows = 8;
 };
 
-// Abstract platform. Implemented by platform_desktop.* and platform_m5.*.
+// 24-bit color. The M5 frontend converts it to RGB565.
+// (Passing raw 0xFFB000 straight to M5GFX was the "everything is red" bug:
+//  M5GFX reads that value as RGB565, not RGB888.)
+struct Color { uint8_t r, g, b; };
+
+// Palette — different terminals and different voices get different colors.
+namespace pal {
+constexpr Color amber {255, 176,   0};  // ORPHEUS / player console (default)
+constexpr Color white {225, 225, 225};  // narration OUTSIDE the terminal
+constexpr Color cyan  {110, 220, 255};  // CANTOR — the caretaker AI
+constexpr Color green { 90, 255, 140};  // systems nominal / COR VITAE
+constexpr Color red   {255,  90,  70};  // alerts, rejections / NULLPOINT
+constexpr Color pale  {200, 140, 255};  // PALE SIGNAL — the alien thing
+constexpr Color grey  {150, 150, 150};  // headers, metadata, prompts
+}
+
 class IPlatform {
 public:
     virtual ~IPlatform() {}
-
-    // Screen dimensions (in character cells).
     virtual Screen screen() const = 0;
-
-    // Print text instantly (no typing effect). Handles '\n'.
+    virtual void setColor(Color c) = 0;
     virtual void print(const std::string& s) = 0;
-
-    // Print text with the "terminal typing" effect: char by char, with a
-    // short delay and a periodic beep. This is the atmospheric output path.
     virtual void typeOut(const std::string& s) = 0;
-
-    // Clear the screen.
     virtual void clear() = 0;
-
-    // Short terminal beep (used on key input / events).
     virtual void beep() = 0;
-
-    // Print a prompt, then read one line of user input (with local echo).
-    // Returns the entered line WITHOUT the trailing newline.
     virtual std::string readLine(const std::string& promptStr) = 0;
-
-    // Wait for any single keypress (used by the pager "-- more --").
-    virtual void waitKey() = 0;
-
-    // Sleep for the given number of milliseconds.
+    virtual void waitKey() = 0;                 // advance one screen
     virtual void delayMs(int ms) = 0;
-
-    // Load a content file into `out`. Returns false if not found.
-    // Paths are logical, e.g. "prologue/briefing.txt".
     virtual bool loadFile(const std::string& path, std::string& out) = 0;
-
-    // Persist and read a small progress value (save system).
-    virtual void  saveState(const std::string& key, const std::string& value) = 0;
+    virtual void saveState(const std::string& key, const std::string& value) = 0;
     virtual std::string loadState(const std::string& key) = 0;
 };
 
 } // namespace kd
-
-#endif // KODZIMIM_PLATFORM_H
+#endif

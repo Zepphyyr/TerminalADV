@@ -1,28 +1,35 @@
-=== INBOX (2) ===
-
-[1] FROM: Cassel, Recovery Ops
-    SUBJ: re: you awake?
-    ---
-    You've read the briefing by now.
-    I know that look.
-    Don't go soft on me because it's
-    four thousand people.
-    They've been gone thirty-four
-    years. This is recovery,
-    not rescue. Do the job.
-
-[2] FROM: Vell Maru (berth-mate)
-    SUBJ: the clamp thing
-    ---
-    Dispatch told you already, yeah?
-    The override is my dock cipher.
-    Same as it's always been --
-    my birthday. You've teased me
-    about the date enough times
-    to have it burned in.
-    If you REALLY blanked,
-    it's on my crew record.
-    Check the roster.
-    Don't die in there. - V
-
--- end of inbox --
+@color grey
+INBOX (2)
+--------------------
+---
+[1] Cassel, Ops
+SUBJ: you awake?
+---
+@color amber
+You have read the briefing by now.
+I know that look.
+---
+Do not go soft on me because it is four thousand people.
+---
+They have been gone thirty-four years.
+---
+This is recovery, not rescue.
+Do the job.
+---
+@color grey
+[2] Vell Maru
+SUBJ: the clamp thing
+---
+@color amber
+Dispatch told you already?
+The override is my dock cipher.
+---
+Same as it always was.
+My birthday.
+---
+You have teased me about the date enough times to have it burned in.
+---
+If you REALLY blanked, it is on my crew record.
+---
+Check the roster.
+Do not die in there. - V

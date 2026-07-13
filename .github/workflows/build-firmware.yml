@@ -23,6 +23,9 @@ jobs:
       - name: Install PlatformIO + esptool
         run: pip install -U platformio esptool
 
+      - name: Regenerate embedded story texts
+        run: python tools/gen_content.py
+
       - name: Build firmware (.bin)
         run: pio run
 

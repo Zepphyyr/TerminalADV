@@ -106,23 +106,22 @@ esptool.py --chip esp32s3 merge_bin -o kodzimim_prologue_merged.bin \
 
 ## Если правишь тексты
 
-Тексты вшиты в `content_embedded.h`, сгенерированный из `content/prologue/*.txt`.
-После редактирования .txt перегенерируй заголовок:
+Просто редактируй `content/prologue/*.txt` — и всё. Скрипт `tools/gen_content.py`
+запускается автоматически перед каждой сборкой (`extra_scripts` в
+`platformio.ini`) и перегенерирует `src/esp32/content_embedded.h`, так что тексты
+в прошивке никогда не разъезжаются с файлами. То же самое делает и GitHub Actions.
 
-```
-python3 - <<'PY'
-import os
-d="content/prologue"; files=["boot","briefing","mail","roster","shiplog","status","docking","cantor"]
-o=["// AUTO-GENERATED from content/prologue/*.txt","#ifndef KODZIMIM_CONTENT_EMBEDDED_H","#define KODZIMIM_CONTENT_EMBEDDED_H","#include <string>","","namespace kd {","inline bool getEmbeddedContent(const std::string& path, std::string& out) {"]
-first=True
-for f in files:
-    txt=open(os.path.join(d,f+".txt"),encoding="utf-8").read()
-    kw="if" if first else "else if"; first=False
-    o.append(f'    {kw} (path == "prologue/{f}.txt") {{ out = R"KD({txt})KD"; return true; }}')
-o+=["    return false;","}","} // namespace kd","#endif"]
-open("src/esp32/content_embedded.h","w",encoding="utf-8").write("\n".join(o)+"\n")
-print("regenerated")
-PY
-```
+## Формат текстов
 
-Затем снова `pio run -t upload`.
+Файл = последовательность «блоков» (beats). Один блок = один экран.
+
+- `---` на отдельной строке — разделитель блоков.
+- `@color <имя>` — меняет цвет с этого блока и далее.
+  Доступно: `amber` (терминал ORPHEUS), `white` (повествование вне терминала),
+  `cyan` (CANTOR), `green` (системы в норме), `red` (тревоги/отказы),
+  `pale` (PALE SIGNAL), `grey` (заголовки, служебное).
+- Пиши **каждое предложение с новой строки** — так границы предложений совпадут
+  с границами строк. Длинные предложения движок переносит сам, стараясь рвать
+  после знаков препинания, а не посреди мысли.
+
+Экран устройства — 20 колонок × 8 строк, в блоке помещается до 6 строк.

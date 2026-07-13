@@ -1,15 +1,29 @@
-=== FERRYMAN STATUS ===
-HULL........... NOMINAL
-POWER.......... NOMINAL
-LIFE SUPPORT... NOMINAL
-RANGE TO TARGET 40 m (holding)
-
-DOCKING CLAMPS. LOCKED
-  >> auth required. fleet code REJECTED.
-  >> use: unlock <code>
-
-EXTERNAL: MERIDIAN DEEP
-  reactors...... EMERGENCY IDLE
-  network....... POWERED (src unknown)
-  crew life-sign NONE
--- end of status --
+@color grey
+FERRYMAN STATUS
+--------------------
+---
+@color green
+HULL......... OK
+POWER........ OK
+LIFE SUPPORT. OK
+RANGE...... 40 m
+---
+@color red
+DOCKING CLAMPS
+LOCKED
+--------------------
+auth required
+fleet code REJECTED
+---
+@color red
+use: unlock <code>
+---
+@color grey
+EXTERNAL
+MERIDIAN DEEP
+--------------------
+---
+@color amber
+reactors   IDLE
+network    POWERED
+life-sign  NONE

@@ -1,17 +1,31 @@
-=== FERRYMAN SYSTEM LOG (recent) ===
-
-T-06d Target reacquired: MERIDIAN DEEP,
-  registry HX-9. Orbit matches its last
-  recorded position, to the meter.
-T-04d Passive scan: hull intact.
-  Reactors at emergency idle. No thermal
-  trace of crew. Network: POWERED.
-T-02d Station comms hailed us. Automated
-  voice, non-standard. Logged, not
-  answered, per Cassel.
-T-19h Note (Vell): the fold-jump was 34
-  years ago. Reactors should be cold by
-  now. Something kept them fed.
-T-02h Clamps refuse fleet auth. Manual
-  override required.
--- end of log --
+@color grey
+FERRYMAN LOG
+--------------------
+---
+@color amber
+T-06d
+Target reacquired: MERIDIAN DEEP, registry HX-9.
+---
+Orbit matches its last recorded position, to the meter.
+---
+T-04d
+Hull intact.
+Reactors at emergency idle.
+---
+No thermal trace of crew.
+Interior network: POWERED.
+---
+T-02d
+Station comms hailed us.
+Automated voice.
+Logged, not answered.
+---
+T-19h
+Note (Vell): the fold-jump was 34 years ago.
+---
+Reactors should be cold by now.
+Something kept them fed.
+---
+T-02h
+Clamps refuse fleet auth.
+Manual override required.

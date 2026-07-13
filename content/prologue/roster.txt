@@ -1,13 +1,23 @@
-=== FERRYMAN CREW ROSTER ===
-recovery detail // 4 souls
-
-CASSEL, R.   Ops lead        berth 01
-VELL, MARU   Systems         berth 07
-  DOB.......... 04-12
-  dock cipher.. [PRIVATE]
-OKONKWO, T.  Structural      berth 03
-YOU          Boarding lead   berth 07
-
-berth 07 is shared: two bunks, one
-cipher on record. Standard practice.
--- end of roster --
+@color grey
+FERRYMAN ROSTER
+--------------------
+recovery detail
+4 souls
+---
+@color amber
+CASSEL, R.
+  Ops lead    b01
+---
+VELL, MARU
+  Systems     b07
+  DOB     04-12
+  cipher [PRIVATE]
+---
+OKONKWO, T.
+  Structural  b03
+---
+YOU
+  Boarding    b07
+---
+@color grey
+berth 07 is shared: two bunks, one cipher on record.

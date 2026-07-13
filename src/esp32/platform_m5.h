@@ -1,10 +1,5 @@
-// platform_m5.h
-// Cardputer-Adv implementation of IPlatform (M5Unified + M5Cardputer).
-// Content is read from LittleFS; progress is saved to NVS (Preferences).
-//
-// NOTE: this file is only compiled for the ESP32 build (PlatformIO), not the
-// desktop test build. It is written to be structurally correct for the
-// Cardputer-Adv; fine-tune font size / beep tone on real hardware.
+// platform_m5.h — Cardputer-Adv implementation of IPlatform (M5Unified + M5Cardputer).
+// Story texts are compiled in (content_embedded.h): one .bin, no filesystem.
 #ifndef KODZIMIM_PLATFORM_M5_H
 #define KODZIMIM_PLATFORM_M5_H
 
@@ -12,9 +7,14 @@
 #include <M5Unified.h>
 #include <Preferences.h>
 #include "../core/platform.h"
-#include "content_embedded.h"   // story texts baked into the firmware
+#include "content_embedded.h"
 
 namespace kd {
+
+// Screen: 240x135. Base font is 6x8; at size 2 that is 12x16 px
+// => 20 columns x 8 rows. Big enough to actually read in the hand.
+static const int KD_TEXT_SIZE = 2;
+static const int KD_CHAR_W    = 6 * KD_TEXT_SIZE;   // 12 px
 
 class M5Platform : public IPlatform {
 public:
@@ -23,15 +23,20 @@ public:
         M5Cardputer.begin(cfg, true);
         auto& d = M5Cardputer.Display;
         d.setRotation(1);
-        d.setTextSize(1);               // 6x8 font -> ~40 cols x ~16 rows
-        d.setTextColor(0xFFB000, 0x000000); // amber on black
-        d.setTextScroll(true);          // auto-scroll like a real console
-        d.fillScreen(0x000000);
+        d.setTextSize(KD_TEXT_SIZE);
+        d.setTextScroll(true);
+        d.fillScreen(0x0000);
+        setColor(pal::amber);
         d.setCursor(0, 0);
     }
 
-    Screen screen() const override {
-        Screen s; s.cols = 40; s.rows = 16; return s;
+    Screen screen() const override { Screen s; s.cols = 20; s.rows = 8; return s; }
+
+    // IMPORTANT: M5GFX expects RGB565. Passing a raw 0xRRGGBB makes everything
+    // look red — that was the original bug. color565() converts properly.
+    void setColor(Color c) override {
+        auto& d = M5Cardputer.Display;
+        d.setTextColor(d.color565(c.r, c.g, c.b), (uint16_t)0x0000);
     }
 
     void print(const std::string& s) override {
@@ -48,7 +53,7 @@ public:
     }
 
     void clear() override {
-        M5Cardputer.Display.fillScreen(0x000000);
+        M5Cardputer.Display.fillScreen(0x0000);
         M5Cardputer.Display.setCursor(0, 0);
     }
 
@@ -59,15 +64,13 @@ public:
         std::string buf;
         for (;;) {
             M5Cardputer.update();
-            if (M5Cardputer.Keyboard.isChange() &&
-                M5Cardputer.Keyboard.isPressed()) {
+            if (M5Cardputer.Keyboard.isChange() && M5Cardputer.Keyboard.isPressed()) {
                 auto st = M5Cardputer.Keyboard.keysState();
                 for (auto c : st.word) { buf += c; echo(c); tick(); }
                 if (st.del && !buf.empty()) {
                     buf.pop_back();
-                    // visually erase last char
                     auto& d = M5Cardputer.Display;
-                    int16_t x = d.getCursorX() - 6;
+                    int16_t x = d.getCursorX() - KD_CHAR_W;
                     if (x < 0) x = 0;
                     d.setCursor(x, d.getCursorY());
                     d.print(' ');
@@ -79,11 +82,14 @@ public:
         }
     }
 
+    // Advance one screen: wait for a fresh key press.
     void waitKey() override {
         for (;;) {
             M5Cardputer.update();
-            if (M5Cardputer.Keyboard.isChange() &&
-                M5Cardputer.Keyboard.isPressed()) { tick(); return; }
+            if (M5Cardputer.Keyboard.isChange() && M5Cardputer.Keyboard.isPressed()) {
+                tick();
+                return;
+            }
             delay(8);
         }
     }
@@ -91,8 +97,6 @@ public:
     void delayMs(int ms) override { delay(ms); }
 
     bool loadFile(const std::string& path, std::string& out) override {
-        // Texts are compiled into the firmware (see content_embedded.h),
-        // so there is no filesystem to mount and only one .bin to flash.
         return getEmbeddedContent(path, out);
     }
 
@@ -101,7 +105,6 @@ public:
         prefs_.putString(key.c_str(), value.c_str());
         prefs_.end();
     }
-
     std::string loadState(const std::string& key) override {
         prefs_.begin("kodzimim", true);
         String v = prefs_.getString(key.c_str(), "");
@@ -111,10 +114,9 @@ public:
 
 private:
     void echo(char c) { M5Cardputer.Display.print(c); }
-    void tick() { M5Cardputer.Speaker.tone(2200, 8); } // short terminal blip
+    void tick() { M5Cardputer.Speaker.tone(2200, 8); }
     Preferences prefs_;
 };
 
 } // namespace kd
-
-#endif // KODZIMIM_PLATFORM_M5_H
+#endif

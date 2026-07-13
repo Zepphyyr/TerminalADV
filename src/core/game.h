@@ -1,5 +1,4 @@
-// game.h
-// KODZIMIM core game engine (portable C++). Drives the PROLOGUE MVP.
+// game.h — KODZIMIM core engine. Beat-based presentation for a 20x8 screen.
 #ifndef KODZIMIM_GAME_H
 #define KODZIMIM_GAME_H
 
@@ -12,47 +11,41 @@ namespace kd {
 class Game {
 public:
     explicit Game(IPlatform* platform);
-
-    // Entry point. Runs until the player quits or the prologue ends.
     void run();
 
 private:
     IPlatform* p_;
-    bool docked_ = false;   // has the player unlocked the docking clamps?
-    bool running_ = true;   // main loop flag
+    bool docked_  = false;
+    bool running_ = true;
+    Color cur_ = pal::amber;   // current color, persists across beats
 
-    // ---- output helpers ----
-    void nl();                                  // newline
-    void line(const std::string& s);            // instant line
-    void say(const std::string& s);             // typed line (atmospheric)
-    void showFile(const std::string& path);     // load + page a content file
-    void page(const std::string& text);         // word-wrap + paginate any text
+    // --- beat rendering -------------------------------------------------
+    // Content is a sequence of BEATS separated by a line "---".
+    // A line "@color <name>" switches the color from that beat onward.
+    // Each beat gets its own screen: clear -> type -> wait for a key.
+    void showBeats(const std::string& text);
+    void showFile(const std::string& path);
+    void renderBeat(const std::vector<std::string>& lines, Color c);
     std::vector<std::string> wrap(const std::string& text, int cols);
 
-    // ---- flow ----
+    // --- flow ------------------------------------------------------------
     void bootPrologue();
-    void shipLoop();          // ORPHEUS ship-terminal command loop
-    void dockingSequence();   // cutscene after the puzzle is solved
+    void shipLoop();
+    void dockingSequence();
     void endPrologue();
 
-    // ---- command handling on the ship terminal ----
-    // Returns false if the command ended the session (shutdown/quit).
+    // --- commands ---------------------------------------------------------
     bool handleCommand(const std::string& raw);
     void cmdHelp();
     void cmdDir();
     void cmdOpen(const std::string& arg);
-    void cmdMail();
-    void cmdLogs();
-    void cmdStatus();
     void cmdUnlock(const std::string& arg);
 };
 
-// ---- small string utilities (kept here so both frontends can reuse) ----
+Color colorByName(const std::string& name);
 std::string toLower(const std::string& s);
 std::string trim(const std::string& s);
-// Split "open briefing" -> cmd="open", arg="briefing".
 void splitCommand(const std::string& raw, std::string& cmd, std::string& arg);
 
 } // namespace kd
-
-#endif // KODZIMIM_GAME_H
+#endif
