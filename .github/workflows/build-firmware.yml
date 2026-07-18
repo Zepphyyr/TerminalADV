@@ -21,7 +21,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install PlatformIO + esptool
-        run: pip install -U platformio esptool
+        run: pip install -U platformio "esptool<5"   # v5 renamed merge_bin -> merge-bin
 
       - name: Regenerate embedded story texts
         run: python tools/gen_content.py
@@ -36,9 +36,13 @@ jobs:
           ARGS="0x0 $D/bootloader.bin 0x8000 $D/partitions.bin 0x10000 $D/firmware.bin"
           BOOTAPP=$(find "$HOME/.platformio" -name boot_app0.bin 2>/dev/null | head -1)
           if [ -n "$BOOTAPP" ]; then ARGS="$ARGS 0xe000 $BOOTAPP"; fi
+          # esptool <5 uses merge_bin/--flash_mode; v5+ uses merge-bin/--flash-mode
           python -m esptool --chip esp32s3 merge_bin \
             -o kodzimim_prologue_merged.bin \
-            --flash_mode dio --flash_size 8MB $ARGS
+            --flash_mode dio --flash_size 8MB $ARGS \
+          || python -m esptool --chip esp32s3 merge-bin \
+            -o kodzimim_prologue_merged.bin \
+            --flash-mode dio --flash-size 8MB $ARGS
           ls -l kodzimim_prologue_merged.bin
 
       - name: Upload firmware artifacts
