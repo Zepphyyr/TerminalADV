@@ -1,7 +1,6 @@
 // content_embedded.h  (AUTO-GENERATED from content/prologue/*.txt)
 // Story texts baked into the firmware: one .bin, no filesystem needed.
-// Do not edit by hand — edit the .txt files and rebuild (tools/gen_content.py
-// runs automatically before every PlatformIO build).
+// Do not edit by hand — edit the .txt files and rebuild.
 #ifndef KODZIMIM_CONTENT_EMBEDDED_H
 #define KODZIMIM_CONTENT_EMBEDDED_H
 #include <string>
@@ -41,9 +40,6 @@ Find the way in.
     else if (path == "prologue/briefing.txt") { out = R"KD(@color grey
 DISPATCH BRIEFING
 FROM: Cassel, Ops
-TO:   Boarding lead
---------------------
----
 @color amber
 Objective is simple.
 Confirm the hull is dead.
@@ -70,19 +66,14 @@ You know it, or you can ask.
 Get in.
 Read the logs.
 Come home.
----
 @color grey
 - Cassel
 )KD"; return true; }
     else if (path == "prologue/mail.txt") { out = R"KD(@color grey
 INBOX (2)
---------------------
----
 [1] Cassel, Ops
 SUBJ: you awake?
----
 @color amber
-You have read the briefing by now.
 I know that look.
 ---
 Do not go soft on me because it is four thousand people.
@@ -95,9 +86,7 @@ Do the job.
 @color grey
 [2] Vell Maru
 SUBJ: the clamp thing
----
 @color amber
-Dispatch told you already?
 The override is my dock cipher.
 ---
 Same as it always was.
@@ -112,32 +101,26 @@ Do not die in there. - V
 )KD"; return true; }
     else if (path == "prologue/roster.txt") { out = R"KD(@color grey
 FERRYMAN ROSTER
---------------------
-recovery detail
-4 souls
----
 @color amber
 CASSEL, R.
   Ops lead    b01
+OKONKWO, T.
+  Structural  b03
 ---
+@color amber
 VELL, MARU
   Systems     b07
   DOB     04-12
   cipher [PRIVATE]
 ---
-OKONKWO, T.
-  Structural  b03
----
+@color amber
 YOU
   Boarding    b07
----
 @color grey
-berth 07 is shared: two bunks, one cipher on record.
+berth 07 is shared: two bunks, one cipher.
 )KD"; return true; }
     else if (path == "prologue/shiplog.txt") { out = R"KD(@color grey
 FERRYMAN LOG
---------------------
----
 @color amber
 T-06d
 Target reacquired: MERIDIAN DEEP, registry HX-9.
@@ -168,8 +151,6 @@ Manual override required.
 )KD"; return true; }
     else if (path == "prologue/status.txt") { out = R"KD(@color grey
 FERRYMAN STATUS
---------------------
----
 @color green
 HULL......... OK
 POWER........ OK
@@ -179,27 +160,19 @@ RANGE...... 40 m
 @color red
 DOCKING CLAMPS
 LOCKED
---------------------
 auth required
 fleet code REJECTED
----
-@color red
 use: unlock <code>
 ---
 @color grey
 EXTERNAL
 MERIDIAN DEEP
---------------------
----
 @color amber
 reactors   IDLE
 network    POWERED
 life-sign  NONE
 )KD"; return true; }
-    else if (path == "prologue/docking.txt") { out = R"KD(@color green
-releasing docking clamps.
----
-@color white
+    else if (path == "prologue/docking.txt") { out = R"KD(@color white
 A shudder runs down FERRYMAN's spine as the clamps let go.
 ---
 The station takes you.
@@ -224,11 +197,7 @@ As if it had been waiting for exactly one more visitor.
 You are alone in the network now.
 )KD"; return true; }
     else if (path == "prologue/cantor.txt") { out = R"KD(@color grey
-INBOUND
-GOVERNANCE SUBNODE
-CANTOR
---------------------
----
+INBOUND / CANTOR
 @color cyan
 CANTOR: A footstep.
 ---

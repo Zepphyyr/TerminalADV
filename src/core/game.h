@@ -12,11 +12,12 @@
 
 namespace kd {
 
-// One line of rendered text, with its own color (so a grey header and an
-// amber body can share the same screen).
+// One rendered line. `hl` = syntax-highlight this line (used by the notebook):
+// codes/passwords go green, ALLCAPS names/systems go cyan, the rest stays base.
 struct CLine {
     Color color;
     std::string text;
+    bool hl = false;
 };
 using ScreenBuf = std::vector<CLine>;
 
@@ -27,22 +28,24 @@ public:
 
 private:
     IPlatform* p_;
-    std::vector<ScreenBuf> screens_;    // queue of screens waiting to be read
-    Color cur_          = pal::amber;   // current color while parsing content
+    std::vector<ScreenBuf> screens_;
+    std::vector<std::string> notes_;
+    Color cur_          = pal::amber;
     bool  docked_       = false;
     bool  running_      = true;
-    bool  cinematic_    = false;        // boot / finale: any input just advances
+    bool  cinematic_    = false;
     bool  finale_       = false;
-    bool  prologueDone_ = false;        // after the prologue you stay playable
-    bool  typeIt_       = true;         // animate this screen? (first show only)
+    bool  prologueDone_ = false;
+    bool  typeIt_       = true;
 
-    // content -> screens
     void queueBeats(const std::string& text);
     void queueFile(const std::string& path);
+    void pushLines(const std::vector<CLine>& lines);
     std::vector<std::string> wrap(const std::string& text, int cols);
 
-    void render();      // draw current screen + hint, leave cursor on prompt row
-    void advance();     // drop the current screen
+    void render();
+    void advance();
+    void printHighlighted(const std::string& text, Color base);
 
     bool handleCommand(const std::string& raw);
     bool handleStationCommand(const std::string& cmd, const std::string& arg);
@@ -55,6 +58,12 @@ private:
     void cmdSave();
     void cmdReset();
     void helpStation();
+
+    void loadNotes();
+    void saveNotes();
+    void addNote(const std::string& body);
+    void showNotes();
+    void clearNotes();
 
     void queueFinale();
     void finish();
