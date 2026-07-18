@@ -1,21 +1,28 @@
-# gen_content.py — regenerates src/esp32/content_embedded.h from content/prologue/*.txt
-#
-# Runs automatically before every PlatformIO build (see platformio.ini:
-# extra_scripts = pre:tools/gen_content.py), so the firmware texts can never
-# drift out of sync with the .txt files. Can also be run by hand:
-#     python tools/gen_content.py
+# gen_content.py — regenerates src/esp32/content_embedded.h from ALL .txt files
+# under content/ (prologue/, talk/, ...). Runs automatically before every
+# PlatformIO build so firmware texts never drift from the source files.
 import os
 
-FILES = ["boot", "briefing", "mail", "roster", "shiplog", "status",
-         "docking", "cantor"]
-SRC_DIR = os.path.join("content", "prologue")
+CONTENT = "content"
 OUT = os.path.join("src", "esp32", "content_embedded.h")
+
+
+def collect():
+    files = []
+    for root, _dirs, names in os.walk(CONTENT):
+        for n in sorted(names):
+            if n.endswith(".txt"):
+                full = os.path.join(root, n)
+                logical = os.path.relpath(full, CONTENT).replace(os.sep, "/")
+                files.append((logical, full))
+    files.sort()
+    return files
 
 
 def generate():
     out = [
-        "// content_embedded.h  (AUTO-GENERATED from content/prologue/*.txt)",
-        "// Story texts baked into the firmware: one .bin, no filesystem needed.",
+        "// content_embedded.h  (AUTO-GENERATED from content/**/*.txt)",
+        "// Story + dialogue texts baked into the firmware: one .bin, no filesystem.",
         "// Do not edit by hand — edit the .txt files and rebuild.",
         "#ifndef KODZIMIM_CONTENT_EMBEDDED_H",
         "#define KODZIMIM_CONTENT_EMBEDDED_H",
@@ -25,22 +32,21 @@ def generate():
         "inline bool getEmbeddedContent(const std::string& path, std::string& out) {",
     ]
     first = True
-    for name in FILES:
-        path = os.path.join(SRC_DIR, name + ".txt")
-        with open(path, encoding="utf-8") as fh:
+    for logical, full in collect():
+        with open(full, encoding="utf-8") as fh:
             text = fh.read()
         if ')KD"' in text:
-            raise SystemExit("raw-string delimiter clash in " + path)
+            raise SystemExit("raw-string delimiter clash in " + full)
         kw = "if" if first else "else if"
         first = False
-        out.append('    %s (path == "prologue/%s.txt") { out = R"KD(%s)KD"; return true; }'
-                   % (kw, name, text))
+        out.append('    %s (path == "%s") { out = R"KD(%s)KD"; return true; }'
+                   % (kw, logical, text))
     out += ["    return false;", "}", "} // namespace kd", "#endif"]
-
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as fh:
         fh.write("\n".join(out) + "\n")
-    print("gen_content: wrote %s (%d bytes)" % (OUT, os.path.getsize(OUT)))
+    print("gen_content: %d files -> %s (%d bytes)" %
+          (len(collect()), OUT, os.path.getsize(OUT)))
 
 
 generate()

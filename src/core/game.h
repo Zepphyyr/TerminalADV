@@ -21,6 +21,15 @@ struct CLine {
 };
 using ScreenBuf = std::vector<CLine>;
 
+// One conversation rule: if the player's sentence contains ALL words of any
+// one trigger phrase, the AI answers with `reply` (which may be multi-beat and
+// carry @color directives). Rules are scored by specificity (longest matched
+// phrase wins), so "did you kill them" beats a bare "them".
+struct DlgRule {
+    std::vector<std::vector<std::string>> triggers;  // list of word-phrases
+    std::string reply;
+};
+
 class Game {
 public:
     explicit Game(IPlatform* platform);
@@ -37,6 +46,13 @@ private:
     bool  finale_       = false;
     bool  prologueDone_ = false;
     bool  typeIt_       = true;
+
+    // conversation ("talk") state
+    bool  inTalk_ = false;
+    std::string dlgIntro_;
+    std::vector<DlgRule> dlgRules_;
+    std::vector<std::string> dlgFallback_;
+    size_t fbIdx_ = 0;
 
     void queueBeats(const std::string& text);
     void queueFile(const std::string& path);
@@ -64,6 +80,11 @@ private:
     void addNote(const std::string& body);
     void showNotes();
     void clearNotes();
+
+    // conversation
+    void talkTo(const std::string& who);
+    bool loadDialogue(const std::string& path);
+    void talkAnswer(const std::string& question);
 
     void queueFinale();
     void finish();

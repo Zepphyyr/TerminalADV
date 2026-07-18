@@ -27,7 +27,8 @@ constexpr Color white {225, 225, 225};  // narration OUTSIDE the terminal
 constexpr Color cyan  {110, 220, 255};  // CANTOR — the caretaker AI
 constexpr Color green { 90, 255, 140};  // systems nominal / COR VITAE
 constexpr Color red   {255,  90,  70};  // alerts, rejections / NULLPOINT
-constexpr Color pale  {200, 140, 255};  // PALE SIGNAL — the alien thing
+constexpr Color blue  {  8,   0, 255};  // HALO-9 "THE WARDEN" — hard police blue
+constexpr Color pale  {200, 140, 255};  // PALE SIGNAL — the thing they built
 constexpr Color grey  {150, 150, 150};  // headers, metadata, prompts
 }
 

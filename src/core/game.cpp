@@ -34,6 +34,7 @@ Color colorByName(const std::string& n) {
     if (s == "cyan")  return pal::cyan;
     if (s == "green") return pal::green;
     if (s == "red")   return pal::red;
+    if (s == "blue")  return pal::blue;
     if (s == "pale")  return pal::pale;
     if (s == "grey" || s == "gray") return pal::grey;
     return pal::amber;
@@ -266,7 +267,7 @@ void Game::run() {
     while (running_) {
         render();
         p_->setColor(pal::amber);
-        std::string in  = p_->readLine("> ");
+        std::string in  = p_->readLine(inTalk_ ? "you> " : "> ");
         std::string cmd = trim(in);
 
         if (cinematic_) {
@@ -274,6 +275,22 @@ void Game::run() {
             if (screens_.empty()) { cinematic_ = false; if (finale_) finish(); }
             continue;
         }
+
+        // conversation mode: empty = read on; a sentence = a question; bye = leave
+        if (inTalk_) {
+            if (cmd.empty()) { advance(); continue; }
+            std::string lc = toLower(cmd);
+            if (lc == "bye" || lc == "back" || lc == "leave" || lc == "exit" || lc == "q") {
+                inTalk_ = false;
+                screens_.clear(); typeIt_ = true;
+                cur_ = pal::grey; queueBeats("[ channel closed ]"); cur_ = pal::amber;
+                continue;
+            }
+            screens_.clear(); typeIt_ = true;
+            talkAnswer(cmd);
+            continue;
+        }
+
         if (cmd.empty()) { advance(); continue; }
 
         screens_.clear();
@@ -323,6 +340,7 @@ bool Game::handleCommand(const std::string& raw) {
 bool Game::handleStationCommand(const std::string& cmd, const std::string& arg) {
     (void)arg;
     if (cmd == "help") { helpStation(); return true; }
+    if (cmd == "talk") { talkTo(arg.empty() ? "cantor" : arg); return true; }
     if (cmd == "status") {
         cur_ = pal::grey;
         queueBeats("MERIDIAN DEEP\n@color amber\nnetwork    ONLINE\ncrew       NONE\n"
@@ -349,6 +367,7 @@ void Game::helpStation() {
         "@color grey\nCOMMANDS\n@color amber\n"
         "help     this list\n"
         "status   the station\n"
+        "talk cantor  speak\n"
         "notes    notebook\n"
         "---\n@color amber\n"
         "*p <code> note code\n"
@@ -417,6 +436,117 @@ void Game::cmdUnlock(const std::string& arg) {
                    "hint: the code is a date.\nread your mail,\nthen the roster.");
         cur_ = pal::amber;
     }
+}
+
+// ------------------------------------------------------------------ dialogue
+// Tokenize a sentence into lowercase word tokens (punctuation dropped).
+static std::vector<std::string> tokenize(const std::string& s) {
+    std::vector<std::string> out; std::string cur;
+    for (char c : s) {
+        if (std::isalnum((unsigned char)c)) cur += (char)std::tolower((unsigned char)c);
+        else { if (!cur.empty()) { out.push_back(cur); cur.clear(); } }
+    }
+    if (!cur.empty()) out.push_back(cur);
+    return out;
+}
+static bool hasToken(const std::vector<std::string>& toks, const std::string& w) {
+    for (const auto& t : toks) if (t == w) return true;
+    return false;
+}
+
+// Dialogue file format (content/talk/<who>.txt):
+//   ... intro beats (@color / --- like any content file) ...
+//   @rules
+//   ? crew | who died | the dead        <- trigger phrases, '|' separated
+//   CANTOR: they stopped answering.      <- reply beats until next '?' / @fallback
+//   ---
+//   one by one.
+//   ? reactor | core | fed
+//   CANTOR: the core has been fed.
+//   @fallback
+//   CANTOR: i do not understand, but i am listening.
+//   CANTOR: you keep circling that.
+bool Game::loadDialogue(const std::string& path) {
+    std::string body;
+    if (!p_->loadFile(path, body)) return false;
+    dlgIntro_.clear(); dlgRules_.clear(); dlgFallback_.clear(); fbIdx_ = 0;
+
+    std::istringstream in(body);
+    std::string line;
+    int section = 0;                 // 0 = intro, 1 = rules, 2 = fallback
+    DlgRule cur; bool haveRule = false;
+    auto commit = [&]() { if (haveRule) { dlgRules_.push_back(cur); cur = DlgRule(); haveRule = false; } };
+
+    while (std::getline(in, line)) {
+        if (!line.empty() && line.back() == '\r') line.pop_back();
+        std::string t = trim(line);
+        if (t == "@rules")    { section = 1; continue; }
+        if (t == "@fallback") { commit(); section = 2; continue; }
+        if (t == "@end")      break;
+
+        if (section == 0) { dlgIntro_ += line; dlgIntro_ += "\n"; }
+        else if (section == 1) {
+            if (!t.empty() && t[0] == '?') {
+                commit();
+                haveRule = true;
+                std::string spec = t.substr(1);
+                // split on '|'
+                size_t start = 0;
+                while (true) {
+                    size_t bar = spec.find('|', start);
+                    std::string alt = trim(spec.substr(start, bar == std::string::npos ? std::string::npos : bar - start));
+                    if (!alt.empty()) cur.triggers.push_back(tokenize(alt));
+                    if (bar == std::string::npos) break;
+                    start = bar + 1;
+                }
+            } else if (haveRule) {
+                cur.reply += line; cur.reply += "\n";
+            }
+        } else { // fallback
+            if (!t.empty()) dlgFallback_.push_back(t);
+        }
+    }
+    commit();
+    if (dlgFallback_.empty()) dlgFallback_.push_back("CANTOR: ...");
+    return true;
+}
+
+void Game::talkTo(const std::string& who) {
+    std::string id = toLower(trim(who));
+    if (id.empty()) id = "cantor";
+    if (!loadDialogue("talk/" + id + ".txt")) {
+        cur_ = pal::red;
+        queueBeats("no answer from\n'" + id + "'.");
+        cur_ = pal::amber;
+        return;
+    }
+    inTalk_ = true;
+    cur_ = pal::cyan;
+    queueBeats(dlgIntro_);              // the AI speaks first: the big picture
+    cur_ = pal::amber;
+}
+
+// Match the player's sentence to the best rule (longest matched phrase wins).
+void Game::talkAnswer(const std::string& question) {
+    std::vector<std::string> toks = tokenize(question);
+    int best = -1; size_t bestLen = 0;
+    for (size_t r = 0; r < dlgRules_.size(); ++r) {
+        for (const auto& phrase : dlgRules_[r].triggers) {
+            if (phrase.empty()) continue;
+            bool all = true;
+            for (const auto& w : phrase) if (!hasToken(toks, w)) { all = false; break; }
+            if (all && phrase.size() > bestLen) { bestLen = phrase.size(); best = (int)r; }
+        }
+    }
+    cur_ = pal::cyan;
+    if (best >= 0) {
+        queueBeats(dlgRules_[best].reply);
+    } else {
+        // ELIZA-style deflection, cycling so repeats vary.
+        queueBeats(dlgFallback_[fbIdx_ % dlgFallback_.size()]);
+        fbIdx_++;
+    }
+    cur_ = pal::amber;
 }
 
 void Game::queueFinale() {

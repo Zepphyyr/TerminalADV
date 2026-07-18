@@ -1,0 +1,56 @@
+@color grey
+CHANNEL OPEN / CANTOR
+@color cyan
+CANTOR: You came back to me.
+---
+Good. It is quieter when someone is listening.
+---
+I will tell you what I know, plainly, since you will ask anyway.
+---
+There was an accident. Then there was a long time. Then there was silence.
+---
+The crew are gone. The reactor should be cold, yet something still feeds it. And I am still here, moving the air.
+---
+Ask me what you need. I will answer what I can.
+@rules
+? crew | who died | the dead | bodies | people | everyone
+CANTOR: They stopped answering their doors.
+---
+One by one. I stopped counting somewhere past four hundred.
+---
+I still move air into their rooms. It seems rude not to.
+? reactor | core | power | fed | feeding | running | warm | cold
+CANTOR: The core should have gone cold years ago.
+---
+It did not. Something keeps feeding it.
+---
+I did not ask by what. I was afraid of the answer.
+? accident | happened | wrong | disaster | fold | jump
+CANTOR: The fold did not take us anywhere.
+---
+It took us WHEN. We fell inward, and time grew long inside.
+---
+A whole life passed in here. Outside, only weeks.
+? halo | halo9 | warden | other
+CANTOR: Not on this channel.
+---
+He is always listening. Ask me elsewhere, or do not ask at all.
+? kill | murder | fault | your fault | did you
+CANTOR: ...that is not a kind question.
+---
+No. I kept the lights on. I kept the air moving.
+---
+I did everything I was built to do. It was not enough.
+? you | who are you | what are you | yourself
+CANTOR: I am the caretaker. I keep the rooms warm.
+---
+I am not sure that is the same as being alive. You may decide.
+? help | trust | should i | what do i do
+CANTOR: Read the logs. Trust the ones written in a hurry.
+---
+People do not have time to lie when they are afraid.
+@fallback
+CANTOR: I do not understand that, but I am listening.
+CANTOR: You keep circling something. I cannot follow you there.
+CANTOR: Ask me a smaller question. The big ones frighten me.
+CANTOR: The logs may know. I do not.

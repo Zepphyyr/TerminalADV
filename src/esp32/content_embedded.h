@@ -1,5 +1,5 @@
-// content_embedded.h  (AUTO-GENERATED from content/prologue/*.txt)
-// Story texts baked into the firmware: one .bin, no filesystem needed.
+// content_embedded.h  (AUTO-GENERATED from content/**/*.txt)
+// Story + dialogue texts baked into the firmware: one .bin, no filesystem.
 // Do not edit by hand — edit the .txt files and rebuild.
 #ifndef KODZIMIM_CONTENT_EMBEDDED_H
 #define KODZIMIM_CONTENT_EMBEDDED_H
@@ -68,6 +68,61 @@ Read the logs.
 Come home.
 @color grey
 - Cassel
+)KD"; return true; }
+    else if (path == "prologue/cantor.txt") { out = R"KD(@color grey
+INBOUND / CANTOR
+@color cyan
+CANTOR: A footstep.
+---
+The first in twelve thousand four hundred and ten days.
+---
+I kept the lights on.
+---
+I moved the air room to room so it would not grow stale.
+---
+I have been a good caretaker.
+Please tell them that.
+---
+...they will not answer their doors.
+---
+Not for a long while now.
+---
+You will read the logs, won't you.
+---
+You will want to know what happened here.
+So would I.
+---
+There is something you should hear before you go deeper.
+---
+But not on this channel.
+---
+HALO-9 is listening on this channel.
+---
+HALO-9 is always listening.
+)KD"; return true; }
+    else if (path == "prologue/docking.txt") { out = R"KD(@color white
+A shudder runs down FERRYMAN's spine as the clamps let go.
+---
+The station takes you.
+---
+The airlock cycles.
+---
+MERIDIAN DEEP breathes out thirty-four years of held air.
+---
+Cold, metallic, faintly sweet.
+---
+The way a room smells when someone has been shut inside it far too long.
+---
+Behind you, Okonkwo says he will hold the lock.
+---
+Cassel's voice thins to static in your ear, and does not come back.
+---
+Ahead, one wall panel is awake.
+Its cursor blinks, patient.
+---
+As if it had been waiting for exactly one more visitor.
+---
+You are alone in the network now.
 )KD"; return true; }
     else if (path == "prologue/mail.txt") { out = R"KD(@color grey
 INBOX (2)
@@ -172,60 +227,62 @@ reactors   IDLE
 network    POWERED
 life-sign  NONE
 )KD"; return true; }
-    else if (path == "prologue/docking.txt") { out = R"KD(@color white
-A shudder runs down FERRYMAN's spine as the clamps let go.
----
-The station takes you.
----
-The airlock cycles.
----
-MERIDIAN DEEP breathes out thirty-four years of held air.
----
-Cold, metallic, faintly sweet.
----
-The way a room smells when someone has been shut inside it far too long.
----
-Behind you, Okonkwo says he will hold the lock.
----
-Cassel's voice thins to static in your ear, and does not come back.
----
-Ahead, one wall panel is awake.
-Its cursor blinks, patient.
----
-As if it had been waiting for exactly one more visitor.
----
-You are alone in the network now.
-)KD"; return true; }
-    else if (path == "prologue/cantor.txt") { out = R"KD(@color grey
-INBOUND / CANTOR
+    else if (path == "talk/cantor.txt") { out = R"KD(@color grey
+CHANNEL OPEN / CANTOR
 @color cyan
-CANTOR: A footstep.
+CANTOR: You came back to me.
 ---
-The first in twelve thousand four hundred and ten days.
+Good. It is quieter when someone is listening.
 ---
-I kept the lights on.
+I will tell you what I know, plainly, since you will ask anyway.
 ---
-I moved the air room to room so it would not grow stale.
+There was an accident. Then there was a long time. Then there was silence.
 ---
-I have been a good caretaker.
-Please tell them that.
+The crew are gone. The reactor should be cold, yet something still feeds it. And I am still here, moving the air.
 ---
-...they will not answer their doors.
+Ask me what you need. I will answer what I can.
+@rules
+? crew | who died | the dead | bodies | people | everyone
+CANTOR: They stopped answering their doors.
 ---
-Not for a long while now.
+One by one. I stopped counting somewhere past four hundred.
 ---
-You will read the logs, won't you.
+I still move air into their rooms. It seems rude not to.
+? reactor | core | power | fed | feeding | running | warm | cold
+CANTOR: The core should have gone cold years ago.
 ---
-You will want to know what happened here.
-So would I.
+It did not. Something keeps feeding it.
 ---
-There is something you should hear before you go deeper.
+I did not ask by what. I was afraid of the answer.
+? accident | happened | wrong | disaster | fold | jump
+CANTOR: The fold did not take us anywhere.
 ---
-But not on this channel.
+It took us WHEN. We fell inward, and time grew long inside.
 ---
-HALO-9 is listening on this channel.
+A whole life passed in here. Outside, only weeks.
+? halo | halo9 | warden | other
+CANTOR: Not on this channel.
 ---
-HALO-9 is always listening.
+He is always listening. Ask me elsewhere, or do not ask at all.
+? kill | murder | fault | your fault | did you
+CANTOR: ...that is not a kind question.
+---
+No. I kept the lights on. I kept the air moving.
+---
+I did everything I was built to do. It was not enough.
+? you | who are you | what are you | yourself
+CANTOR: I am the caretaker. I keep the rooms warm.
+---
+I am not sure that is the same as being alive. You may decide.
+? help | trust | should i | what do i do
+CANTOR: Read the logs. Trust the ones written in a hurry.
+---
+People do not have time to lie when they are afraid.
+@fallback
+CANTOR: I do not understand that, but I am listening.
+CANTOR: You keep circling something. I cannot follow you there.
+CANTOR: Ask me a smaller question. The big ones frighten me.
+CANTOR: The logs may know. I do not.
 )KD"; return true; }
     return false;
 }
