@@ -17,7 +17,13 @@ namespace kd {
 struct CLine {
     Color color;
     std::string text;
-    bool hl = false;
+    bool hl;
+    // NOTE: an explicit constructor (instead of `bool hl = false;`) keeps this
+    // usable under C++11, which is what the Arduino ESP32 core compiles with.
+    // A default member initializer would make CLine a non-aggregate there and
+    // break every CLine{...} call site.
+    CLine(Color c, const std::string& t, bool highlight = false)
+        : color(c), text(t), hl(highlight) {}
 };
 using ScreenBuf = std::vector<CLine>;
 
