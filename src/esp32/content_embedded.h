@@ -217,7 +217,7 @@ DOCKING CLAMPS
 LOCKED
 auth required
 fleet code REJECTED
-use: unlock <code>
+use: /unlock <code>
 ---
 @color grey
 EXTERNAL

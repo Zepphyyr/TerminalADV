@@ -177,9 +177,9 @@ void Game::render() {
         }
     }
     for (int i = used; i < contentRows; ++i) p_->print("\n");
-    p_->setColor(pal::grey);
-    if (screens_.size() > 1)   p_->print("[enter] more");
-    else if (screens_.empty()) p_->print("type 'help'");
+    if (screens_.size() > 1) { p_->setColor(pal::grey); p_->print("[enter] more"); }
+    else if (inTalk_)         { p_->setColor(pal::cyan); p_->print("CANTOR listening"); }
+    else if (screens_.empty()){ p_->setColor(pal::grey); p_->print("/help"); }
     p_->print("\n");
     typeIt_ = false;
 }
@@ -233,7 +233,7 @@ void Game::showNotes() {
     lines.push_back(CLine{pal::grey, "NOTEBOOK", false});
     if (notes_.empty()) {
         lines.push_back(CLine{pal::grey, "(empty)", false});
-        lines.push_back(CLine{pal::grey, "add:  note <text>", false});
+        lines.push_back(CLine{pal::grey, "add:  /note <text>", false});
         lines.push_back(CLine{pal::grey, "or:   *p <code>", false});
     } else {
         for (const auto& e : notes_)
@@ -253,12 +253,13 @@ void Game::run() {
     if (p_->loadState("progress") == "prologue_done") {
         prologueDone_ = true;
         cinematic_    = false;
+        if (loadDialogue("talk/cantor.txt")) inTalk_ = true;  // he is always there
         cur_ = pal::grey;
         queueBeats("SAVE FOUND\nprologue complete.\n"
                    "---\n"
                    "@color amber\nYou are aboard\nMERIDIAN DEEP.\n"
-                   "@color cyan\ntalk cantor\n"
-                   "@color grey\nhelp / reset");
+                   "@color cyan\nCANTOR is on the\nchannel.\n"
+                   "@color grey\njust type to speak\n/help for orders");
         cur_ = pal::amber;
     } else {
         cinematic_ = true;
@@ -277,27 +278,24 @@ void Game::run() {
             continue;
         }
 
-        // conversation mode: empty = read on; a sentence = a question; bye = leave
-        if (inTalk_) {
-            if (cmd.empty()) { advance(); continue; }
-            std::string lc = toLower(cmd);
-            if (lc == "bye" || lc == "back" || lc == "leave" || lc == "exit" || lc == "q") {
-                inTalk_ = false;
-                screens_.clear(); typeIt_ = true;
-                cur_ = pal::grey; queueBeats("[ channel closed ]"); cur_ = pal::amber;
-                continue;
-            }
-            screens_.clear(); typeIt_ = true;
-            talkAnswer(cmd);
-            continue;
-        }
-
         if (cmd.empty()) { advance(); continue; }
 
         screens_.clear();
         typeIt_ = true;
-        if (!handleCommand(cmd)) break;
-        if (docked_ && !finale_ && !prologueDone_) queueFinale();
+
+        // INPUT MODEL:
+        //   *note...  -> quick notebook entry
+        //   /command  -> an order to the terminal
+        //   anything  -> you are SPEAKING (to whoever is on the channel)
+        if (cmd[0] == '*') { addNote(cmd); continue; }
+        if (cmd[0] == '/') {
+            std::string body = trim(cmd.substr(1));
+            if (body.empty()) { cmdHelp(); continue; }
+            if (!handleCommand(body)) break;
+            if (docked_ && !finale_ && !prologueDone_) queueFinale();
+            continue;
+        }
+        handleSpeech(cmd);
     }
 }
 
@@ -366,15 +364,16 @@ bool Game::handleStationCommand(const std::string& cmd, const std::string& arg) 
 void Game::helpStation() {
     queueBeats(
         "@color grey\nCOMMANDS\n@color amber\n"
-        "help     this list\n"
-        "status   the station\n"
-        "talk cantor  speak\n"
-        "notes    notebook\n"
+        "/help     this list\n"
+        "/status   the station\n"
+        "/notes    notebook\n"
+        "/talk cantor\n"
         "---\n@color amber\n"
         "*p <code> note code\n"
-        "save     save now\n"
-        "reset    start over\n"
-        "shutdown reboot\n");
+        "/save    /reset\n"
+        "/shutdown reboot\n"
+        "---\n@color grey\n"
+        "plain words are\nspoken aloud.");
     cur_ = pal::amber;
 }
 
@@ -399,17 +398,18 @@ void Game::cmdHelp() {
     cur_ = pal::amber;
     queueBeats(
         "@color grey\nCOMMANDS\n@color amber\n"
-        "help   this list\n"
-        "dir    list docs\n"
-        "open X open a doc\n"
-        "mail   your inbox\n"
-        "logs   ship log\n"
+        "/help   this list\n"
+        "/dir    list docs\n"
+        "/open X open a doc\n"
+        "/mail   your inbox\n"
+        "/logs   ship log\n"
         "---\n@color amber\n"
-        "status ship + dock\n"
-        "unlock <code>\n"
-        "notes  notebook\n"
+        "/status ship + dock\n"
+        "/unlock <code>\n"
+        "/notes  notebook\n"
         "*p <code> quick note\n"
-        "save   shutdown");
+        "---\n@color grey\n"
+        "plain words are\nspoken aloud.");
     cur_ = pal::amber;
 }
 
@@ -423,12 +423,12 @@ void Game::cmdOpen(const std::string& arg) {
     std::string a = toLower(arg);
     if (a == "briefing") queueFile("prologue/briefing.txt");
     else if (a == "roster" || a == "vell" || a == "maru") queueFile("prologue/roster.txt");
-    else if (a.empty()) { cur_ = pal::grey; queueBeats("open what?\ntry 'dir'."); cur_ = pal::amber; }
-    else { cur_ = pal::red; queueBeats("no document named\n'" + arg + "'.\ntry 'dir'."); cur_ = pal::amber; }
+    else if (a.empty()) { cur_ = pal::grey; queueBeats("open what?\ntry /dir."); cur_ = pal::amber; }
+    else { cur_ = pal::red; queueBeats("no document named\n'" + arg + "'.\ntry /dir."); cur_ = pal::amber; }
 }
 
 void Game::cmdUnlock(const std::string& arg) {
-    if (arg.empty()) { cur_ = pal::grey; queueBeats("unlock: give a code.\ne.g. unlock 0000"); cur_ = pal::amber; return; }
+    if (arg.empty()) { cur_ = pal::grey; queueBeats("unlock: give a code.\ne.g. /unlock 0000"); cur_ = pal::amber; return; }
     p_->beep();
     if (digitsOnly(arg) == "0412") { docked_ = true; }
     else {
@@ -512,6 +512,49 @@ bool Game::loadDialogue(const std::string& path) {
     return true;
 }
 
+// Plain words are speech. If a channel is open the AI answers; if not, we say
+// so in-fiction — and if the player typed a bare command name, we gently point
+// out that orders need a slash.
+bool Game::isKnownCommand(const std::string& c) {
+    static const char* cmds[] = {"help","dir","open","mail","logs","status","unlock",
+                                 "dock","notes","note","save","reset","shutdown",
+                                 "quit","exit","clear","talk","bye"};
+    for (size_t i = 0; i < sizeof(cmds)/sizeof(cmds[0]); ++i)
+        if (c == cmds[i]) return true;
+    return false;
+}
+
+void Game::closeChannel() {
+    inTalk_ = false;
+    cur_ = pal::grey;
+    queueBeats("[ channel closed ]\n@color grey\n/help for commands");
+    cur_ = pal::amber;
+}
+
+void Game::handleSpeech(const std::string& raw) {
+    std::string lc = toLower(raw);
+
+    if (inTalk_) {
+        if (lc == "bye" || lc == "goodbye" || lc == "leave") { closeChannel(); return; }
+        talkAnswer(raw);
+        return;
+    }
+
+    std::string cmd, arg;
+    splitCommand(raw, cmd, arg);
+    if (isKnownCommand(cmd)) {
+        cur_ = pal::grey;
+        queueBeats("orders need a slash.\n---\n@color amber\n/" + cmd +
+                   "\n@color grey\nplain words are\nspoken aloud.");
+        cur_ = pal::amber;
+        return;
+    }
+    cur_ = pal::grey;
+    queueBeats("you say it aloud.\n---\nnothing on this\nchannel answers.\n"
+               "---\n@color grey\n/talk cantor\nto open a channel");
+    cur_ = pal::amber;
+}
+
 void Game::talkTo(const std::string& who) {
     std::string id = toLower(trim(who));
     if (id.empty()) id = "cantor";
@@ -561,15 +604,18 @@ void Game::queueFinale() {
     cinematic_ = true; finale_ = true; typeIt_ = true;
 }
 
+// End of the prologue. CANTOR just spoke to you, so his channel stays OPEN:
+// the player's first instinct is to ask him something, and that should simply
+// work. Plain words = speech, "/..." = orders, "bye" closes the channel.
 void Game::finish() {
     saveProgress("prologue_done");
     prologueDone_ = true; finale_ = false; cinematic_ = false;
+
+    if (loadDialogue("talk/cantor.txt")) inTalk_ = true;
     cur_ = pal::grey;
     queueBeats("progress saved.\n"
-               "@color cyan\nCANTOR is still\nlistening.\n"
-               "---\n@color amber\ntalk cantor\n"
-               "@color grey\n  ask him anything\n"
-               "help / shutdown");
+               "@color cyan\nCANTOR: I am still\nhere. Ask me.\n"
+               "@color grey\njust type to speak\n/help for orders");
     cur_ = pal::amber; typeIt_ = true;
 }
 

@@ -69,7 +69,10 @@ private:
     void advance();
     void printHighlighted(const std::string& text, Color base);
 
-    bool handleCommand(const std::string& raw);
+    bool handleCommand(const std::string& raw);   // "/command" (slash stripped)
+    void handleSpeech(const std::string& raw);    // plain words = talking
+    static bool isKnownCommand(const std::string& cmd);
+    void closeChannel();
     bool handleStationCommand(const std::string& cmd, const std::string& arg);
 
     void cmdHelp();

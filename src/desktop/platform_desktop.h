@@ -58,7 +58,7 @@ public:
     std::string readLine(const std::string& promptStr) override {
         std::cout << promptStr; std::cout.flush();
         std::string line;
-        if (!std::getline(std::cin, line)) return "shutdown";  // EOF
+        if (!std::getline(std::cin, line)) return "/shutdown";  // EOF
         return line;
     }
 
