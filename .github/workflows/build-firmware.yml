@@ -8,6 +8,10 @@ on:
   push:
   workflow_dispatch:
 
+# needed to publish the rolling 'latest' release
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -38,12 +42,12 @@ jobs:
           if [ -n "$BOOTAPP" ]; then ARGS="$ARGS 0xe000 $BOOTAPP"; fi
           # esptool <5 uses merge_bin/--flash_mode; v5+ uses merge-bin/--flash-mode
           python -m esptool --chip esp32s3 merge_bin \
-            -o kodzimim_prologue_merged.bin \
+            -o kodzimim.bin \
             --flash_mode dio --flash_size 8MB $ARGS \
           || python -m esptool --chip esp32s3 merge-bin \
-            -o kodzimim_prologue_merged.bin \
+            -o kodzimim.bin \
             --flash-mode dio --flash-size 8MB $ARGS
-          ls -l kodzimim_prologue_merged.bin
+          ls -l kodzimim.bin
 
       - name: Upload firmware artifacts
         uses: actions/upload-artifact@v4
@@ -53,4 +57,20 @@ jobs:
             .pio/build/cardputer-adv/firmware.bin
             .pio/build/cardputer-adv/bootloader.bin
             .pio/build/cardputer-adv/partitions.bin
-            kodzimim_prologue_merged.bin
+            kodzimim.bin
+
+      # Publish a rolling "latest" release so the Cardputer can install the
+      # firmware straight from a fixed URL (Launcher -> install from URL):
+      #   https://github.com/<user>/<repo>/releases/latest/download/kodzimim.bin
+      - name: Publish rolling "latest" release
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Latest build
+          body: |
+            Automatic build of the KODZIMIM prologue firmware.
+            Flash `kodzimim.bin` to address 0x0, or install it from the
+            Launcher via URL / Favorites.
+          files: kodzimim.bin
+          fail_on_unmatched_files: true
