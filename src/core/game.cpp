@@ -257,7 +257,8 @@ void Game::run() {
         queueBeats("SAVE FOUND\nprologue complete.\n"
                    "---\n"
                    "@color amber\nYou are aboard\nMERIDIAN DEEP.\n"
-                   "@color grey\ntype 'help'\n'reset' starts over");
+                   "@color cyan\ntalk cantor\n"
+                   "@color grey\nhelp / reset");
         cur_ = pal::amber;
     } else {
         cinematic_ = true;
@@ -564,7 +565,11 @@ void Game::finish() {
     saveProgress("prologue_done");
     prologueDone_ = true; finale_ = false; cinematic_ = false;
     cur_ = pal::grey;
-    queueBeats("progress saved.\n@color amber\ntype 'help'\n'shutdown' reboots");
+    queueBeats("progress saved.\n"
+               "@color cyan\nCANTOR is still\nlistening.\n"
+               "---\n@color amber\ntalk cantor\n"
+               "@color grey\n  ask him anything\n"
+               "help / shutdown");
     cur_ = pal::amber; typeIt_ = true;
 }
 
