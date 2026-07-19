@@ -54,8 +54,15 @@ private:
     bool  prologueDone_ = false;
     bool  typeIt_       = true;
 
-    // conversation ("talk") state
-    bool  inTalk_ = false;
+    // ---- conversation state -------------------------------------------
+    // Who your plain words go to. Empty = nobody is on the channel.
+    // It is STICKY: "/c ..." or "/h ..." switches the addressee, after which
+    // you just type normally. Moving to a terminal sets it from nodeDefault_.
+    std::string addressee_;
+    std::string nodeDefault_ = "cantor";  // who lives at this terminal
+    std::string dlgLoaded_;               // which talk file is in memory
+    Color dlgVoice_ = pal::cyan;          // that speaker's colour
+    bool  introShown_ = false;
     std::string dlgIntro_;
     std::vector<DlgRule> dlgRules_;
     std::vector<std::string> dlgFallback_;
@@ -95,6 +102,10 @@ private:
     void clearNotes();
 
     // conversation
+    bool ensureDialogue(const std::string& who);
+    void speakTo(const std::string& who, const std::string& phrase);
+    void arriveAt(const std::string& who);      // terminal sets the default
+    std::string voiceName(const std::string& who) const;
     void talkTo(const std::string& who);
     bool loadDialogue(const std::string& path);
     void talkAnswer(const std::string& question);

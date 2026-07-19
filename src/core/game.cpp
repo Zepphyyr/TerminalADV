@@ -178,7 +178,7 @@ void Game::render() {
     }
     for (int i = used; i < contentRows; ++i) p_->print("\n");
     if (screens_.size() > 1) { p_->setColor(pal::grey); p_->print("[enter] more"); }
-    else if (inTalk_)         { p_->setColor(pal::cyan); p_->print("CANTOR listening"); }
+    else if (!addressee_.empty()) { p_->setColor(dlgVoice_); p_->print(voiceName(addressee_)); }
     else if (screens_.empty()){ p_->setColor(pal::grey); p_->print("/help"); }
     p_->print("\n");
     typeIt_ = false;
@@ -253,7 +253,7 @@ void Game::run() {
     if (p_->loadState("progress") == "prologue_done") {
         prologueDone_ = true;
         cinematic_    = false;
-        if (loadDialogue("talk/cantor.txt")) inTalk_ = true;  // he is always there
+        arriveAt("cantor");   // he is always there
         cur_ = pal::grey;
         queueBeats("SAVE FOUND\nprologue complete.\n"
                    "---\n"
@@ -269,7 +269,7 @@ void Game::run() {
     while (running_) {
         render();
         p_->setColor(pal::amber);
-        std::string in  = p_->readLine(inTalk_ ? "you> " : "> ");
+        std::string in  = p_->readLine(addressee_.empty() ? "> " : "you> ");
         std::string cmd = trim(in);
 
         if (cinematic_) {
@@ -303,7 +303,7 @@ bool Game::handleCommand(const std::string& raw) {
     std::string cmd, arg;
     splitCommand(raw, cmd, arg);
     if (cmd == "o") cmd = "open";
-    if (cmd == "h" || cmd == "?") cmd = "help";
+    if (cmd == "?") cmd = "help";   // NB: "h" is reserved for addressing HALO-9
     if (cmd == "l") cmd = "logs";
     if (cmd == "n") cmd = "notes";
 
@@ -314,6 +314,8 @@ bool Game::handleCommand(const std::string& raw) {
         else addNote(arg);
         return true;
     }
+    if (cmd == "c" || cmd == "cantor") { speakTo("cantor", arg); return true; }
+    if (cmd == "h" || cmd == "halo")   { speakTo("halo",   arg); return true; }
     if (cmd == "version" || cmd == "build") {
         cur_ = pal::grey;
         queueBeats(std::string("KODZIMIM\nbuild\n@color amber\n")
@@ -374,14 +376,15 @@ void Game::helpStation() {
         "/help     this list\n"
         "/status   the station\n"
         "/notes    notebook\n"
-        "/talk cantor\n"
+        "/c <words> CANTOR\n"
+        "/h <words> HALO-9\n"
         "/version build id\n"
         "---\n@color amber\n"
         "*p <code> note code\n"
         "/save    /reset\n"
         "/shutdown reboot\n"
         "---\n@color grey\n"
-        "plain words are\nspoken aloud.");
+        "plain words go to\nwhoever is on the\nchannel. /c and /h\nswitch, and stick.");
     cur_ = pal::amber;
 }
 
@@ -415,10 +418,11 @@ void Game::cmdHelp() {
         "/status ship + dock\n"
         "/unlock <code>\n"
         "/notes  notebook\n"
+        "/c <words> speak\n"
         "/version build id\n"
         "*p <code> quick note\n"
         "---\n@color grey\n"
-        "plain words are\nspoken aloud.");
+        "plain words go to\nwhoever is on the\nchannel. /c and /h\nswitch, and stick.");
     cur_ = pal::amber;
 }
 
@@ -481,6 +485,7 @@ bool Game::loadDialogue(const std::string& path) {
     if (!p_->loadFile(path, body)) return false;
     dlgIntro_.clear(); dlgRules_.clear(); dlgFallback_.clear();
     dlgAmbient_.clear(); fbIdx_ = 0; lastFb_ = (size_t)-1;
+    dlgVoice_ = pal::cyan;
 
     std::istringstream in(body);
     std::string line;
@@ -503,6 +508,7 @@ bool Game::loadDialogue(const std::string& path) {
     while (std::getline(in, line)) {
         if (!line.empty() && line.back() == '\r') line.pop_back();
         std::string t = trim(line);
+        if (t.rfind("@voice", 0) == 0) { dlgVoice_ = colorByName(t.substr(6)); continue; }
         if (t == "@rules")    { section = 1; continue; }
         if (t == "@fallback") { commit(); section = 2; continue; }
         if (t == "@ambient")  { commit(); section = 3; continue; }
@@ -541,7 +547,7 @@ bool Game::loadDialogue(const std::string& path) {
 // so in-fiction — and if the player typed a bare command name, we gently point
 // out that orders need a slash.
 bool Game::isKnownCommand(const std::string& c) {
-    static const char* cmds[] = {"help","dir","open","mail","logs","status","unlock","version","build",
+    static const char* cmds[] = {"help","dir","open","mail","logs","status","unlock","version","build","c","h",
                                  "dock","notes","note","save","reset","shutdown",
                                  "quit","exit","clear","talk","bye"};
     for (size_t i = 0; i < sizeof(cmds)/sizeof(cmds[0]); ++i)
@@ -550,7 +556,7 @@ bool Game::isKnownCommand(const std::string& c) {
 }
 
 void Game::closeChannel() {
-    inTalk_ = false;
+    addressee_.clear();
     cur_ = pal::grey;
     queueBeats("[ channel closed ]\n@color grey\n/help for commands");
     cur_ = pal::amber;
@@ -559,7 +565,7 @@ void Game::closeChannel() {
 void Game::handleSpeech(const std::string& raw) {
     std::string lc = toLower(raw);
 
-    if (inTalk_) {
+    if (!addressee_.empty()) {
         if (lc == "bye" || lc == "goodbye" || lc == "leave") { closeChannel(); return; }
         talkAnswer(raw);
         return;
@@ -580,18 +586,70 @@ void Game::handleSpeech(const std::string& raw) {
     cur_ = pal::amber;
 }
 
+
+std::string Game::voiceName(const std::string& who) const {
+    if (who == "cantor") return "CANTOR";
+    if (who == "halo")   return "HALO-9";
+    if (who.empty())     return "";
+    std::string up = who;
+    for (size_t i = 0; i < up.size(); ++i) up[i] = (char)std::toupper((unsigned char)up[i]);
+    return up;
+}
+
+// Load a speaker's script once and keep it resident.
+bool Game::ensureDialogue(const std::string& who) {
+    if (dlgLoaded_ == who) return true;
+    if (!loadDialogue("talk/" + who + ".txt")) return false;
+    dlgLoaded_ = who;
+    introShown_ = false;
+    return true;
+}
+
+// "/c ..." / "/h ...": switch who you are addressing, then (optionally) speak.
+// The switch sticks, so the next lines need no prefix.
+void Game::speakTo(const std::string& who, const std::string& phrase) {
+    if (!ensureDialogue(who)) {
+        cur_ = pal::red;
+        queueBeats("no channel for\n'" + voiceName(who) + "'.");
+        cur_ = pal::amber;
+        return;
+    }
+    bool switched = (addressee_ != who);
+    addressee_ = who;
+    if (switched && !introShown_) {
+        introShown_ = true;
+        cur_ = dlgVoice_;
+        queueBeats(dlgIntro_);
+        cur_ = pal::amber;
+        if (trim(phrase).empty()) return;
+    } else if (switched) {
+        cur_ = pal::grey;
+        queueBeats("[ " + voiceName(who) + " on the\n  channel ]");
+        cur_ = pal::amber;
+        if (trim(phrase).empty()) return;
+    }
+    if (!trim(phrase).empty()) talkAnswer(phrase);
+}
+
+// Walking up to a terminal decides who you are talking to by default.
+void Game::arriveAt(const std::string& who) {
+    nodeDefault_ = who;
+    if (who.empty()) { addressee_.clear(); return; }
+    if (ensureDialogue(who)) addressee_ = who;
+}
+
 void Game::talkTo(const std::string& who) {
     std::string id = toLower(trim(who));
     if (id.empty()) id = "cantor";
-    if (!loadDialogue("talk/" + id + ".txt")) {
+    if (!ensureDialogue(id)) {
         cur_ = pal::red;
         queueBeats("no answer from\n'" + id + "'.");
         cur_ = pal::amber;
         return;
     }
-    inTalk_ = true;
-    cur_ = pal::cyan;
-    queueBeats(dlgIntro_);              // the AI speaks first: the big picture
+    addressee_ = id; introShown_ = true;
+    cur_ = dlgVoice_;
+    queueBeats(dlgIntro_);
     cur_ = pal::amber;
 }
 
@@ -659,7 +717,7 @@ void Game::talkAnswer(const std::string& question) {
             if (all && phrase.size() > bestLen) { bestLen = phrase.size(); best = (int)r; }
         }
     }
-    cur_ = pal::cyan;
+    cur_ = dlgVoice_;
     if (best >= 0) {
         DlgRule& r = dlgRules_[best];
         size_t pick = 0;
@@ -703,7 +761,7 @@ void Game::finish() {
     saveProgress("prologue_done");
     prologueDone_ = true; finale_ = false; cinematic_ = false;
 
-    if (loadDialogue("talk/cantor.txt")) inTalk_ = true;
+    arriveAt("cantor");           // his node: plain words reach him by default
     cur_ = pal::grey;
     queueBeats("progress saved.\n"
                "@color cyan\nCANTOR: I am still\nhere. Ask me.\n"

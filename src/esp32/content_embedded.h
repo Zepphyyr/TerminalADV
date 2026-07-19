@@ -381,6 +381,28 @@ CANTOR: The power draw dips every night at the same minute. I have stopped askin
 CANTOR: Sometimes I answer a question before it is asked. That frightens me.
 CANTOR: There is a child's drawing in corridor nine. It is still there.
 )KD"; return true; }
+    else if (path == "talk/halo.txt") { out = R"KD(@voice blue
+@color grey
+CHANNEL OPEN
+@color blue
+HALO-9 / THE WARDEN
+@color grey
+carrier tone.
+no words.
+---
+@color grey
+Something on the other end is listening.
+It does not answer.
+@rules
+@fallback
+the channel stays open. nothing speaks.
+a pause, exactly as long as your question was.
+the carrier tone shifts a half-tone, then steadies.
+you are heard. that is all you are.
+no reply. the line does not close either.
+@ambient
+somewhere a fan changes pitch, then returns to it.
+)KD"; return true; }
     return false;
 }
 } // namespace kd
