@@ -33,21 +33,26 @@ jobs:
       - name: Build firmware (.bin)
         run: pio run
 
-      - name: Make single-file merged .bin (flash to 0x0)
+      # Two DIFFERENT images, and they are not interchangeable:
+      #   kodzimim-app.bin  = application only  -> M5Launcher / OTA installs this
+      #   kodzimim-full.bin = whole flash image -> esptool / web flasher at 0x0
+      # Feeding the full image to the Launcher gives "flash read failed".
+      - name: Package both images
         run: |
           set -e
           D=.pio/build/cardputer-adv
+          cp "$D/firmware.bin" kodzimim-app.bin
           ARGS="0x0 $D/bootloader.bin 0x8000 $D/partitions.bin 0x10000 $D/firmware.bin"
           BOOTAPP=$(find "$HOME/.platformio" -name boot_app0.bin 2>/dev/null | head -1)
           if [ -n "$BOOTAPP" ]; then ARGS="$ARGS 0xe000 $BOOTAPP"; fi
           # esptool <5 uses merge_bin/--flash_mode; v5+ uses merge-bin/--flash-mode
           python -m esptool --chip esp32s3 merge_bin \
-            -o kodzimim.bin \
+            -o kodzimim-full.bin \
             --flash_mode dio --flash_size 8MB $ARGS \
           || python -m esptool --chip esp32s3 merge-bin \
-            -o kodzimim.bin \
+            -o kodzimim-full.bin \
             --flash-mode dio --flash-size 8MB $ARGS
-          ls -l kodzimim.bin
+          ls -l kodzimim-app.bin kodzimim-full.bin
 
       - name: Upload firmware artifacts
         uses: actions/upload-artifact@v4
@@ -57,11 +62,12 @@ jobs:
             .pio/build/cardputer-adv/firmware.bin
             .pio/build/cardputer-adv/bootloader.bin
             .pio/build/cardputer-adv/partitions.bin
-            kodzimim.bin
+            kodzimim-app.bin
+            kodzimim-full.bin
 
       # Publish a rolling "latest" release so the Cardputer can install the
       # firmware straight from a fixed URL (Launcher -> install from URL):
-      #   https://github.com/<user>/<repo>/releases/latest/download/kodzimim.bin
+      #   https://github.com/<user>/<repo>/releases/latest/download/kodzimim-app.bin
       - name: Publish rolling "latest" release
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
@@ -70,7 +76,14 @@ jobs:
           name: Latest build
           body: |
             Automatic build of the KODZIMIM prologue firmware.
-            Flash `kodzimim.bin` to address 0x0, or install it from the
-            Launcher via URL / Favorites.
-          files: kodzimim.bin
+
+            * `kodzimim-app.bin`  — application only. Use this for **M5Launcher**
+              (install from SD / URL / WebUI) and for OTA.
+            * `kodzimim-full.bin` — whole flash image. Use this with **esptool**
+              or the web flasher, written to address **0x0**.
+
+            Using the full image in the Launcher fails with "flash read failed".
+          files: |
+            kodzimim-app.bin
+            kodzimim-full.bin
           fail_on_unmatched_files: true

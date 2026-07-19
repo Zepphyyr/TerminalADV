@@ -18,6 +18,19 @@
 #include <string>
 #include <thread>
 
+#ifdef _WIN32
+#include <windows.h>
+// Windows consoles ignore ANSI escapes unless the program asks for them, so
+// without this you get literal garbage like "<-[38;2;255;176;0m" instead of
+// colour. Harmless no-op on older systems.
+static inline void kdEnableVirtualTerminal() {
+    HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD mode = 0;
+    if (h != INVALID_HANDLE_VALUE && GetConsoleMode(h, &mode))
+        SetConsoleMode(h, mode | 0x0004 /* ENABLE_VIRTUAL_TERMINAL_PROCESSING */);
+}
+#endif
+
 namespace kd {
 
 class DesktopPlatform : public IPlatform {
@@ -29,6 +42,9 @@ public:
         beepOn_ = std::getenv("KD_BEEP") != nullptr;
         if (const char* c = std::getenv("KD_COLS")) screen_.cols = std::atoi(c);
         if (const char* r = std::getenv("KD_ROWS")) screen_.rows = std::atoi(r);
+#ifdef _WIN32
+        kdEnableVirtualTerminal();
+#endif
     }
 
     Screen screen() const override { return screen_; }
