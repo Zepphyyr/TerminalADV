@@ -476,8 +476,20 @@ bool Game::loadDialogue(const std::string& path) {
     std::istringstream in(body);
     std::string line;
     int section = 0;                 // 0 = intro, 1 = rules, 2 = fallback
-    DlgRule cur; bool haveRule = false;
-    auto commit = [&]() { if (haveRule) { dlgRules_.push_back(cur); cur = DlgRule(); haveRule = false; } };
+    DlgRule cur; bool haveRule = false; std::string curReply;
+    auto commit = [&]() {
+        if (!haveRule) return;
+        // a reply block may hold several variants separated by a "~~~" line
+        std::istringstream rs(curReply);
+        std::string ln, acc;
+        while (std::getline(rs, ln)) {
+            if (trim(ln) == "~~~") { if (!trim(acc).empty()) cur.replies.push_back(acc); acc.clear(); }
+            else { acc += ln; acc += "\n"; }
+        }
+        if (!trim(acc).empty()) cur.replies.push_back(acc);
+        dlgRules_.push_back(cur);
+        cur = DlgRule(); curReply.clear(); haveRule = false;
+    };
 
     while (std::getline(in, line)) {
         if (!line.empty() && line.back() == '\r') line.pop_back();
@@ -503,7 +515,7 @@ bool Game::loadDialogue(const std::string& path) {
                     start = bar + 1;
                 }
             } else if (haveRule) {
-                cur.reply += line; cur.reply += "\n";
+                curReply += line; curReply += "\n";
             }
         } else if (section == 2) {
             if (!t.empty()) dlgFallback_.push_back(t);
@@ -639,7 +651,18 @@ void Game::talkAnswer(const std::string& question) {
         }
     }
     cur_ = pal::cyan;
-    if (best >= 0) queueBeats(dlgRules_[best].reply);
+    if (best >= 0) {
+        DlgRule& r = dlgRules_[best];
+        size_t pick = 0;
+        if (r.replies.size() > 1) {
+            for (int t = 0; t < 8; ++t) {
+                pick = nextRand() % r.replies.size();
+                if (pick != r.lastReply) break;
+            }
+        }
+        r.lastReply = pick;
+        queueBeats(r.replies.empty() ? std::string("CANTOR: ...") : r.replies[pick]);
+    }
     else           queueBeats(pickDeflection(toks));
 
     // Every so often he adds something nobody asked for. He has been alone a

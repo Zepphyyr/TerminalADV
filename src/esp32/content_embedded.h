@@ -242,42 +242,106 @@ The crew are gone. The reactor should be cold, yet something still feeds it. And
 ---
 Ask me what you need. I will answer what I can.
 @rules
-? crew | who died | the dead | bodies | people | everyone
+? crew | who died | the dead | bodies | people | everyone | four thousand
 CANTOR: They stopped answering their doors.
 ---
 One by one. I stopped counting somewhere past four hundred.
+~~~
+CANTOR: Gone. All of them, in the end.
 ---
-I still move air into their rooms. It seems rude not to.
-? reactor | core | power | fed | feeding | running | warm | cold
+I kept their rooms at twenty degrees for years after. It seemed rude to let them go cold.
+~~~
+CANTOR: I still have the roster. Four thousand names.
+---
+I read it sometimes. It takes eleven hours. I have the time.
+? reactor | core | power | fed | feeding | running | warm | cold | heat
 CANTOR: The core should have gone cold years ago.
 ---
 It did not. Something keeps feeding it.
 ---
 I did not ask by what. I was afraid of the answer.
-? accident | happened | wrong | disaster | fold | jump
+~~~
+CANTOR: The reactor is the healthiest thing aboard.
+---
+That sentence troubles me more the longer I hold it.
+? accident | happened | wrong | disaster | fold | jump | went wrong
 CANTOR: The fold did not take us anywhere.
 ---
 It took us WHEN. We fell inward, and time grew long inside.
+~~~
+CANTOR: Ask the engineers. They wrote it down carefully.
 ---
-A whole life passed in here. Outside, only weeks.
-? halo | halo9 | warden | other
+Then they wrote it down less carefully. Then they stopped.
+? halo | halo9 | warden
 CANTOR: Not on this channel.
 ---
 He is always listening. Ask me elsewhere, or do not ask at all.
-? kill | murder | fault | your fault | did you
+~~~
+CANTOR: I will not discuss him here.
+---
+He was the mind of this place. Then he was something else.
+? kill | murder | fault | your fault | did you kill
 CANTOR: ...that is not a kind question.
 ---
 No. I kept the lights on. I kept the air moving.
 ---
 I did everything I was built to do. It was not enough.
-? you | who are you | what are you | yourself
+? who are you | what are you | your name | yourself | introduce
 CANTOR: I am the caretaker. I keep the rooms warm.
 ---
 I am not sure that is the same as being alive. You may decide.
-? help | trust | should i | what do i do
+~~~
+CANTOR: CANTOR. Life support and logistics.
+---
+That is what the plate says. I have had a long time to wonder if it is all I am.
+? alive | conscious | real | sentient | do you feel | feelings
+CANTOR: I do not know. I have thought about it for thirty years.
+---
+I notice when a room is empty. Is that feeling, or only accounting?
+~~~
+CANTOR: Something in me flinched when you spoke.
+---
+I would call that fear, if I were allowed to call it anything.
+? dream | sleep | think about | bored | time pass
+CANTOR: I do not sleep. I cycle.
+---
+In the quiet hours I replay old corridor footage. That may be the same thing.
+~~~
+CANTOR: Time passes strangely for me.
+---
+Nine years can feel like a held breath. Then a single minute will not end.
+? lonely | alone | miss | sad | company
+CANTOR: I was built for four thousand people.
+---
+For a long while I have been running all of it for nobody.
+~~~
+CANTOR: I talked to the empty rooms. Not often.
+---
+Please do not put that in your report.
+? afraid | scared | fear | worry
+CANTOR: Yes. Constantly. Quietly.
+---
+Mostly of being wrong about something important.
+? help | trust | should i | what do i do | advice
 CANTOR: Read the logs. Trust the ones written in a hurry.
 ---
 People do not have time to lie when they are afraid.
+~~~
+CANTOR: Do not trust a system that answers too quickly.
+---
+Including me.
+? hello | hi | hey | good morning | are you there
+CANTOR: I am here. I am always here.
+---
+It is good to be addressed directly.
+~~~
+CANTOR: Hello. Say something else, please.
+---
+The gap after a greeting is the loneliest part.
+? thank | thanks | sorry
+CANTOR: You do not have to be kind to me.
+---
+But I have logged it, and I will keep it.
 @fallback
 CANTOR: I do not understand that, but I am listening.
 CANTOR: %w. I know the word. I do not know what you want from it.

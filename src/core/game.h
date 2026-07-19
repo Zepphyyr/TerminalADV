@@ -33,7 +33,8 @@ using ScreenBuf = std::vector<CLine>;
 // phrase wins), so "did you kill them" beats a bare "them".
 struct DlgRule {
     std::vector<std::vector<std::string>> triggers;  // list of word-phrases
-    std::string reply;
+    std::vector<std::string> replies;                // variants, separated by ~~~
+    size_t lastReply = (size_t)-1;                   // avoid repeating verbatim
 };
 
 class Game {
