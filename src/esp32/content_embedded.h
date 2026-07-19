@@ -330,6 +330,22 @@ People do not have time to lie when they are afraid.
 CANTOR: Do not trust a system that answers too quickly.
 ---
 Including me.
+? channel | frequency | someone else | anyone else | other voice | reach him | switch
+CANTOR: This channel is mine. Life support keeps its own line.
+---
+The others live deeper in the network. You would have to go to them.
+~~~
+CANTOR: You cannot change it from here.
+---
+Find a terminal that belongs to somebody else, and you will be speaking to somebody else.
+? where | how do i get | which way | deck | corridor | map | go
+CANTOR: I know every room. I am not good at telling people how to walk.
+---
+Follow the lit corridors. I have kept those working out of habit.
+? me | who am i | why me | my name
+CANTOR: You are the first footstep in a very long time.
+---
+Beyond that I have no file on you. That is unusual, and I have chosen not to worry about it.
 ? hello | hi | hey | good morning | are you there
 CANTOR: I am here. I am always here.
 ---

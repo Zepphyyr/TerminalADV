@@ -314,6 +314,13 @@ bool Game::handleCommand(const std::string& raw) {
         else addNote(arg);
         return true;
     }
+    if (cmd == "version" || cmd == "build") {
+        cur_ = pal::grey;
+        queueBeats(std::string("KODZIMIM\nbuild\n@color amber\n")
+                   + __DATE__ + "\n" + __TIME__);
+        cur_ = pal::amber;
+        return true;
+    }
     if (cmd == "shutdown" || cmd == "quit" || cmd == "exit") { cmdShutdown(); return true; }
     if (cmd == "save")  { cmdSave();  return true; }
     if (cmd == "reset") { cmdReset(); return true; }
@@ -368,6 +375,7 @@ void Game::helpStation() {
         "/status   the station\n"
         "/notes    notebook\n"
         "/talk cantor\n"
+        "/version build id\n"
         "---\n@color amber\n"
         "*p <code> note code\n"
         "/save    /reset\n"
@@ -407,6 +415,7 @@ void Game::cmdHelp() {
         "/status ship + dock\n"
         "/unlock <code>\n"
         "/notes  notebook\n"
+        "/version build id\n"
         "*p <code> quick note\n"
         "---\n@color grey\n"
         "plain words are\nspoken aloud.");
@@ -532,7 +541,7 @@ bool Game::loadDialogue(const std::string& path) {
 // so in-fiction — and if the player typed a bare command name, we gently point
 // out that orders need a slash.
 bool Game::isKnownCommand(const std::string& c) {
-    static const char* cmds[] = {"help","dir","open","mail","logs","status","unlock",
+    static const char* cmds[] = {"help","dir","open","mail","logs","status","unlock","version","build",
                                  "dock","notes","note","save","reset","shutdown",
                                  "quit","exit","clear","talk","bye"};
     for (size_t i = 0; i < sizeof(cmds)/sizeof(cmds[0]); ++i)
@@ -665,10 +674,12 @@ void Game::talkAnswer(const std::string& question) {
     }
     else           queueBeats(pickDeflection(toks));
 
-    // Every so often he adds something nobody asked for. He has been alone a
-    // long time, and it makes him feel like a resident rather than a lookup.
-    if (!dlgAmbient_.empty() && (nextRand() % 3) == 0) {
-        cur_ = pal::cyan;
+    // Sometimes he volunteers a thought nobody asked for. ONLY after he has
+    // actually answered something: tacking a non-sequitur onto "I did not
+    // understand you" just reads as broken. Rendered grey so it is visibly an
+    // aside rather than a reply.
+    if (best >= 0 && !dlgAmbient_.empty() && (nextRand() % 4) == 0) {
+        cur_ = pal::grey;
         queueBeats(dlgAmbient_[nextRand() % dlgAmbient_.size()]);
     }
     cur_ = pal::amber;
