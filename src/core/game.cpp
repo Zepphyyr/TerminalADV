@@ -470,7 +470,8 @@ static bool hasToken(const std::vector<std::string>& toks, const std::string& w)
 bool Game::loadDialogue(const std::string& path) {
     std::string body;
     if (!p_->loadFile(path, body)) return false;
-    dlgIntro_.clear(); dlgRules_.clear(); dlgFallback_.clear(); fbIdx_ = 0;
+    dlgIntro_.clear(); dlgRules_.clear(); dlgFallback_.clear();
+    dlgAmbient_.clear(); fbIdx_ = 0; lastFb_ = (size_t)-1;
 
     std::istringstream in(body);
     std::string line;
@@ -483,6 +484,7 @@ bool Game::loadDialogue(const std::string& path) {
         std::string t = trim(line);
         if (t == "@rules")    { section = 1; continue; }
         if (t == "@fallback") { commit(); section = 2; continue; }
+        if (t == "@ambient")  { commit(); section = 3; continue; }
         if (t == "@end")      break;
 
         if (section == 0) { dlgIntro_ += line; dlgIntro_ += "\n"; }
@@ -503,8 +505,10 @@ bool Game::loadDialogue(const std::string& path) {
             } else if (haveRule) {
                 cur.reply += line; cur.reply += "\n";
             }
-        } else { // fallback
+        } else if (section == 2) {
             if (!t.empty()) dlgFallback_.push_back(t);
+        } else {                       // ambient
+            if (!t.empty()) dlgAmbient_.push_back(t);
         }
     }
     commit();
@@ -571,6 +575,58 @@ void Game::talkTo(const std::string& who) {
 }
 
 // Match the player's sentence to the best rule (longest matched phrase wins).
+
+// Cheap deterministic PRNG (xorshift) — no <random> weight on the device.
+unsigned Game::nextRand() {
+    rng_ ^= rng_ << 13; rng_ ^= rng_ >> 17; rng_ ^= rng_ << 5;
+    return rng_;
+}
+
+// The word the player seems to care about, so CANTOR can echo it back —
+// the old ELIZA trick that makes a canned line feel like a reply.
+static std::string salientWord(const std::vector<std::string>& toks) {
+    static const char* stop[] = {"what","who","why","how","when","where","is","are","was",
+        "were","the","a","an","you","your","yours","me","my","mine","do","did","does","done",
+        "i","it","its","to","of","and","or","in","on","at","that","this","these","those",
+        "can","could","would","will","shall","tell","about","know","knew","there","they",
+        "them","their","he","she","we","us","for","with","but","not","no","yes","if","then",
+        "have","has","had","been","be","am","get","got","say","said","think","really","just"};
+    std::string best;
+    for (size_t i = 0; i < toks.size(); ++i) {
+        const std::string& t = toks[i];
+        if (t.size() < 4) continue;
+        bool isStop = false;
+        for (size_t k = 0; k < sizeof(stop)/sizeof(stop[0]); ++k)
+            if (t == stop[k]) { isStop = true; break; }
+        if (isStop) continue;
+        if (t.size() > best.size()) best = t;
+    }
+    return best;
+}
+
+// Pick a deflection: never the same one twice in a row, and prefer templates
+// that can quote the player's own word ("%w") when we found one.
+std::string Game::pickDeflection(const std::vector<std::string>& toks) {
+    if (dlgFallback_.empty()) return "CANTOR: ...";
+    std::string w = salientWord(toks);
+    const size_t n = dlgFallback_.size();
+    for (int tries = 0; tries < 16; ++tries) {
+        size_t idx = nextRand() % n;
+        if (n > 1 && idx == lastFb_) continue;
+        std::string line = dlgFallback_[idx];
+        size_t at = line.find("%w");
+        if (at != std::string::npos) {
+            if (w.empty()) continue;           // needs a word, we have none
+            line = line.substr(0, at) + w + line.substr(at + 2);
+        }
+        lastFb_ = idx;
+        return line;
+    }
+    for (size_t i = 0; i < n; ++i)
+        if (dlgFallback_[i].find("%w") == std::string::npos) { lastFb_ = i; return dlgFallback_[i]; }
+    return dlgFallback_[0];
+}
+
 void Game::talkAnswer(const std::string& question) {
     std::vector<std::string> toks = tokenize(question);
     int best = -1; size_t bestLen = 0;
@@ -583,12 +639,14 @@ void Game::talkAnswer(const std::string& question) {
         }
     }
     cur_ = pal::cyan;
-    if (best >= 0) {
-        queueBeats(dlgRules_[best].reply);
-    } else {
-        // ELIZA-style deflection, cycling so repeats vary.
-        queueBeats(dlgFallback_[fbIdx_ % dlgFallback_.size()]);
-        fbIdx_++;
+    if (best >= 0) queueBeats(dlgRules_[best].reply);
+    else           queueBeats(pickDeflection(toks));
+
+    // Every so often he adds something nobody asked for. He has been alone a
+    // long time, and it makes him feel like a resident rather than a lookup.
+    if (!dlgAmbient_.empty() && (nextRand() % 3) == 0) {
+        cur_ = pal::cyan;
+        queueBeats(dlgAmbient_[nextRand() % dlgAmbient_.size()]);
     }
     cur_ = pal::amber;
 }

@@ -58,7 +58,10 @@ private:
     std::string dlgIntro_;
     std::vector<DlgRule> dlgRules_;
     std::vector<std::string> dlgFallback_;
+    std::vector<std::string> dlgAmbient_;   // unprompted thoughts he drops in
     size_t fbIdx_ = 0;
+    size_t lastFb_ = (size_t)-1;            // never repeat a deflection twice
+    unsigned rng_ = 2463534242u;
 
     void queueBeats(const std::string& text);
     void queueFile(const std::string& path);
@@ -94,6 +97,8 @@ private:
     void talkTo(const std::string& who);
     bool loadDialogue(const std::string& path);
     void talkAnswer(const std::string& question);
+    unsigned nextRand();
+    std::string pickDeflection(const std::vector<std::string>& toks);
 
     void queueFinale();
     void finish();

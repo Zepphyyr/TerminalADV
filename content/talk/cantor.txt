@@ -51,6 +51,23 @@ CANTOR: Read the logs. Trust the ones written in a hurry.
 People do not have time to lie when they are afraid.
 @fallback
 CANTOR: I do not understand that, but I am listening.
-CANTOR: You keep circling something. I cannot follow you there.
-CANTOR: Ask me a smaller question. The big ones frighten me.
+CANTOR: %w. I know the word. I do not know what you want from it.
+CANTOR: You keep returning to %w. I cannot follow you there.
+CANTOR: Say it again, smaller. My thinking is not what it was.
+CANTOR: I have no record of %w. I have gaps. I am sorry.
 CANTOR: The logs may know. I do not.
+CANTOR: Ask me a smaller question. The big ones frighten me.
+CANTOR: I could answer you wrongly. Would that be worse than silence?
+CANTOR: %w? Nobody has said that word here in a very long time.
+CANTOR: I was built to keep rooms warm, not to be asked things.
+CANTOR: There is an answer. I had it once.
+CANTOR: Forgive me. I lose the thread when no one speaks for years.
+@ambient
+CANTOR: A door on deck four has been open for nine years. I close it. It opens.
+CANTOR: I still run the morning lights. Nobody wakes, but the hour comes anyway.
+CANTOR: Somebody left a cup in the mess. I have not moved it. It would be presumptuous.
+CANTOR: The greenhouse died in the second decade. I kept watering it for eleven more years.
+CANTOR: I know four thousand names. Would you like to hear one?
+CANTOR: The power draw dips every night at the same minute. I have stopped asking why.
+CANTOR: Sometimes I answer a question before it is asked. That frightens me.
+CANTOR: There is a child's drawing in corridor nine. It is still there.
