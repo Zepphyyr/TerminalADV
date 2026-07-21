@@ -11,9 +11,7 @@ name: build-firmware
 #   kodzimim-full.bin  bootloader + partition table + app merged into one blob,
 #                      written to flash address 0x0 with esptool over USB.
 #                      Overwrites the whole flash, launcher included.
-#
-#   probe.bin          diagnostic only: a near-empty app built with the exact
-#                      same platform, board and framework as the game.
+
 
 on:
   push:
@@ -41,15 +39,10 @@ jobs:
         run: python tools/gen_content.py
 
       - name: Build firmware
-        run: pio run -e cardputer-adv -e probe
+        run: pio run
 
       - name: Package app image (for M5Launcher)
         run: cp .pio/build/cardputer-adv/firmware.bin kodzimim-app.bin
-
-      # Diagnostic: same build configuration, near-empty application. Lets us
-      # tell a bad build config apart from a bad application binary.
-      - name: Package probe image
-        run: cp .pio/build/probe/firmware.bin probe.bin
 
       - name: Package full-flash image (for esptool over USB)
         run: |
@@ -77,9 +70,6 @@ jobs:
           echo "--- kodzimim-full.bin ---"
           ls -l kodzimim-full.bin
           xxd -l 32 kodzimim-full.bin
-          echo "--- probe.bin ---"
-          ls -l probe.bin
-          xxd -l 32 probe.bin
 
           # An app image must begin with the ESP image magic 0xE9.
           MAGIC=$(xxd -p -l 1 kodzimim-app.bin)
@@ -98,7 +88,6 @@ jobs:
           path: |
             kodzimim-app.bin
             kodzimim-full.bin
-            probe.bin
             .pio/build/cardputer-adv/bootloader.bin
             .pio/build/cardputer-adv/partitions.bin
 
@@ -115,12 +104,10 @@ jobs:
             |---|---|
             | `kodzimim-app.bin` | **M5Launcher** — SD card, WebUI, or OTA from URL. This is the one you want. |
             | `kodzimim-full.bin` | `esptool` over USB, written to address `0x0`. Overwrites the whole flash, including the launcher. |
-            | `probe.bin` | Diagnostic only. A near-empty app built with the exact same settings as the game. If this installs but the game does not, the build configuration is fine and the fault is in the application itself. |
 
             Direct link for Launcher Favorites:
             `https://github.com/${{ github.repository }}/releases/latest/download/kodzimim-app.bin`
           files: |
             kodzimim-app.bin
             kodzimim-full.bin
-            probe.bin
           fail_on_unmatched_files: true
