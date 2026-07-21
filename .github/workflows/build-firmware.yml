@@ -1,14 +1,23 @@
 name: build-firmware
 
-# Builds the KODZIMIM prologue firmware for M5Stack Cardputer-Adv in the cloud
-# and publishes the .bin files as downloadable artifacts. No local toolchain
-# needed: push to GitHub (or use "Run workflow"), then grab the artifact.
+# Builds the KODZIMIM firmware for M5Stack Cardputer-Adv in the cloud and
+# publishes TWO different images. They are not interchangeable:
+#
+#   kodzimim-app.bin   pure ESP32 application image (starts at byte 0xE9 with
+#                      an app header, no bootloader). THIS is what M5Launcher
+#                      installs into an OTA app slot. Use it for SD / WebUI /
+#                      OTA-from-URL installs.
+#
+#   kodzimim-full.bin  bootloader + partition table + app merged into one blob
+#                      that must be written to flash address 0x0 with esptool
+#                      over USB. Feeding this to M5Launcher FAILS ("flash read
+#                      failed"): the launcher writes it into an app slot, where
+#                      a bootloader-at-offset-0 image makes no sense.
 
 on:
   push:
   workflow_dispatch:
 
-# needed to publish the rolling 'latest' release
 permissions:
   contents: write
 
@@ -30,10 +39,13 @@ jobs:
       - name: Regenerate embedded story texts
         run: python tools/gen_content.py
 
-      - name: Build firmware (.bin)
+      - name: Build firmware
         run: pio run
 
-      - name: Make single-file merged .bin (flash to 0x0)
+      - name: Package app image (for M5Launcher)
+        run: cp .pio/build/cardputer-adv/firmware.bin kodzimim-app.bin
+
+      - name: Package full-flash image (for esptool over USB)
         run: |
           set -e
           D=.pio/build/cardputer-adv
@@ -42,26 +54,44 @@ jobs:
           if [ -n "$BOOTAPP" ]; then ARGS="$ARGS 0xe000 $BOOTAPP"; fi
           # esptool <5 uses merge_bin/--flash_mode; v5+ uses merge-bin/--flash-mode
           python -m esptool --chip esp32s3 merge_bin \
-            -o kodzimim.bin \
+            -o kodzimim-full.bin \
             --flash_mode dio --flash_size 8MB $ARGS \
           || python -m esptool --chip esp32s3 merge-bin \
-            -o kodzimim.bin \
+            -o kodzimim-full.bin \
             --flash-mode dio --flash-size 8MB $ARGS
-          ls -l kodzimim.bin
 
-      - name: Upload firmware artifacts
+      # Guard rail: prove the two images really are what we claim, so a broken
+      # or swapped file can never reach a release again.
+      - name: Verify image headers
+        run: |
+          set -e
+          echo "--- kodzimim-app.bin ---"
+          ls -l kodzimim-app.bin
+          xxd -l 32 kodzimim-app.bin
+          echo "--- kodzimim-full.bin ---"
+          ls -l kodzimim-full.bin
+          xxd -l 32 kodzimim-full.bin
+
+          # An app image must begin with the ESP image magic 0xE9.
+          MAGIC=$(xxd -p -l 1 kodzimim-app.bin)
+          [ "$MAGIC" = "e9" ] || { echo "app image magic is 0x$MAGIC, expected 0xe9"; exit 1; }
+
+          # The app image must NOT be a merged blob: merged images pad the gap
+          # before 0x10000 with 0xFF, so byte 0x1000 would be 0xff there.
+          BYTE=$(xxd -p -s 4096 -l 1 kodzimim-app.bin)
+          [ "$BYTE" != "ff" ] || { echo "kodzimim-app.bin looks like a merged image"; exit 1; }
+          echo "OK: app image is a plain application binary."
+
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: kodzimim-firmware
           path: |
-            .pio/build/cardputer-adv/firmware.bin
+            kodzimim-app.bin
+            kodzimim-full.bin
             .pio/build/cardputer-adv/bootloader.bin
             .pio/build/cardputer-adv/partitions.bin
-            kodzimim.bin
 
-      # Publish a rolling "latest" release so the Cardputer can install the
-      # firmware straight from a fixed URL (Launcher -> install from URL):
-      #   https://github.com/<user>/<repo>/releases/latest/download/kodzimim.bin
       - name: Publish rolling "latest" release
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
@@ -69,8 +99,16 @@ jobs:
           tag_name: latest
           name: Latest build
           body: |
-            Automatic build of the KODZIMIM prologue firmware.
-            Flash `kodzimim.bin` to address 0x0, or install it from the
-            Launcher via URL / Favorites.
-          files: kodzimim.bin
+            Automatic build of the KODZIMIM firmware.
+
+            | file | how to install |
+            |---|---|
+            | `kodzimim-app.bin` | **M5Launcher** — SD card, WebUI, or OTA from URL. This is the one you want. |
+            | `kodzimim-full.bin` | `esptool` over USB, written to address `0x0`. Overwrites the whole flash, including the launcher. |
+
+            Direct link for Launcher Favorites:
+            `https://github.com/${{ github.repository }}/releases/latest/download/kodzimim-app.bin`
+          files: |
+            kodzimim-app.bin
+            kodzimim-full.bin
           fail_on_unmatched_files: true
