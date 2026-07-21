@@ -21,27 +21,10 @@ Workflow уже лежит в проекте: `.github/workflows/build-firmware.
 4. После коммита открой вкладку **Actions** — сборка **build-firmware**
    запустится сама (2–4 минуты). Дождись зелёной галочки.
 5. Зайди в завершённый запуск → блок **Artifacts** внизу → скачай
-   **kodzimim-firmware** (zip). Либо, что удобнее, бери файлы из раздела
-   **Releases** — там всегда лежит свежая сборка.
-
-## ВАЖНО: два разных .bin, они НЕ взаимозаменяемы
-
-| Файл | Что это | Чем шить |
-|---|---|---|
-| **kodzimim-app.bin** | только приложение | **M5Launcher** (SD / URL / WebUI), OTA |
-| **kodzimim-full.bin** | весь флеш: загрузчик + разделы + приложение | **esptool** / веб-флешер, адрес **0x0** |
-
-Если скормить лаунчеру `full`-образ, он попытается прочитать заголовок
-загрузчика как приложение и выдаст **«flash read failed / Update error»**.
-Ровно так же наоборот: `app`-образ, записанный на 0x0 голым esptool, не
-загрузится, потому что в нём нет загрузчика.
-
-Постоянные ссылки:
-
-```
-https://github.com/Zepphyyr/TerminalADV/releases/latest/download/kodzimim-app.bin
-https://github.com/Zepphyyr/TerminalADV/releases/latest/download/kodzimim-full.bin
-```
+   **kodzimim-firmware** (zip). Внутри:
+   - `firmware.bin` — только приложение (для `pio`/`esptool` на 0x10000);
+   - `kodzimim_prologue_merged.bin` — **единый образ, шьётся на 0x0** (то, что
+     ты хотел — «взять один .bin и залить»).
 
 ## Прошить `.bin` тоже без установки (веб-флешер)
 
