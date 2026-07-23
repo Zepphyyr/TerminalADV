@@ -26,3 +26,6 @@ on this list.
 @color grey
 find it. the coils
 remember the number.
+@color amber
+enter it:
+/solve <number>

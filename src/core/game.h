@@ -54,6 +54,18 @@ private:
     bool  prologueDone_ = false;
     bool  typeIt_       = true;
 
+    // ---- Act I: deck navigation ---------------------------------------
+    // Where the player stands. "" = aboard but not on a deck yet (post-prologue
+    // station state). Persisted under save key "deck" so a reboot resumes here.
+    std::string deck_;            // "", "helion", "argent", "act1_done"
+    bool  pendingGo_   = false;   // Maru asked "go on?" — next line answers
+    bool  haloHailed_  = false;   // HALO-9 has broken silence on HELION
+    // Puzzle gates — a deck is passable once its card is in hand.
+    bool  cardLang_    = false;   // HELION: won by solving the energy balance
+    bool  cardOkoro_   = false;   // ARGENT: won by solving STOW
+    bool  cantorConfronted_ = false; // decoded line brought to CANTOR (once)
+    bool  glitchFired_ = false;   // PALE input glitch has fired (once, in STOW)
+
     // ---- conversation state -------------------------------------------
     // Who your plain words go to. Empty = nobody is on the channel.
     // It is STICKY: "/c ..." or "/h ..." switches the addressee, after which
@@ -85,6 +97,25 @@ private:
     static bool isKnownCommand(const std::string& cmd);
     void closeChannel();
     bool handleStationCommand(const std::string& cmd, const std::string& arg);
+
+    // Act I deck flow
+    void enterAct1();                                        // station -> HELION
+    void arriveDeck(const std::string& deck);               // show arrival, save
+    void resumeDeck(const std::string& deck);               // reboot back onto deck
+    bool handleDeckCommand(const std::string& cmd, const std::string& arg);
+    bool helionCommand(const std::string& cmd, const std::string& arg);
+    bool argentCommand(const std::string& cmd, const std::string& arg);
+    void helpDeck();
+    void deckStatus();
+    void askGoOn();                                          // Maru: "go on?"
+    void advanceDeck();                                      // helion->argent->end
+    std::string deckTitle(const std::string& deck) const;
+    void unknownHere();                                      // shared error beat
+
+    // Act I puzzles
+    void solveEnergy(const std::string& arg);   // HELION: /solve <n> -> Lang card
+    bool runStow();                             // ARGENT: STOW grid, returns solved
+    bool decodedLine(const std::string& raw) const; // player spoke the decoded phrase
 
     void cmdHelp();
     void cmdDir();

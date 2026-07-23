@@ -131,7 +131,8 @@ so every row and
 every column meets
 its number.
 @color amber
-the loader waits.
+type /stow to work
+the loader.
 )KD"; return true; }
     else if (path == "act1/argent/wake.txt") { out = R"KD(@color white
 The arm wakes, swings down the aisle, and lays a single card in your palm.
@@ -310,6 +311,9 @@ on this list.
 @color grey
 find it. the coils
 remember the number.
+@color amber
+enter it:
+/solve <number>
 )KD"; return true; }
     else if (path == "prologue/boot.txt") { out = R"KD(@color amber
 ORPHEUS INTERACTIVE

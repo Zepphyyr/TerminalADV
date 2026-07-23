@@ -6,6 +6,9 @@
 
 namespace kd {
 
+// defined further down, used earlier by decodedLine()
+static std::vector<std::string> tokenize(const std::string& s);
+
 std::string toLower(const std::string& s) {
     std::string r = s;
     for (char& c : r) c = (char)std::tolower((unsigned char)c);
@@ -253,14 +256,19 @@ void Game::run() {
     if (p_->loadState("progress") == "prologue_done") {
         prologueDone_ = true;
         cinematic_    = false;
-        arriveAt("cantor");   // he is always there
-        cur_ = pal::grey;
-        queueBeats("SAVE FOUND\nprologue complete.\n"
-                   "---\n"
-                   "@color amber\nYou are aboard\nMERIDIAN DEEP.\n"
-                   "@color cyan\nCANTOR is on the\nchannel.\n"
-                   "@color grey\njust type to speak\n/help for orders");
-        cur_ = pal::amber;
+        deck_ = trim(p_->loadState("deck"));
+        if (!deck_.empty() && deck_ != "act1_done") {
+            resumeDeck(deck_);
+        } else {
+            arriveAt("cantor");   // he is always there
+            cur_ = pal::grey;
+            queueBeats("SAVE FOUND\nprologue complete.\n"
+                       "---\n"
+                       "@color amber\nYou are aboard\nMERIDIAN DEEP.\n"
+                       "@color cyan\nCANTOR is on the\nchannel.\n"
+                       "@color grey\n/proceed to step\nonto the station.");
+            cur_ = pal::amber;
+        }
     } else {
         cinematic_ = true;
         queueFile("prologue/boot.txt");
@@ -282,6 +290,22 @@ void Game::run() {
 
         screens_.clear();
         typeIt_ = true;
+
+        // Maru asked "go on?" — this line answers. yes advances; anything else
+        // dismisses the prompt (and, if it was a real order, still runs below).
+        if (pendingGo_) {
+            pendingGo_ = false;
+            std::string a = toLower(cmd);
+            if (a=="yes"||a=="y"||a=="yeah"||a=="ok"||a=="go"||a=="onward") {
+                advanceDeck(); continue;
+            }
+            if (a=="not yet"||a=="no"||a=="wait"||a=="stay"||a=="n") {
+                cur_ = pal::amber;
+                queueBeats("MARU: Alright.\nWhen you're ready.");
+                cur_ = pal::amber; continue;
+            }
+            // otherwise: fall through and treat the input normally
+        }
 
         // INPUT MODEL:
         //   *note...  -> quick notebook entry
@@ -327,7 +351,10 @@ bool Game::handleCommand(const std::string& raw) {
     if (cmd == "save")  { cmdSave();  return true; }
     if (cmd == "reset") { cmdReset(); return true; }
 
-    if (prologueDone_) return handleStationCommand(cmd, arg);
+    if (prologueDone_) {
+        if (!deck_.empty()) return handleDeckCommand(cmd, arg);
+        return handleStationCommand(cmd, arg);
+    }
 
     if      (cmd == "help")   cmdHelp();
     else if (cmd == "dir")    cmdDir();
@@ -346,9 +373,11 @@ bool Game::handleCommand(const std::string& raw) {
 }
 
 bool Game::handleStationCommand(const std::string& cmd, const std::string& arg) {
-    (void)arg;
     if (cmd == "help") { helpStation(); return true; }
     if (cmd == "talk") { talkTo(arg.empty() ? "cantor" : arg); return true; }
+    if (cmd == "proceed" || cmd == "enter" || cmd == "begin" || cmd == "go") {
+        enterAct1(); return true;
+    }
     if (cmd == "status") {
         cur_ = pal::grey;
         queueBeats("MERIDIAN DEEP\n@color amber\nnetwork    ONLINE\ncrew       NONE\n"
@@ -358,16 +387,357 @@ bool Game::handleStationCommand(const std::string& cmd, const std::string& arg) 
     }
     if (cmd == "logs" || cmd == "mail" || cmd == "dir" || cmd == "open") {
         cur_ = pal::grey;
-        queueBeats("FERRYMAN is behind\nthe airlock now.\n"
-                   "---\nThe station's own\nterminals are not\nopen to you yet.\n"
-                   "---\n@color amber\nACT I:\nTHE QUIET DECKS\nis not built yet.");
+        queueBeats("You are aboard, but\nstill at the airlock\npanel.\n"
+                   "---\nThe station opens\nfurther in.\n"
+                   "---\n@color amber\n/proceed\nto step onto the\nfirst deck.");
         cur_ = pal::amber;
         return true;
     }
+    unknownHere();
+    return true;
+}
+
+// ------------------------------------------------------------- Act I decks
+std::string Game::deckTitle(const std::string& deck) const {
+    if (deck == "helion") return "HELION / DECK H-2";
+    if (deck == "argent") return "ARGENT / DECK A-5";
+    if (deck == "act1_done") return "MERIDIAN DEEP";
+    return "MERIDIAN DEEP";
+}
+
+void Game::unknownHere() {
     cur_ = pal::red;
-    queueBeats("unknown directive.\nthis system does not\nremember that word.");
+    queueBeats("unknown directive.\nthis system does not\nremember that word.\n"
+               "---\n@color grey\n/help for what this\nterminal understands.");
+    cur_ = pal::amber;
+}
+
+// Step off the airlock panel onto the first station deck.
+void Game::enterAct1() {
+    cur_ = pal::grey;
+    queueBeats("You leave the airlock\npanel behind.\n"
+               "---\n@color amber\nThe station opens\naround you.");
+    cur_ = pal::amber;
+    arriveDeck("helion");
+}
+
+// Show a deck's arrival, set the channel, and persist the location.
+void Game::arriveDeck(const std::string& deck) {
+    deck_ = deck;
+    p_->saveState("deck", deck_);
+    arriveAt("cantor");                 // CANTOR is station-wide; plain words reach him
+    if      (deck == "helion") queueFile("act1/helion/arrive.txt");
+    else if (deck == "argent") queueFile("act1/argent/arrive.txt");
+    cur_ = pal::grey;
+    queueBeats("@color amber\nMARU: I'm on comms.\nLook around. Say\n/go when you want\nto move on.\n@color grey");
+    cur_ = pal::amber;
+}
+
+// Reboot landed us mid-Act-I: re-orient without replaying the arrival cinematic.
+void Game::resumeDeck(const std::string& deck) {
+    deck_ = deck;
+    // Reaching a later deck means the earlier cards were already earned; restore
+    // them so a reboot never strands the player behind a gate.
+    cardLang_  = (deck == "argent" || deck == "act1_done");
+    cardOkoro_ = (deck == "act1_done");
+    arriveAt("cantor");
+    cur_ = pal::grey;
+    queueBeats("RESUME\n@color amber\n" + deckTitle(deck) +
+               "\n@color grey\n/look  where am I\n/help  orders");
+    cur_ = pal::amber;
+}
+
+bool Game::handleDeckCommand(const std::string& cmd, const std::string& arg) {
+    if (cmd == "help")   { helpDeck();   return true; }
+    if (cmd == "status") { deckStatus(); return true; }
+    if (cmd == "talk")   { talkTo(arg.empty() ? "cantor" : arg); return true; }
+    if (cmd == "go" || cmd == "proceed" || cmd == "next") { askGoOn(); return true; }
+    if (deck_ == "helion") return helionCommand(cmd, arg);
+    if (deck_ == "argent") return argentCommand(cmd, arg);
+    // act1_done or unknown deck: end-of-content
+    cur_ = pal::grey;
+    queueBeats("END OF ACT I\n---\n@color amber\nThe decks beyond are\nnot yet built.\n"
+               "@color grey\nTalk to CANTOR or\nHALO-9 in the\nmeantime.");
     cur_ = pal::amber;
     return true;
+}
+
+bool Game::helionCommand(const std::string& cmd, const std::string& arg) {
+    (void)arg;
+    if (cmd == "look")  { queueFile("act1/helion/arrive.txt"); return true; }
+    if (cmd == "dir") {
+        queueBeats("@color grey\nHELION / H-2\n@color amber\n"
+                   "/logs   Lang's logs\n/diary  scratched\n/power  load ledger\n"
+                   "---\n@color grey\n/go when ready");
+        cur_ = pal::amber; return true;
+    }
+    if (cmd == "logs" || cmd == "lang")  { queueFile("act1/helion/lang_log.txt"); return true; }
+    if (cmd == "diary" || cmd == "junia"){ queueFile("act1/helion/junia_diary.txt"); return true; }
+    if (cmd == "power" || cmd == "ledger" || cmd == "load") {
+        queueFile("act1/helion/power.txt");
+        if (!haloHailed_) {              // the silent channel breaks, once
+            haloHailed_ = true;
+            queueFile("act1/helion/halo_hail.txt");
+        }
+        return true;
+    }
+    if (cmd == "solve" || cmd == "balance" || cmd == "enter") {
+        solveEnergy(arg); return true;
+    }
+    unknownHere();
+    return true;
+}
+
+// HELION energy balance. Buses 604+396 = 1000 kW; known draws sum to 981 (with
+// FOLD COILS listed as 0.30 MW to force a conversion); the missing 19 kW is the
+// answer, and doubles as the Caesar shift for HALO-9's cipher.
+void Game::solveEnergy(const std::string& arg) {
+    std::string d = digitsOnly(arg);
+    if (d.empty()) {
+        cur_ = pal::grey;
+        queueBeats("solve: give a number.\n/solve <n>\n---\n@color grey\nbus total minus the\nknown draws.");
+        cur_ = pal::amber; return;
+    }
+    p_->beep();
+    if (d == "19") {
+        cardLang_ = true;
+        cur_ = pal::green;
+        queueBeats("BALANCE CONFIRMED\nunmetered load = 19 kW\n"
+                   "---\n@color amber\nSomething the size of\none habitation unit\nstill draws power.\n"
+                   "In a dead city.\n"
+                   "---\n@color grey\nACCESS CARD released:\n@color amber\nLANG, T.\n"
+                   "---\n@color blue\n(19 is also the number\nHALO-9 asked for.)\n"
+                   "@color grey\n/go when ready.");
+        cur_ = pal::amber;
+    } else {
+        cur_ = pal::red;
+        queueBeats("THAT DOES NOT BALANCE.\n---\n@color grey\nsum BOTH buses.\n"
+                   "watch the MW line.\ntry /power again.");
+        cur_ = pal::amber;
+    }
+}
+
+bool Game::argentCommand(const std::string& cmd, const std::string& arg) {
+    (void)arg;
+    if (cmd == "look") { queueFile("act1/argent/arrive.txt"); return true; }
+    if (cmd == "dir") {
+        queueBeats("@color grey\nARGENT / A-5\n@color amber\n"
+                   "/ledger  rations\n/bay     synth-grain\n/comms   FERRYMAN\n"
+                   "/archive the card\n---\n@color grey\n/go when ready");
+        cur_ = pal::amber; return true;
+    }
+    if (cmd == "ledger" || cmd == "rations" || cmd == "okoro") {
+        queueFile("act1/argent/okoro_ledger.txt"); return true;
+    }
+    if (cmd == "bay" || cmd == "emil" || cmd == "grain") {
+        queueFile("act1/argent/emil.txt"); return true;
+    }
+    if (cmd == "comms" || cmd == "ferryman" || cmd == "cassel") {
+        queueFile("act1/argent/cassel.txt"); return true;
+    }
+    if (cmd == "archive" || cmd == "card") {
+        if (cardOkoro_) {
+            cur_ = pal::grey;
+            queueBeats("You already hold\nOkoro's card.\n@color grey\n/go to move on.");
+            cur_ = pal::amber; return true;
+        }
+        queueFile("act1/argent/stow.txt");
+        return true;
+    }
+    if (cmd == "stow" || cmd == "loader") {
+        if (cardOkoro_) {
+            cur_ = pal::grey; queueBeats("The loader is done.\nYou have the card.");
+            cur_ = pal::amber; return true;
+        }
+        bool solved = runStow();          // blocking sub-loop; paints its own frames
+        if (solved) {
+            cardOkoro_ = true;
+            cur_ = pal::green;
+            queueBeats("The aisle clears.\nThe loader arm swings.\n"
+                       "---\n@color grey\nACCESS CARD lifted:\n@color amber\nOKORO, S.\n"
+                       "---\n@color amber\nMARU: That's it.\n/go to slot it and\nmove on.");
+            cur_ = pal::amber;
+        } else {
+            cur_ = pal::grey;
+            queueBeats("You step back from\nthe loader.\n@color grey\n/stow to try again.");
+            cur_ = pal::amber;
+        }
+        return true;
+    }
+    unknownHere();
+    return true;
+}
+
+void Game::helpDeck() {
+    if (deck_ == "helion") {
+        queueBeats("@color grey\nHELION / H-2\n@color amber\n"
+                   "/look   the deck\n/logs   Lang\n/diary  Junia\n"
+                   "/power  load ledger\n/solve <n> answer\n"
+                   "---\n@color amber\n/c <w> CANTOR\n/h <w> HALO-9\n"
+                   "/notes  notebook\n/go     move on\n"
+                   "---\n@color grey\nplain words are\nspoken on the\nchannel.");
+    } else if (deck_ == "argent") {
+        queueBeats("@color grey\nARGENT / A-5\n@color amber\n"
+                   "/look   the deck\n/ledger rations\n/bay    Emil\n"
+                   "/comms  FERRYMAN\n/archive the card\n/stow   the loader\n"
+                   "---\n@color amber\n/c <w> CANTOR\n/h <w> HALO-9\n"
+                   "/notes  notebook\n/go     move on\n"
+                   "---\n@color grey\nplain words are\nspoken on the\nchannel.");
+    } else {
+        helpStation();
+    }
+    cur_ = pal::amber;
+}
+
+void Game::deckStatus() {
+    cur_ = pal::grey;
+    std::string halo = haloHailed_ ? "STIRRING" : "?";
+    queueBeats("@color grey\n" + deckTitle(deck_) +
+               "\n@color amber\nnetwork   ONLINE\ncrew      NONE\n"
+               "CANTOR    LISTENING\nHALO-9    " + halo);
+    cur_ = pal::amber;
+}
+
+// Maru asks whether to move to the next sector. The gate is a placeholder until
+// the real card/puzzle checks land: HELION needs the ledger seen, ARGENT the
+// archive. If not ready, Maru says so instead of arming the prompt.
+void Game::askGoOn() {
+    bool ready = (deck_ == "helion") ? cardLang_
+               : (deck_ == "argent") ? cardOkoro_
+               : true;
+    if (!ready) {
+        cur_ = pal::amber;
+        if (deck_ == "helion")
+            queueBeats("MARU: The lift wants a\ncard we don't have.\n"
+                       "@color grey\nthat load ledger is\nnagging at me.\n(try /power, /solve)");
+        else
+            queueBeats("MARU: We can't leave\nwithout Okoro's card.\n"
+                       "@color grey\nit's in the archive.\n(try /archive, /stow)");
+        cur_ = pal::amber;
+        return;
+    }
+    pendingGo_ = true;
+    cur_ = pal::amber;
+    queueBeats("MARU: Go on to the\nnext sector?\n"
+               "@color grey\nyes  /  not yet");
+    cur_ = pal::amber;
+}
+
+// helion -> (lift) -> argent -> (wake) -> act1_done
+void Game::advanceDeck() {
+    if (deck_ == "helion") {
+        queueFile("act1/helion/lift.txt");     // CANTOR greets the dead Dr. Lang
+        arriveDeck("argent");
+        return;
+    }
+    if (deck_ == "argent") {
+        queueFile("act1/argent/wake.txt");     // power restored, HALO-9 wakes
+        deck_ = "act1_done";
+        p_->saveState("deck", deck_);
+        cur_ = pal::grey;
+        queueBeats("[ ACT I COMPLETE ]\n---\n@color amber\nAct II is not built\nyet. Your progress\nis saved.");
+        cur_ = pal::amber;
+        return;
+    }
+}
+
+// Did the player speak HALO-9's decoded line? ("CANTOR IS NOT ALONE IN HIS OWN
+// VOICE") We match loosely on its load-bearing words so paraphrases still land.
+bool Game::decodedLine(const std::string& raw) const {
+    std::vector<std::string> t = tokenize(raw);
+    bool alone = false, voice = false, notw = false;
+    for (size_t i = 0; i < t.size(); ++i) {
+        if (t[i] == "alone") alone = true;
+        if (t[i] == "voice" || t[i] == "voices" || t[i] == "head") voice = true;
+        if (t[i] == "not"   || t[i] == "another" || t[i] == "someone") notw = true;
+    }
+    return alone && (voice || notw);
+}
+
+// ------------------------------------------------------------------- STOW
+// ARGENT archive puzzle: fill a 5x5 shelf grid so every row and column carries
+// its rated crate count, without touching the pillar cells. Line-based input:
+//   "c4"  toggle a cell    "ok" check    "?" help    "q" leave
+// Returns true only when solved. The first crate the player places triggers the
+// one-and-only PALE glitch: the panel registers a DIFFERENT cell for a beat.
+bool Game::runStow() {
+    const int N = 5;
+    bool pillar[5][5] = {{false}};
+    pillar[1][0] = true;   // B1
+    pillar[2][2] = true;   // C3
+    pillar[3][4] = true;   // D5
+    const int rowT[5] = {3, 2, 2, 2, 3};
+    const int colT[5] = {3, 2, 2, 2, 3};
+    bool fill[5][5] = {{false}};
+    std::string msg = "STOW  place crates";
+
+    auto rowSum = [&](int r){ int s=0; for(int c=0;c<N;c++) s+=fill[r][c]?1:0; return s; };
+    auto colSum = [&](int c){ int s=0; for(int r=0;r<N;r++) s+=fill[r][c]?1:0; return s; };
+
+    auto paint = [&]() {
+        p_->clear();
+        p_->setColor(pal::grey); p_->print(msg); p_->print("\n");
+        p_->setColor(pal::grey); p_->print("   1 2 3 4 5\n");
+        for (int r = 0; r < N; ++r) {
+            p_->setColor(pal::grey);
+            std::string head(1, (char)('A' + r)); head += " ";
+            p_->print(head);
+            for (int c = 0; c < N; ++c) {
+                if      (pillar[r][c]) { p_->setColor(pal::red);   p_->print("X"); }
+                else if (fill[r][c])   { p_->setColor(pal::green); p_->print("#"); }
+                else                   { p_->setColor(pal::grey);  p_->print("."); }
+                p_->print(" ");
+            }
+            int rs = rowSum(r);
+            p_->setColor(rs == rowT[r] ? pal::green : pal::amber);
+            p_->print("|"); p_->print(std::to_string(rowT[r])); p_->print("\n");
+        }
+        p_->setColor(pal::grey); p_->print("  ");
+        for (int c = 0; c < N; ++c) {
+            p_->setColor(colSum(c) == colT[c] ? pal::green : pal::amber);
+            p_->print(std::to_string(colT[c])); p_->print(" ");
+        }
+        p_->print("\n");
+    };
+
+    for (;;) {
+        paint();
+        p_->setColor(pal::amber);
+        std::string in = trim(toLower(p_->readLine("stow> ")));
+        if (in == "q" || in == "quit" || in == "exit" || in == "bye") return false;
+        if (in == "?" || in == "help") { msg = "cell eg c4  ok=check"; continue; }
+        if (in == "ok" || in == "done" || in == "check") {
+            bool solved = true;
+            for (int r = 0; r < N; ++r) if (rowSum(r) != rowT[r]) solved = false;
+            for (int c = 0; c < N; ++c) if (colSum(c) != colT[c]) solved = false;
+            if (solved) return true;
+            msg = "not balanced yet.";
+            continue;
+        }
+        // parse a cell reference like "c4" (row letter A-E, col digit 1-5)
+        if (in.size() >= 2 && in[0] >= 'a' && in[0] <= 'e'
+                           && in[1] >= '1' && in[1] <= '5') {
+            int r = in[0] - 'a', c = in[1] - '1';
+            if (pillar[r][c]) { p_->beep(); msg = "that's a pillar."; continue; }
+            // PALE glitch: the first placement registers on a different cell,
+            // for exactly one frame, then the panel "corrects" itself.
+            if (!glitchFired_) {
+                glitchFired_ = true;
+                int gr = (r + 1) % N, gc = (c + 2) % N;
+                if (!pillar[gr][gc]) {
+                    fill[gr][gc] = !fill[gr][gc];
+                    std::string keep = msg; msg = "input... slipped.";
+                    paint(); p_->beep(); p_->delayMs(650);
+                    fill[gr][gc] = !fill[gr][gc];   // revert the ghost cell
+                    msg = keep;
+                }
+                msg = "panel misread you.";
+            }
+            fill[r][c] = !fill[r][c];
+            continue;
+        }
+        p_->beep(); msg = "cell like c4, or ok";
+    }
 }
 
 void Game::helpStation() {
@@ -400,6 +770,7 @@ void Game::cmdSave() {
 void Game::cmdReset() {
     p_->saveState("progress", "");
     p_->saveState("notes", "");
+    p_->saveState("deck", "");
     p_->clear(); p_->setColor(pal::grey); p_->print("\nsave erased.\nrebooting.\n");
     p_->delayMs(900); p_->reboot(); running_ = false;
 }
@@ -549,7 +920,13 @@ bool Game::loadDialogue(const std::string& path) {
 bool Game::isKnownCommand(const std::string& c) {
     static const char* cmds[] = {"help","dir","open","mail","logs","status","unlock","version","build","c","h",
                                  "dock","notes","note","save","reset","shutdown",
-                                 "quit","exit","clear","talk","bye"};
+                                 "quit","exit","clear","talk","bye",
+                                 // Act I deck verbs
+                                 "proceed","enter","begin","go","next","look",
+                                 "diary","junia","lang","power","ledger","load",
+                                 "rations","okoro","bay","emil","grain",
+                                 "comms","ferryman","cassel","archive","stow","card",
+                                 "solve","balance","loader"};
     for (size_t i = 0; i < sizeof(cmds)/sizeof(cmds[0]); ++i)
         if (c == cmds[i]) return true;
     return false;
@@ -567,6 +944,13 @@ void Game::handleSpeech(const std::string& raw) {
 
     if (!addressee_.empty()) {
         if (lc == "bye" || lc == "goodbye" || lc == "leave") { closeChannel(); return; }
+        // Bringing HALO-9's decoded truth to CANTOR: he sincerely denies it.
+        // Only meaningful once the player has the cipher shift (Lang's card).
+        if (addressee_ == "cantor" && cardLang_ && !cantorConfronted_ && decodedLine(raw)) {
+            cantorConfronted_ = true;
+            queueFile("act1/argent/cantor_reply.txt");
+            return;
+        }
         talkAnswer(raw);
         return;
     }
@@ -765,6 +1149,7 @@ void Game::finish() {
     cur_ = pal::grey;
     queueBeats("progress saved.\n"
                "@color cyan\nCANTOR: I am still\nhere. Ask me.\n"
+               "@color amber\nMARU: A deck lock is\nahead. /proceed\nwhen you're ready.\n"
                "@color grey\njust type to speak\n/help for orders");
     cur_ = pal::amber; typeIt_ = true;
 }

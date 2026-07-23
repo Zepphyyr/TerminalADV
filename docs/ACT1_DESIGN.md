@@ -94,20 +94,36 @@ follow-up once we wire it.
 
 ---
 
-## Engine work still to do (content is ahead of code)
+## Engine work — status
 
-The .txt beats exist but the engine cannot yet drive Act I. Needed:
+Foundation is built and tested end-to-end on the desktop build (fresh save ->
+prologue -> `/proceed` -> HELION -> `/power` (HALO hail) -> `/go`/`yes` -> lift ->
+ARGENT -> `/archive` -> `/go`/`yes` -> wake -> act1_done; plus reboot-resume).
 
-1. **Deck/room navigation** beyond the prologue's station mode: a notion of
-   "current deck" and gated transitions (HELION -> lift -> ARGENT -> next).
-2. **Access-card state** + the lift gate: holding a card enables a transition
-   and picks the lift greeting.
-3. **Interactive puzzle screens**: a puzzle takes over input/render, reports
-   success/failure back to the flow. First client is STOW; the arithmetic and
-   cipher are solved in the player's head, so they only need an *answer check*
-   (player types 19 / the decoded line), not a bespoke screen.
-4. **The "go on?" beat**: Maru asks at each sector edge; `yes` / `not yet`.
-5. **PALE glitch hook**: a one-shot render filter that prints a different number
-   than the player typed, exactly once, on ARGENT. See STORY_BIBLE §8.
-6. **Progress flags**: which decks are done, which cards are held — into the
-   existing NVS save.
+- [x] **Deck navigation**: `deck_` state ("", helion, argent, act1_done), entered
+  from the station with `/proceed`, per-deck content commands, `/help` `/status`.
+- [x] **"Go on?" beat**: Maru asks at each sector edge; `yes` / `not yet`.
+- [x] **Progress persistence**: current deck saved under NVS key `deck`; reboot
+  resumes onto it; `/reset` clears it.
+- [x] **HALO breaks silence once** on HELION (after `/power`).
+
+- [x] **Access-card state** — `cardLang_` / `cardOkoro_` gate the two sector
+  transitions; resume restores them by deck. Lift greeting plays on advance.
+- [x] **Energy-balance answer check** — `/solve <n>` on HELION; `19` grants
+  Lang's card and confirms the cipher shift.
+- [x] **Cipher payoff** — speaking the decoded line to CANTOR (once, after the
+  shift is known) fires `cantor_reply.txt`; matched loosely on its key words.
+- [x] **STOW** — interactive 5x5 fill grid (`runStow`), line-based input
+  (`c4` / `ok` / `?` / `q`); solving grants Okoro's card and opens the gate.
+- [x] **PALE glitch** — one-shot: the first crate placed in STOW registers on a
+  different cell for one frame, then the panel "corrects." Fires once per run.
+
+All verified on the desktop build: full puzzle path fresh-save -> act1_done,
+wrong-answer rejection, gate refusal without a card, and the CANTOR payoff.
+
+### Puzzle solutions (for reference)
+- Energy balance: **19** (kW). See the ledger table above.
+- Caesar: shift **19** -> `CANTOR IS NOT ALONE IN HIS OWN VOICE`.
+- STOW: rows/cols target [3,2,2,2,3]; pillars B1, C3, D5. One valid fill:
+  A1 A3 A5 / B2 B4 / C1 C5 / D2 D4 / E1 E3 E5. (Any fill meeting the counts
+  and avoiding pillars wins.)
