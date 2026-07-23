@@ -1,0 +1,18 @@
+@color white
+The lock to HELION opens on a room that still thinks it is working.
+---
+Fans turn. A wall of glass holds a diagram of the fold-drive, lit and slowly rotating.
+---
+Nobody has watched it in thirty-four years.
+---
+@color grey
+HELION DYNAMICS
+FOLD PROPULSION
+DECK H-2
+@color white
+The consoles are clean.
+Whoever left did not leave in a hurry.
+---
+One terminal is logged in under a name.
+@color amber
+LANG, T.  Lead Engineer

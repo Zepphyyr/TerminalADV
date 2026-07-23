@@ -1,0 +1,28 @@
+@color grey
+HELION DYNAMICS
+POWER LEDGER
+@color amber
+BUS A....... 604 kW
+BUS B....... 396 kW
+---
+@color grey
+KNOWN DRAWS
+@color amber
+LIFE SUPPORT 240 kW
+HAB LIGHTS.. 155 kW
+FOLD COILS. 0.30 MW
+SYNTH-GRAIN. 88 kW
+NETWORK..... 60 kW
+THERMAL.... 138 kW
+---
+@color grey
+UNMETERED LOAD
+bus total minus
+the known draws
+@color red
+something draws
+power that is not
+on this list.
+@color grey
+find it. the coils
+remember the number.

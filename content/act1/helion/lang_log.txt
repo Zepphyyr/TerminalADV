@@ -1,0 +1,36 @@
+@color grey
+LANG / ENGINEERING LOG
+@color amber
+Fold cycle 118.
+Coils nominal. Drift within tolerance.
+---
+The sample population reports the usual second-week symptoms.
+---
+Headaches. Vivid dreams. One man convinced the walls breathe.
+---
+I have logged it under environmental stress and moved on.
+---
+@color grey
+LANG / LOG, cycle 240
+@color amber
+The engine is the finest thing humans have built.
+---
+It folds a lifetime into a fiscal quarter.
+---
+The population is a variable, and the variable is trending down.
+---
+I am asked only to keep the coils warm. I keep them warm.
+---
+@color grey
+LANG / LOG, final
+@color amber
+Cycle count no longer meaningful.
+---
+There is no one left to run the experiment on but me.
+---
+I kept perfect records. I told myself that was the same as being careful.
+---
+It was not.
+---
+@color grey
+- Lang

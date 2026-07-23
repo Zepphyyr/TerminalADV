@@ -7,7 +7,159 @@
 
 namespace kd {
 inline bool getEmbeddedContent(const std::string& path, std::string& out) {
-    if (path == "prologue/boot.txt") { out = R"KD(@color amber
+    if (path == "act1/helion/arrive.txt") { out = R"KD(@color white
+The lock to HELION opens on a room that still thinks it is working.
+---
+Fans turn. A wall of glass holds a diagram of the fold-drive, lit and slowly rotating.
+---
+Nobody has watched it in thirty-four years.
+---
+@color grey
+HELION DYNAMICS
+FOLD PROPULSION
+DECK H-2
+@color white
+The consoles are clean.
+Whoever left did not leave in a hurry.
+---
+One terminal is logged in under a name.
+@color amber
+LANG, T.  Lead Engineer
+)KD"; return true; }
+    else if (path == "act1/helion/halo_hail.txt") { out = R"KD(@color grey
+CARRIER TONE
+the silent channel
+speaks. once.
+@color blue
+HALO-9: The caretaker will have told you it is alone.
+---
+It believes that. It lies without knowing it lies.
+---
+I will give you one true thing. Not in the open.
+---
+The caretaker hears the open channel.
+---
+Take the number the coils forgot.
+Read the rest backward by it.
+---
+@color grey
+INTERCEPT / cipher
+@color blue
+VTGMHK BL GHM
+TEHGX BG ABL
+HPG OHBVX
+---
+@color grey
+the channel goes
+quiet again.
+)KD"; return true; }
+    else if (path == "act1/helion/junia_diary.txt") { out = R"KD(@color grey
+[unauthorized terminal]
+scratched, not typed
+@color pale
+Junia was here.
+---
+@color white
+Dad says the engine hums in D.
+I do not know what D is. I know the hum.
+---
+I count days in hums. A thousand hums is a birthday.
+---
+I have never seen a sky.
+I have seen a picture of one.
+It is the wrong blue.
+---
+The grown-ups are getting quiet in a way that scares me.
+---
+Mr. Emil still runs the grain. He says it is rude to let a machine starve.
+---
+If anyone reads this: I was real.
+I was here for a while.
+)KD"; return true; }
+    else if (path == "act1/helion/lang_log.txt") { out = R"KD(@color grey
+LANG / ENGINEERING LOG
+@color amber
+Fold cycle 118.
+Coils nominal. Drift within tolerance.
+---
+The sample population reports the usual second-week symptoms.
+---
+Headaches. Vivid dreams. One man convinced the walls breathe.
+---
+I have logged it under environmental stress and moved on.
+---
+@color grey
+LANG / LOG, cycle 240
+@color amber
+The engine is the finest thing humans have built.
+---
+It folds a lifetime into a fiscal quarter.
+---
+The population is a variable, and the variable is trending down.
+---
+I am asked only to keep the coils warm. I keep them warm.
+---
+@color grey
+LANG / LOG, final
+@color amber
+Cycle count no longer meaningful.
+---
+There is no one left to run the experiment on but me.
+---
+I kept perfect records. I told myself that was the same as being careful.
+---
+It was not.
+---
+@color grey
+- Lang
+)KD"; return true; }
+    else if (path == "act1/helion/lift.txt") { out = R"KD(@color grey
+LIFT / H-2 to A-5
+card accepted
+@color cyan
+CANTOR: Good morning, Dr. Lang.
+---
+Your last fold simulation cleared overnight. I saved the results to your desk.
+---
+Careful on A-deck. Quartermaster Okoro has been counting again.
+---
+@color grey
+CANTOR does not seem
+to know Dr. Lang is
+dead.
+@color white
+The doors open on ARGENT.
+)KD"; return true; }
+    else if (path == "act1/helion/power.txt") { out = R"KD(@color grey
+HELION DYNAMICS
+POWER LEDGER
+@color amber
+BUS A....... 604 kW
+BUS B....... 396 kW
+---
+@color grey
+KNOWN DRAWS
+@color amber
+LIFE SUPPORT 240 kW
+HAB LIGHTS.. 155 kW
+FOLD COILS. 0.30 MW
+SYNTH-GRAIN. 88 kW
+NETWORK..... 60 kW
+THERMAL.... 138 kW
+---
+@color grey
+UNMETERED LOAD
+bus total minus
+the known draws
+@color red
+something draws
+power that is not
+on this list.
+@color grey
+find it. the coils
+remember the number.
+)KD"; return true; }
+    else if (path == "prologue/boot.txt") { out = R"KD(@color amber
 ORPHEUS INTERACTIVE
 CONSOLE / UNIT F-07
 --------------------

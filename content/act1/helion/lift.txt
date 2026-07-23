@@ -1,0 +1,16 @@
+@color grey
+LIFT / H-2 to A-5
+card accepted
+@color cyan
+CANTOR: Good morning, Dr. Lang.
+---
+Your last fold simulation cleared overnight. I saved the results to your desk.
+---
+Careful on A-deck. Quartermaster Okoro has been counting again.
+---
+@color grey
+CANTOR does not seem
+to know Dr. Lang is
+dead.
+@color white
+The doors open on ARGENT.
