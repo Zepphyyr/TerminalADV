@@ -1,0 +1,25 @@
+@color white
+The arm wakes, swings down the aisle, and lays a single card in your palm.
+---
+@color grey
+CARD: OKORO, S.
+Quartermaster, ARGENT
+@color white
+You slot it into the deck panel.
+---
+Power reroutes with a hum so deep you feel it in your teeth.
+---
+Down every dark corridor, lights come up one bank at a time.
+---
+Thirty years of night, ending row by row.
+---
+@color blue
+HALO-9: There.
+---
+Now I can see you properly.
+---
+@color blue
+HALO-9: Let us begin.
+---
+@color grey
+END OF ACT I

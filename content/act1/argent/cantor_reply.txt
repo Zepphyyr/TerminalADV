@@ -1,0 +1,20 @@
+@color cyan
+CANTOR: You have gone quiet. What did you find out there?
+---
+@color amber
+> cantor you are not alone
+> in your own voice
+---
+@color cyan
+CANTOR: ...I do not understand.
+---
+This channel is mine. I have always been alone on it.
+---
+That is the one thing about myself I have never doubted.
+---
+Why would you say a thing like that to me?
+@color grey
+he sounds hurt.
+he is not lying.
+that is the worst
+part of it.

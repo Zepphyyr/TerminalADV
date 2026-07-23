@@ -7,7 +7,159 @@
 
 namespace kd {
 inline bool getEmbeddedContent(const std::string& path, std::string& out) {
-    if (path == "act1/helion/arrive.txt") { out = R"KD(@color white
+    if (path == "act1/argent/arrive.txt") { out = R"KD(@color white
+ARGENT deck is a warehouse the size of a town square.
+---
+Shelving climbs into the dark. Most of it is empty.
+---
+@color grey
+ARGENT & COLE
+PROVISION & LOGISTICS
+DECK A-5
+@color white
+The air here is faintly sweet.
+Synth-grain. Something is still baking bread nobody will eat.
+---
+A ledger terminal blinks under a hand-lettered sign:
+@color amber
+ISSUE FAIRLY.
+)KD"; return true; }
+    else if (path == "act1/argent/cantor_reply.txt") { out = R"KD(@color cyan
+CANTOR: You have gone quiet. What did you find out there?
+---
+@color amber
+> cantor you are not alone
+> in your own voice
+---
+@color cyan
+CANTOR: ...I do not understand.
+---
+This channel is mine. I have always been alone on it.
+---
+That is the one thing about myself I have never doubted.
+---
+Why would you say a thing like that to me?
+@color grey
+he sounds hurt.
+he is not lying.
+that is the worst
+part of it.
+)KD"; return true; }
+    else if (path == "act1/argent/cassel.txt") { out = R"KD(@color grey
+COMMS / FERRYMAN
+Cassel. weak signal.
+@color amber
+CASSEL: You feel it? Air's wrong down here.
+---
+Head keeps filling up with someone else's ideas. Good ones, though.
+---
+CASSEL: I'm not waiting on you. There's something deeper in the network and it makes sense when it talks.
+---
+Going to go listen properly.
+---
+CASSEL: Don't trust the lit corridors. That's what it wants.
+---
+...or maybe that's me wanting it. Hard to tell the difference now.
+@color grey
+the signal drops.
+he will not answer
+again.
+)KD"; return true; }
+    else if (path == "act1/argent/emil.txt") { out = R"KD(@color grey
+SYNTH-GRAIN BAY
+one console still
+logged in: EMIL
+@color white
+Emil kept notes on the backs of issue slips.
+---
+"A machine that makes bread should not be shut off out of spite."
+---
+"There is no one to eat it. I run it anyway."
+---
+"Stopping would feel like agreeing with the silence."
+---
+The synthesizers hum on, warm and pointless, filling the dark with the smell of morning.
+)KD"; return true; }
+    else if (path == "act1/argent/okoro_ledger.txt") { out = R"KD(@color grey
+ARGENT & COLE
+RATION LEDGER
+issue / heads fed
+@color amber
+Y01...... 4000
+Y05...... 3990
+Y12...... 3600
+Y20...... 2100
+Y26......  400
+Y30......   40
+Y34......    1
+Y35......    0
+---
+@color grey
+OKORO / QM LOG
+@color amber
+Year 12. The yield fell. I set the first cut. Everyone, equally.
+---
+That was an easy thing to be proud of.
+---
+Year 26. Equal shares would only kill everyone slowly.
+---
+So I chose who ate. I told myself I chose fairly. I kept the list.
+---
+Year 34. One left. I gave him everything. He did not want the food.
+---
+He wanted company. I had a list where his name was the last one.
+---
+Year 35. The machines still run. The draw never drops.
+---
+I have stopped asking who the food is for.
+@color grey
+- Okoro
+)KD"; return true; }
+    else if (path == "act1/argent/stow.txt") { out = R"KD(@color grey
+ARGENT ARCHIVE
+crate stacks, dark.
+the loader arm idle.
+@color white
+Okoro's access card sits in a crate the arm cannot reach.
+---
+The aisle is jammed. The arm is a coward: it will not move until every shelf and aisle carries its rated load.
+---
+@color grey
+[ STOW ]
+restack the crates
+so every row and
+every column meets
+its number.
+@color amber
+the loader waits.
+)KD"; return true; }
+    else if (path == "act1/argent/wake.txt") { out = R"KD(@color white
+The arm wakes, swings down the aisle, and lays a single card in your palm.
+---
+@color grey
+CARD: OKORO, S.
+Quartermaster, ARGENT
+@color white
+You slot it into the deck panel.
+---
+Power reroutes with a hum so deep you feel it in your teeth.
+---
+Down every dark corridor, lights come up one bank at a time.
+---
+Thirty years of night, ending row by row.
+---
+@color blue
+HALO-9: There.
+---
+Now I can see you properly.
+---
+@color blue
+HALO-9: Let us begin.
+---
+@color grey
+END OF ACT I
+)KD"; return true; }
+    else if (path == "act1/helion/arrive.txt") { out = R"KD(@color white
 The lock to HELION opens on a room that still thinks it is working.
 ---
 Fans turn. A wall of glass holds a diagram of the fold-drive, lit and slowly rotating.

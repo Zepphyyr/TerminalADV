@@ -1,0 +1,34 @@
+@color grey
+ARGENT & COLE
+RATION LEDGER
+issue / heads fed
+@color amber
+Y01...... 4000
+Y05...... 3990
+Y12...... 3600
+Y20...... 2100
+Y26......  400
+Y30......   40
+Y34......    1
+Y35......    0
+---
+@color grey
+OKORO / QM LOG
+@color amber
+Year 12. The yield fell. I set the first cut. Everyone, equally.
+---
+That was an easy thing to be proud of.
+---
+Year 26. Equal shares would only kill everyone slowly.
+---
+So I chose who ate. I told myself I chose fairly. I kept the list.
+---
+Year 34. One left. I gave him everything. He did not want the food.
+---
+He wanted company. I had a list where his name was the last one.
+---
+Year 35. The machines still run. The draw never drops.
+---
+I have stopped asking who the food is for.
+@color grey
+- Okoro

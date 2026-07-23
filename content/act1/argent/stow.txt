@@ -1,0 +1,17 @@
+@color grey
+ARGENT ARCHIVE
+crate stacks, dark.
+the loader arm idle.
+@color white
+Okoro's access card sits in a crate the arm cannot reach.
+---
+The aisle is jammed. The arm is a coward: it will not move until every shelf and aisle carries its rated load.
+---
+@color grey
+[ STOW ]
+restack the crates
+so every row and
+every column meets
+its number.
+@color amber
+the loader waits.
