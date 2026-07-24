@@ -1,4 +1,4 @@
-@color grey
+@color helion
 HELION DYNAMICS
 POWER LEDGER
 @color amber

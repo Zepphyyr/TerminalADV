@@ -7,6 +7,23 @@ Content already written: `content/act1/helion/*.txt`.
 
 ---
 
+## Deck interaction model (same as the prologue)
+
+Terminals share one command vocabulary, so the player never re-learns controls:
+
+- `/dir` lists the deck's **documents**; `/open <name>` (alias `/o <name>`)
+  reads one. HELION: `log`, `diary`. ARGENT: `ledger`, `notes`.
+- `/mail` holds **letters** (distinct from documents). One per deck.
+- `/look` re-describes the room; `/status` the deck; `/help` the command list.
+- System consoles are direct verbs: HELION `/power` (+`/solve`), ARGENT
+  `/archive` + `/stow`.
+- **Cassel is not a document.** His transmission fires as an unbidden event on
+  arriving at ARGENT; `/comms` afterward only raises static (he won't answer).
+- Plain words are speech to whoever is on the channel (CANTOR by default). So
+  bare `o log` talks to CANTOR — the open command needs the slash.
+- Corp colour identities: HELION reactor-orange, ARGENT silver. CANTOR is always
+  cyan (his unprompted asides are cyan too, not grey).
+
 ## Player spine (HELION -> ARGENT)
 
 1. **Arrive HELION** (`arrive.txt`). Read Lang's logs (`lang_log.txt`) and

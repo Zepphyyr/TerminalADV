@@ -1,4 +1,4 @@
-@color grey
+@color argent
 SYNTH-GRAIN BAY
 one console still
 logged in: EMIL

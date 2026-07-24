@@ -12,7 +12,7 @@ ARGENT deck is a warehouse the size of a town square.
 ---
 Shelving climbs into the dark. Most of it is empty.
 ---
-@color grey
+@color argent
 ARGENT & COLE
 PROVISION & LOGISTICS
 DECK A-5
@@ -65,7 +65,7 @@ the signal drops.
 he will not answer
 again.
 )KD"; return true; }
-    else if (path == "act1/argent/emil.txt") { out = R"KD(@color grey
+    else if (path == "act1/argent/emil.txt") { out = R"KD(@color argent
 SYNTH-GRAIN BAY
 one console still
 logged in: EMIL
@@ -80,7 +80,22 @@ Emil kept notes on the backs of issue slips.
 ---
 The synthesizers hum on, warm and pointless, filling the dark with the smell of morning.
 )KD"; return true; }
-    else if (path == "act1/argent/okoro_ledger.txt") { out = R"KD(@color grey
+    else if (path == "act1/argent/mail.txt") { out = R"KD(@color argent
+ARGENT / HELD MAIL
+[1] to: Okoro
+SUBJ: my daughter
+@color amber
+Please.
+---
+She is seven. She has not had a full share in eleven days.
+---
+Take my name off the list. Put hers on twice. I will give her mine.
+---
+I am not asking for me.
+@color grey
+[no reply on file]
+)KD"; return true; }
+    else if (path == "act1/argent/okoro_ledger.txt") { out = R"KD(@color argent
 ARGENT & COLE
 RATION LEDGER
 issue / heads fed
@@ -115,7 +130,7 @@ I have stopped asking who the food is for.
 @color grey
 - Okoro
 )KD"; return true; }
-    else if (path == "act1/argent/stow.txt") { out = R"KD(@color grey
+    else if (path == "act1/argent/stow.txt") { out = R"KD(@color argent
 ARGENT ARCHIVE
 crate stacks, dark.
 the loader arm idle.
@@ -167,7 +182,7 @@ Fans turn. A wall of glass holds a diagram of the fold-drive, lit and slowly rot
 ---
 Nobody has watched it in thirty-four years.
 ---
-@color grey
+@color helion
 HELION DYNAMICS
 FOLD PROPULSION
 DECK H-2
@@ -289,7 +304,24 @@ dead.
 @color white
 The doors open on ARGENT.
 )KD"; return true; }
-    else if (path == "act1/helion/power.txt") { out = R"KD(@color grey
+    else if (path == "act1/helion/mail.txt") { out = R"KD(@color helion
+HELION / INBOX (1)
+[1] Program Office
+SUBJ: attrition
+@color amber
+Dr. Lang,
+---
+Your notes flag rising attrition in the resident sample.
+---
+Noted. It does not affect the fold data, which remains excellent.
+---
+Continue. Do not editorialize in the logs. Numbers only.
+---
+The board thanks you for your discretion.
+@color grey
+- Program Office
+)KD"; return true; }
+    else if (path == "act1/helion/power.txt") { out = R"KD(@color helion
 HELION DYNAMICS
 POWER LEDGER
 @color amber

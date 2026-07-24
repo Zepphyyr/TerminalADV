@@ -30,6 +30,9 @@ constexpr Color red   {255,  90,  70};  // alerts, rejections / NULLPOINT
 constexpr Color blue  {  8,   0, 255};  // HALO-9 "THE WARDEN" — hard police blue
 constexpr Color pale  {200, 140, 255};  // PALE SIGNAL — the thing they built
 constexpr Color grey  {150, 150, 150};  // headers, metadata, prompts
+// Corporate module identities — each deck's brand reads at a glance.
+constexpr Color helion {255, 105,   0};  // HELION DYNAMICS — reactor orange
+constexpr Color argent {176, 196, 222};  // ARGENT & COLE — silver / steel
 }
 
 class IPlatform {

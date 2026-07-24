@@ -105,6 +105,10 @@ private:
     bool handleDeckCommand(const std::string& cmd, const std::string& arg);
     bool helionCommand(const std::string& cmd, const std::string& arg);
     bool argentCommand(const std::string& cmd, const std::string& arg);
+    void deckLook();                                    // /look — the room
+    void deckDir();                                     // /dir  — list documents
+    void deckOpen(const std::string& arg);              // /open <name> (o <name>)
+    void deckMail();                                    // /mail — held letters
     void helpDeck();
     void deckStatus();
     void askGoOn();                                          // Maru: "go on?"

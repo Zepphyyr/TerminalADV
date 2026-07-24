@@ -5,7 +5,7 @@ Fans turn. A wall of glass holds a diagram of the fold-drive, lit and slowly rot
 ---
 Nobody has watched it in thirty-four years.
 ---
-@color grey
+@color helion
 HELION DYNAMICS
 FOLD PROPULSION
 DECK H-2

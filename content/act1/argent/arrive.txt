@@ -3,7 +3,7 @@ ARGENT deck is a warehouse the size of a town square.
 ---
 Shelving climbs into the dark. Most of it is empty.
 ---
-@color grey
+@color argent
 ARGENT & COLE
 PROVISION & LOGISTICS
 DECK A-5

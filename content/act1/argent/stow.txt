@@ -1,4 +1,4 @@
-@color grey
+@color argent
 ARGENT ARCHIVE
 crate stacks, dark.
 the loader arm idle.

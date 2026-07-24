@@ -40,6 +40,8 @@ Color colorByName(const std::string& n) {
     if (s == "blue")  return pal::blue;
     if (s == "pale")  return pal::pale;
     if (s == "grey" || s == "gray") return pal::grey;
+    if (s == "helion") return pal::helion;
+    if (s == "argent") return pal::argent;
     return pal::amber;
 }
 
@@ -426,8 +428,12 @@ void Game::arriveDeck(const std::string& deck) {
     deck_ = deck;
     p_->saveState("deck", deck_);
     arriveAt("cantor");                 // CANTOR is station-wide; plain words reach him
-    if      (deck == "helion") queueFile("act1/helion/arrive.txt");
-    else if (deck == "argent") queueFile("act1/argent/arrive.txt");
+    if (deck == "helion") {
+        queueFile("act1/helion/arrive.txt");
+    } else if (deck == "argent") {
+        queueFile("act1/argent/arrive.txt");
+        queueFile("act1/argent/cassel.txt");   // an unbidden transmission, not a file
+    }
     cur_ = pal::grey;
     queueBeats("@color amber\nMARU: I'm on comms.\nLook around. Say\n/go when you want\nto move on.\n@color grey");
     cur_ = pal::amber;
@@ -452,6 +458,12 @@ bool Game::handleDeckCommand(const std::string& cmd, const std::string& arg) {
     if (cmd == "status") { deckStatus(); return true; }
     if (cmd == "talk")   { talkTo(arg.empty() ? "cantor" : arg); return true; }
     if (cmd == "go" || cmd == "proceed" || cmd == "next") { askGoOn(); return true; }
+    // Shared terminal verbs, same model as the prologue: dir lists documents,
+    // open (aliased "o") reads one, mail holds letters.
+    if (cmd == "look") { deckLook(); return true; }
+    if (cmd == "dir")  { deckDir();  return true; }
+    if (cmd == "open") { deckOpen(arg); return true; }
+    if (cmd == "mail") { deckMail(); return true; }
     if (deck_ == "helion") return helionCommand(cmd, arg);
     if (deck_ == "argent") return argentCommand(cmd, arg);
     // act1_done or unknown deck: end-of-content
@@ -463,17 +475,7 @@ bool Game::handleDeckCommand(const std::string& cmd, const std::string& arg) {
 }
 
 bool Game::helionCommand(const std::string& cmd, const std::string& arg) {
-    (void)arg;
-    if (cmd == "look")  { queueFile("act1/helion/arrive.txt"); return true; }
-    if (cmd == "dir") {
-        queueBeats("@color grey\nHELION / H-2\n@color amber\n"
-                   "/logs   Lang's logs\n/diary  scratched\n/power  load ledger\n"
-                   "---\n@color grey\n/go when ready");
-        cur_ = pal::amber; return true;
-    }
-    if (cmd == "logs" || cmd == "lang")  { queueFile("act1/helion/lang_log.txt"); return true; }
-    if (cmd == "diary" || cmd == "junia"){ queueFile("act1/helion/junia_diary.txt"); return true; }
-    if (cmd == "power" || cmd == "ledger" || cmd == "load") {
+    if (cmd == "power" || cmd == "load") {
         queueFile("act1/helion/power.txt");
         if (!haloHailed_) {              // the silent channel breaks, once
             haloHailed_ = true;
@@ -481,9 +483,7 @@ bool Game::helionCommand(const std::string& cmd, const std::string& arg) {
         }
         return true;
     }
-    if (cmd == "solve" || cmd == "balance" || cmd == "enter") {
-        solveEnergy(arg); return true;
-    }
+    if (cmd == "solve" || cmd == "balance") { solveEnergy(arg); return true; }
     unknownHere();
     return true;
 }
@@ -520,21 +520,12 @@ void Game::solveEnergy(const std::string& arg) {
 
 bool Game::argentCommand(const std::string& cmd, const std::string& arg) {
     (void)arg;
-    if (cmd == "look") { queueFile("act1/argent/arrive.txt"); return true; }
-    if (cmd == "dir") {
-        queueBeats("@color grey\nARGENT / A-5\n@color amber\n"
-                   "/ledger  rations\n/bay     synth-grain\n/comms   FERRYMAN\n"
-                   "/archive the card\n---\n@color grey\n/go when ready");
+    if (cmd == "comms" || cmd == "ferryman" || cmd == "cassel" || cmd == "hail") {
+        // Cassel already called on arrival; hailing back gets only static.
+        cur_ = pal::grey;
+        queueBeats("You hail FERRYMAN.\n---\n@color grey\nStatic. Cassel does\nnot answer.\n"
+                   "He said he would\nnot.");
         cur_ = pal::amber; return true;
-    }
-    if (cmd == "ledger" || cmd == "rations" || cmd == "okoro") {
-        queueFile("act1/argent/okoro_ledger.txt"); return true;
-    }
-    if (cmd == "bay" || cmd == "emil" || cmd == "grain") {
-        queueFile("act1/argent/emil.txt"); return true;
-    }
-    if (cmd == "comms" || cmd == "ferryman" || cmd == "cassel") {
-        queueFile("act1/argent/cassel.txt"); return true;
     }
     if (cmd == "archive" || cmd == "card") {
         if (cardOkoro_) {
@@ -569,19 +560,63 @@ bool Game::argentCommand(const std::string& cmd, const std::string& arg) {
     return true;
 }
 
+void Game::deckLook() {
+    if      (deck_ == "helion") queueFile("act1/helion/arrive.txt");
+    else if (deck_ == "argent") queueFile("act1/argent/arrive.txt");
+    else { cur_ = pal::grey; queueBeats("nothing to see here\nyet."); cur_ = pal::amber; }
+}
+
+void Game::deckDir() {
+    if (deck_ == "helion") {
+        queueBeats("@color helion\nDOCUMENTS / H-2\n@color amber\n"
+                   "log\n  Lang's engineering\n  logs\n"
+                   "diary\n  scratched notes\n"
+                   "---\n@color grey\n/open <name>\n/mail for letters");
+    } else if (deck_ == "argent") {
+        queueBeats("@color argent\nDOCUMENTS / A-5\n@color amber\n"
+                   "ledger\n  ration issue log\n"
+                   "notes\n  Emil's slips\n"
+                   "---\n@color grey\n/open <name>\n/mail for letters");
+    } else {
+        cur_ = pal::grey; queueBeats("no documents here.");
+    }
+    cur_ = pal::amber;
+}
+
+void Game::deckOpen(const std::string& arg) {
+    std::string a = toLower(trim(arg));
+    if (a.empty()) { cur_ = pal::grey; queueBeats("open what?\ntry /dir."); cur_ = pal::amber; return; }
+    if (deck_ == "helion") {
+        if (a == "log" || a == "logs" || a == "lang")   { queueFile("act1/helion/lang_log.txt"); return; }
+        if (a == "diary" || a == "junia")               { queueFile("act1/helion/junia_diary.txt"); return; }
+    } else if (deck_ == "argent") {
+        if (a == "ledger" || a == "rations" || a == "okoro") { queueFile("act1/argent/okoro_ledger.txt"); return; }
+        if (a == "notes"  || a == "emil" || a == "bay")      { queueFile("act1/argent/emil.txt"); return; }
+    }
+    cur_ = pal::red;
+    queueBeats("no document named\n'" + arg + "'.\ntry /dir.");
+    cur_ = pal::amber;
+}
+
+void Game::deckMail() {
+    if      (deck_ == "helion") queueFile("act1/helion/mail.txt");
+    else if (deck_ == "argent") queueFile("act1/argent/mail.txt");
+    else { cur_ = pal::grey; queueBeats("no mail here."); cur_ = pal::amber; }
+}
+
 void Game::helpDeck() {
     if (deck_ == "helion") {
-        queueBeats("@color grey\nHELION / H-2\n@color amber\n"
-                   "/look   the deck\n/logs   Lang\n/diary  Junia\n"
-                   "/power  load ledger\n/solve <n> answer\n"
+        queueBeats("@color helion\nHELION / H-2\n@color amber\n"
+                   "/look   the deck\n/dir    documents\n/open <name>\n"
+                   "/mail   letters\n/power  load ledger\n/solve <n> answer\n"
                    "---\n@color amber\n/c <w> CANTOR\n/h <w> HALO-9\n"
                    "/notes  notebook\n/go     move on\n"
                    "---\n@color grey\nplain words are\nspoken on the\nchannel.");
     } else if (deck_ == "argent") {
-        queueBeats("@color grey\nARGENT / A-5\n@color amber\n"
-                   "/look   the deck\n/ledger rations\n/bay    Emil\n"
-                   "/comms  FERRYMAN\n/archive the card\n/stow   the loader\n"
-                   "---\n@color amber\n/c <w> CANTOR\n/h <w> HALO-9\n"
+        queueBeats("@color argent\nARGENT / A-5\n@color amber\n"
+                   "/look   the deck\n/dir    documents\n/open <name>\n"
+                   "/mail   letters\n/archive the card\n/stow   the loader\n"
+                   "---\n@color amber\n/comms  hail crew\n/c <w> CANTOR\n/h <w> HALO-9\n"
                    "/notes  notebook\n/go     move on\n"
                    "---\n@color grey\nplain words are\nspoken on the\nchannel.");
     } else {
@@ -593,7 +628,8 @@ void Game::helpDeck() {
 void Game::deckStatus() {
     cur_ = pal::grey;
     std::string halo = haloHailed_ ? "STIRRING" : "?";
-    queueBeats("@color grey\n" + deckTitle(deck_) +
+    std::string acc = (deck_ == "helion") ? "helion" : (deck_ == "argent") ? "argent" : "grey";
+    queueBeats("@color " + acc + "\n" + deckTitle(deck_) +
                "\n@color amber\nnetwork   ONLINE\ncrew      NONE\n"
                "CANTOR    LISTENING\nHALO-9    " + halo);
     cur_ = pal::amber;
@@ -1122,7 +1158,7 @@ void Game::talkAnswer(const std::string& question) {
     // understand you" just reads as broken. Rendered grey so it is visibly an
     // aside rather than a reply.
     if (best >= 0 && !dlgAmbient_.empty() && (nextRand() % 4) == 0) {
-        cur_ = pal::grey;
+        cur_ = dlgVoice_;   // an aside, but still HIS voice — keep his colour
         queueBeats(dlgAmbient_[nextRand() % dlgAmbient_.size()]);
     }
     cur_ = pal::amber;

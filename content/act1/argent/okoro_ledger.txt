@@ -1,4 +1,4 @@
-@color grey
+@color argent
 ARGENT & COLE
 RATION LEDGER
 issue / heads fed
