@@ -706,15 +706,17 @@ bool Game::runStow() {
     const int rowT[5] = {3, 2, 2, 2, 3};
     const int colT[5] = {3, 2, 2, 2, 3};
     bool fill[5][5] = {{false}};
-    std::string msg = "STOW  place crates";
+    // Status shown in the input prompt (the screen is only 8 rows: header +
+    // 5 grid rows + column footer already fill 7, leaving the prompt row).
+    std::string msg = "place a crate";
 
     auto rowSum = [&](int r){ int s=0; for(int c=0;c<N;c++) s+=fill[r][c]?1:0; return s; };
     auto colSum = [&](int c){ int s=0; for(int r=0;r<N;r++) s+=fill[r][c]?1:0; return s; };
 
     auto paint = [&]() {
         p_->clear();
-        p_->setColor(pal::grey); p_->print(msg); p_->print("\n");
-        p_->setColor(pal::grey); p_->print("   1 2 3 4 5\n");
+        // 2-space indent so column numbers sit over the cells (rows begin "A ").
+        p_->setColor(pal::grey); p_->print("  1 2 3 4 5\n");
         for (int r = 0; r < N; ++r) {
             p_->setColor(pal::grey);
             std::string head(1, (char)('A' + r)); head += " ";
@@ -740,9 +742,9 @@ bool Game::runStow() {
     for (;;) {
         paint();
         p_->setColor(pal::amber);
-        std::string in = trim(toLower(p_->readLine("stow> ")));
+        std::string in = trim(toLower(p_->readLine(msg + "> ")));
         if (in == "q" || in == "quit" || in == "exit" || in == "bye") return false;
-        if (in == "?" || in == "help") { msg = "cell eg c4  ok=check"; continue; }
+        if (in == "?" || in == "help") { msg = "c4 to place, ok"; continue; }
         if (in == "ok" || in == "done" || in == "check") {
             bool solved = true;
             for (int r = 0; r < N; ++r) if (rowSum(r) != rowT[r]) solved = false;
@@ -762,18 +764,16 @@ bool Game::runStow() {
                 glitchFired_ = true;
                 int gr = (r + 1) % N, gc = (c + 2) % N;
                 if (!pillar[gr][gc]) {
-                    fill[gr][gc] = !fill[gr][gc];
-                    std::string keep = msg; msg = "input... slipped.";
+                    fill[gr][gc] = !fill[gr][gc];   // a ghost cell, for one beat
                     paint(); p_->beep(); p_->delayMs(650);
                     fill[gr][gc] = !fill[gr][gc];   // revert the ghost cell
-                    msg = keep;
                 }
                 msg = "panel misread you.";
             }
             fill[r][c] = !fill[r][c];
             continue;
         }
-        p_->beep(); msg = "cell like c4, or ok";
+        p_->beep(); msg = "try c4 or ok";
     }
 }
 
