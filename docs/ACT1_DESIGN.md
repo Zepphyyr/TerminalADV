@@ -35,7 +35,9 @@ Terminals share one command vocabulary, so the player never re-learns controls:
 3. **HALO-9 breaks silence** (`halo_hail.txt`): one clean line + ciphertext.
 4. **Lift to ARGENT** (`lift.txt`). CANTOR greets "Dr. Lang" warmly — it does
    not know he is dead. First crack in CANTOR's reliability.
-5. **ARGENT** (content TBD): Okoro's ration ledgers = the death curve; Emil in
+5. **ARGENT**: Okoro's ration ledger = a census-necrology across generations
+   (centuries, not a 35-year starvation); the synth-grain / "bread like paper"
+   theme via Emil; Emil in
    the background. Player **decrypts** HALO-9 with shift 7 -> a true line that
    **contradicts CANTOR**. First contradiction caught. Cassel appears once.
    First PALE glitch fires here. **STOW** puzzle yields Okoro's card -> restores

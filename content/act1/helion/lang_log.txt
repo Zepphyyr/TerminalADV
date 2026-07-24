@@ -1,36 +1,22 @@
 @color grey
 LANG / ENGINEERING LOG
 @color amber
-Fold cycle 118.
-Coils nominal. Drift within tolerance.
+Cycle 118. Coils nominal. Drift inside tolerance. A good quiet number, the kind that lets a man sleep.
 ---
-The sample population reports the usual second-week symptoms.
+Cycle 240. The residents report the usual second-week weather in the skull. Lights behind the eyes. I file it under environment and let the engine speak for itself.
 ---
-Headaches. Vivid dreams. One man convinced the walls breathe.
----
-I have logged it under environmental stress and moved on.
+The engine says: excellent.
 ---
 @color grey
-LANG / LOG, cycle 240
+LANG / LOG, later
 @color amber
-The engine is the finest thing humans have built.
----
-It folds a lifetime into a fiscal quarter.
----
-The population is a variable, and the variable is trending down.
----
-I am asked only to keep the coils warm. I keep them warm.
+I have started rounding the resident count to the nearest ten. It reads cleaner. It is also easier, and I notice I prefer the easier thing now.
 ---
 @color grey
-LANG / LOG, final
+LANG / LOG, last entry
 @color amber
-Cycle count no longer meaningful.
+The fold data is the finest of my career. I could publish, if there were a season to publish into. A board. A spring somewhere with my name still on a door.
 ---
-There is no one left to run the experiment on but me.
----
-I kept perfect records. I told myself that was the same as being careful.
----
-It was not.
----
+I kept perfect records. I have begun to suspect that was a kind of hiding.
 @color grey
 - Lang

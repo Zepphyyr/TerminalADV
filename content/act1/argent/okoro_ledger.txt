@@ -1,34 +1,37 @@
 @color argent
 ARGENT & COLE
 RATION LEDGER
-issue / heads fed
+heads on the roll
 @color amber
-Y01...... 4000
-Y05...... 3990
-Y12...... 3600
-Y20...... 2100
-Y26......  400
-Y30......   40
-Y34......    1
-Y35......    0
+FOUNDING.. 4,000
+GEN 2..... 4,300
+GEN 4..... 4,610
+GEN 7..... 4,180
+GEN 9..... 2,900
+GEN 11.... 1,040
+GEN 13....   210
+GEN 15....    18
+LAST.......     1
+CLOSED.....     0
 ---
 @color grey
-OKORO / QM LOG
-@color amber
-Year 12. The yield fell. I set the first cut. Everyone, equally.
+the roll only shrank
+after the seventh
+turning. the column
+marked CAUSE was
+left blank every
+year.
 ---
-That was an easy thing to be proud of.
----
-Year 26. Equal shares would only kill everyone slowly.
----
-So I chose who ate. I told myself I chose fairly. I kept the list.
----
-Year 34. One left. I gave him everything. He did not want the food.
----
-He wanted company. I had a list where his name was the last one.
----
-Year 35. The machines still run. The draw never drops.
----
-I have stopped asking who the food is for.
 @color grey
+OKORO / QM
+last of the office
+@color amber
+I inherited a full roll and a good machine. I have spent a life subtracting.
+---
+When there were still choices to make, I made them, and I kept the list.
+---
+I will not pretend the list was fair. I will only say it was mine.
+---
+Toward the end there was more food than mouths. I set two places out of habit. One of them I ate. The other I cleared away.
+@color argent
 - Okoro

@@ -67,18 +67,24 @@ again.
 )KD"; return true; }
     else if (path == "act1/argent/emil.txt") { out = R"KD(@color argent
 SYNTH-GRAIN BAY
-one console still
+one console warm.
 logged in: EMIL
 @color white
-Emil kept notes on the backs of issue slips.
+The bay smells of bread and of nothing else. It has for a very long time.
 ---
-"A machine that makes bread should not be shut off out of spite."
+Emil left his thinking on the backs of ration slips, in a small careful hand.
 ---
-"There is no one to eat it. I run it anyway."
+@color amber
+"They built these mills to a number. So many calories, so much protein, and not one gram of joy in the spec."
 ---
-"Stopping would feel like agreeing with the silence."
+"The loaf comes out the colour of paper. It tastes the way a clean room smells."
 ---
-The synthesizers hum on, warm and pointless, filling the dark with the smell of morning.
+"People used to drop notes in the return bin. 'Like chewing a wall.' 'I dreamed of an orange.' I kept the funny ones."
+---
+"ARGENT never wrote back. Flavour was not a deliverable."
+---
+@color white
+He kept the mills turning long after the last tray went uncollected. The bay still bakes on the hour, and sets each loaf out to cool for no one.
 )KD"; return true; }
     else if (path == "act1/argent/mail.txt") { out = R"KD(@color argent
 ARGENT / HELD MAIL
@@ -98,36 +104,39 @@ I am not asking for me.
     else if (path == "act1/argent/okoro_ledger.txt") { out = R"KD(@color argent
 ARGENT & COLE
 RATION LEDGER
-issue / heads fed
+heads on the roll
 @color amber
-Y01...... 4000
-Y05...... 3990
-Y12...... 3600
-Y20...... 2100
-Y26......  400
-Y30......   40
-Y34......    1
-Y35......    0
+FOUNDING.. 4,000
+GEN 2..... 4,300
+GEN 4..... 4,610
+GEN 7..... 4,180
+GEN 9..... 2,900
+GEN 11.... 1,040
+GEN 13....   210
+GEN 15....    18
+LAST.......     1
+CLOSED.....     0
 ---
 @color grey
-OKORO / QM LOG
-@color amber
-Year 12. The yield fell. I set the first cut. Everyone, equally.
+the roll only shrank
+after the seventh
+turning. the column
+marked CAUSE was
+left blank every
+year.
 ---
-That was an easy thing to be proud of.
----
-Year 26. Equal shares would only kill everyone slowly.
----
-So I chose who ate. I told myself I chose fairly. I kept the list.
----
-Year 34. One left. I gave him everything. He did not want the food.
----
-He wanted company. I had a list where his name was the last one.
----
-Year 35. The machines still run. The draw never drops.
----
-I have stopped asking who the food is for.
 @color grey
+OKORO / QM
+last of the office
+@color amber
+I inherited a full roll and a good machine. I have spent a life subtracting.
+---
+When there were still choices to make, I made them, and I kept the list.
+---
+I will not pretend the list was fair. I will only say it was mine.
+---
+Toward the end there was more food than mouths. I set two places out of habit. One of them I ate. The other I cleared away.
+@color argent
 - Okoro
 )KD"; return true; }
     else if (path == "act1/argent/stow.txt") { out = R"KD(@color argent
@@ -231,59 +240,38 @@ quiet again.
 [unauthorized terminal]
 scratched, not typed
 @color pale
-Junia was here.
----
+someone small was here
 @color white
-Dad says the engine hums in D.
-I do not know what D is. I know the hum.
+The engine hums in a note Dad calls D. I have decided D is a colour. It is the colour of the corridor at the low hour.
 ---
-I count days in hums. A thousand hums is a birthday.
+I collect quiets. The quiet after a door closes. The quiet Mum does now, in the place where answers used to go.
 ---
-I have never seen a sky.
-I have seen a picture of one.
-It is the wrong blue.
+The baker gave me a heel of bread and called it cake so I would smile. I smiled to help him. It tasted like the inside of a spoon.
 ---
-The grown-ups are getting quiet in a way that scares me.
+I keep a list of things I have only met in pictures. Rain. Dogs. The number of people there used to be.
 ---
-Mr. Emil still runs the grain. He says it is rude to let a machine starve.
----
-If anyone reads this: I was real.
-I was here for a while.
+If you are reading this, you came from Outside. Tell me what the wind does. I have theories.
 )KD"; return true; }
     else if (path == "act1/helion/lang_log.txt") { out = R"KD(@color grey
 LANG / ENGINEERING LOG
 @color amber
-Fold cycle 118.
-Coils nominal. Drift within tolerance.
+Cycle 118. Coils nominal. Drift inside tolerance. A good quiet number, the kind that lets a man sleep.
 ---
-The sample population reports the usual second-week symptoms.
+Cycle 240. The residents report the usual second-week weather in the skull. Lights behind the eyes. I file it under environment and let the engine speak for itself.
 ---
-Headaches. Vivid dreams. One man convinced the walls breathe.
----
-I have logged it under environmental stress and moved on.
+The engine says: excellent.
 ---
 @color grey
-LANG / LOG, cycle 240
+LANG / LOG, later
 @color amber
-The engine is the finest thing humans have built.
----
-It folds a lifetime into a fiscal quarter.
----
-The population is a variable, and the variable is trending down.
----
-I am asked only to keep the coils warm. I keep them warm.
+I have started rounding the resident count to the nearest ten. It reads cleaner. It is also easier, and I notice I prefer the easier thing now.
 ---
 @color grey
-LANG / LOG, final
+LANG / LOG, last entry
 @color amber
-Cycle count no longer meaningful.
+The fold data is the finest of my career. I could publish, if there were a season to publish into. A board. A spring somewhere with my name still on a door.
 ---
-There is no one left to run the experiment on but me.
----
-I kept perfect records. I told myself that was the same as being careful.
----
-It was not.
----
+I kept perfect records. I have begun to suspect that was a kind of hiding.
 @color grey
 - Lang
 )KD"; return true; }

@@ -1,14 +1,20 @@
 @color argent
 SYNTH-GRAIN BAY
-one console still
+one console warm.
 logged in: EMIL
 @color white
-Emil kept notes on the backs of issue slips.
+The bay smells of bread and of nothing else. It has for a very long time.
 ---
-"A machine that makes bread should not be shut off out of spite."
+Emil left his thinking on the backs of ration slips, in a small careful hand.
 ---
-"There is no one to eat it. I run it anyway."
+@color amber
+"They built these mills to a number. So many calories, so much protein, and not one gram of joy in the spec."
 ---
-"Stopping would feel like agreeing with the silence."
+"The loaf comes out the colour of paper. It tastes the way a clean room smells."
 ---
-The synthesizers hum on, warm and pointless, filling the dark with the smell of morning.
+"People used to drop notes in the return bin. 'Like chewing a wall.' 'I dreamed of an orange.' I kept the funny ones."
+---
+"ARGENT never wrote back. Flavour was not a deliverable."
+---
+@color white
+He kept the mills turning long after the last tray went uncollected. The bay still bakes on the hour, and sets each loaf out to cool for no one.
