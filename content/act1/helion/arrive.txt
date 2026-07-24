@@ -16,3 +16,8 @@ Whoever left did not leave in a hurry.
 One terminal is logged in under a name.
 @color amber
 LANG, T.  Lead Engineer
+@color grey
+His access card sits
+in the reader, held
+by a blinking
+AUDIT LOCK.

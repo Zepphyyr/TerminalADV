@@ -178,6 +178,11 @@ Whoever left did not leave in a hurry.
 One terminal is logged in under a name.
 @color amber
 LANG, T.  Lead Engineer
+@color grey
+His access card sits
+in the reader, held
+by a blinking
+AUDIT LOCK.
 )KD"; return true; }
     else if (path == "act1/helion/halo_hail.txt") { out = R"KD(@color grey
 CARRIER TONE
@@ -192,15 +197,16 @@ I will give you one true thing. Not in the open.
 ---
 The caretaker hears the open channel.
 ---
-Take the number the coils forgot.
-Read the rest backward by it.
+Take the load nothing on the ledger owns.
+---
+I moved each letter forward by it. Walk them back.
 ---
 @color grey
 INTERCEPT / cipher
 @color blue
-VTGMHK BL GHM
-TEHGX BG ABL
-HPG OHBVX
+JHUAVY PZ UVA
+HSVUL PU OPZ
+VDU CVPJL
 ---
 @color grey
 the channel goes
@@ -298,20 +304,20 @@ HAB LIGHTS.. 155 kW
 FOLD COILS. 0.30 MW
 SYNTH-GRAIN. 88 kW
 NETWORK..... 60 kW
-THERMAL.... 138 kW
+THERMAL.... 150 kW
 ---
 @color grey
-UNMETERED LOAD
-bus total minus
-the known draws
-@color red
-something draws
-power that is not
-on this list.
-@color grey
-find it. the coils
-remember the number.
+AUDIT INTERLOCK
+Lang's card is held
+in the reader until
+this ledger
+reconciles.
 @color amber
+unaccounted load =
+bus total minus the
+known draws.
+@color grey
+(mind the units.)
 enter it:
 /solve <number>
 )KD"; return true; }

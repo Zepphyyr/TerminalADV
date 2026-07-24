@@ -488,9 +488,11 @@ bool Game::helionCommand(const std::string& cmd, const std::string& arg) {
     return true;
 }
 
-// HELION energy balance. Buses 604+396 = 1000 kW; known draws sum to 981 (with
-// FOLD COILS listed as 0.30 MW to force a conversion); the missing 19 kW is the
-// answer, and doubles as the Caesar shift for HALO-9's cipher.
+// HELION energy balance. Buses 604+396 = 1000 kW; known draws sum to 993 (with
+// FOLD COILS listed as 0.30 MW to force a kW conversion); the missing 7 kW is
+// the answer. The same 7 is the Caesar shift for HALO-9's cipher. Narratively,
+// the deck's audit interlock holds Lang's card until the ledger reconciles;
+// entering the unaccounted figure reconciles it and releases the card.
 void Game::solveEnergy(const std::string& arg) {
     std::string d = digitsOnly(arg);
     if (d.empty()) {
@@ -499,20 +501,19 @@ void Game::solveEnergy(const std::string& arg) {
         cur_ = pal::amber; return;
     }
     p_->beep();
-    if (d == "19") {
+    if (d == "7") {
         cardLang_ = true;
         cur_ = pal::green;
-        queueBeats("BALANCE CONFIRMED\nunmetered load = 19 kW\n"
-                   "---\n@color amber\nSomething the size of\none habitation unit\nstill draws power.\n"
-                   "In a dead city.\n"
-                   "---\n@color grey\nACCESS CARD released:\n@color amber\nLANG, T.\n"
-                   "---\n@color blue\n(19 is also the number\nHALO-9 asked for.)\n"
+        queueBeats("AUDIT RECONCILED\nunaccounted load: 7 kW\n"
+                   "---\n@color amber\nSomething the size of one habitation unit still draws power. In a dead city.\n"
+                   "---\n@color amber\nThe console decides the deck is not being tampered with, and releases the card seated in Lang's reader.\n"
+                   "---\n@color grey\nACCESS CARD:\n@color amber\nLANG, T.\n"
+                   "---\n@color blue\n(7 is also the shift HALO-9 asked for.)\n"
                    "@color grey\n/go when ready.");
         cur_ = pal::amber;
     } else {
         cur_ = pal::red;
-        queueBeats("THAT DOES NOT BALANCE.\n---\n@color grey\nsum BOTH buses.\n"
-                   "watch the MW line.\ntry /power again.");
+        queueBeats("LEDGER STILL OFF.\nthe interlock holds.\n---\n@color grey\nsum BOTH buses for\nthe total. convert\nthe MW line. then\nsubtract. try again.");
         cur_ = pal::amber;
     }
 }

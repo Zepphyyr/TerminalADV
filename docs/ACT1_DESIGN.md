@@ -19,7 +19,7 @@ Content already written: `content/act1/helion/*.txt`.
 4. **Lift to ARGENT** (`lift.txt`). CANTOR greets "Dr. Lang" warmly — it does
    not know he is dead. First crack in CANTOR's reliability.
 5. **ARGENT** (content TBD): Okoro's ration ledgers = the death curve; Emil in
-   the background. Player **decrypts** HALO-9 with shift 19 -> a true line that
+   the background. Player **decrypts** HALO-9 with shift 7 -> a true line that
    **contradicts CANTOR**. First contradiction caught. Cassel appears once.
    First PALE glitch fires here. **STOW** puzzle yields Okoro's card -> restores
    power to the next decks -> HALO-9 wakes fully. Act ends.
@@ -39,30 +39,38 @@ HAB LIGHTS   = 155 kW
 FOLD COILS   = 0.30 MW      <- trap: convert to 300 kW
 SYNTH-GRAIN  =  88 kW
 NETWORK      =  60 kW
-THERMAL      = 138 kW       known total = 981 kW
+THERMAL      = 150 kW       known total = 993 kW
 ```
 
-**Solution:** 1000 - 981 = **19 kW unmetered.**
+**Solution:** 1000 - 993 = **7 kW unaccounted.**
 
 Deliberate friction: total is split across two buses (must be summed); one draw
 is stated in MW (must be converted). Everything else is plain subtraction.
 
-Thematic point: 19 kW is about one habitation unit — something the size of a
+Thematic point: 7 kW is about one habitation unit — something the size of a
 single occupant is still drawing power in a city with no occupants.
 
-**Answer 19 is reused as** the card code and the cipher shift. The reuse is the
-intended "aha": the number you dug out of the ledger is the key to everything
-else on this deck.
+**Why entering 7 releases the card (narrative):** HELION consoles hold their
+access cards under a *power-audit interlock* — while the ledger does not
+reconcile, the system treats the discrepancy as possible tampering and will not
+release credentials. Entering the unaccounted figure reconciles the audit, so
+the console frees Lang's card from the reader. (The irony: the "tampering" is
+PALE's 7 kW draw, unexplained for thirty years.)
+
+**Answer 7 is reused as the cipher shift** — the number you dug out of the
+ledger is the key to HALO-9's message too.
 
 ## Puzzle 2 — HALO-9's Caesar cipher
 
 **Ciphertext (in `halo_hail.txt`):**
 
 ```
-VTGMHK BL GHM TEHGX BG ABL HPG OHBVX
+JHUAVY PZ UVA HSVUL PU OPZ VDU CVPJL
 ```
 
-**Key:** shift 19 (from puzzle 1). Decrypt = shift each letter *back* 19.
+**Key:** shift 7 (from puzzle 1). HALO says "I moved each letter forward by it,
+walk them back" — encryption is +7 (A->H), so decrypt = shift each letter
+*back* 7.
 
 **Plaintext:** `CANTOR IS NOT ALONE IN HIS OWN VOICE`
 
@@ -122,8 +130,9 @@ All verified on the desktop build: full puzzle path fresh-save -> act1_done,
 wrong-answer rejection, gate refusal without a card, and the CANTOR payoff.
 
 ### Puzzle solutions (for reference)
-- Energy balance: **19** (kW). See the ledger table above.
-- Caesar: shift **19** -> `CANTOR IS NOT ALONE IN HIS OWN VOICE`.
+- Energy balance: **7** (kW). See the ledger table above.
+- Caesar: shift **7** (decode back 7) -> `CANTOR IS NOT ALONE IN HIS OWN VOICE`.
+  Ciphertext `JHUAVY PZ UVA HSVUL PU OPZ VDU CVPJL`.
 - STOW: rows/cols target [3,2,2,2,3]; pillars B1, C3, D5. One valid fill:
   A1 A3 A5 / B2 B4 / C1 C5 / D2 D4 / E1 E3 E5. (Any fill meeting the counts
   and avoiding pillars wins.)
