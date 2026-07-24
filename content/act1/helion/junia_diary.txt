@@ -1,9 +1,8 @@
-@color grey
+@color helion
 [unauthorized terminal]
 scratched, not typed
-@color pale
 someone small was here
-@color white
+---
 The engine hums in a note Dad calls D. I have decided D is a colour. It is the colour of the corridor at the low hour.
 ---
 I collect quiets. The quiet after a door closes. The quiet Mum does now, in the place where answers used to go.

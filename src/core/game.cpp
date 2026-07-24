@@ -31,17 +31,28 @@ static std::string digitsOnly(const std::string& s) {
     for (char c : s) if (std::isdigit((unsigned char)c)) r += c;
     return r;
 }
+// Names map to docs/PALETTE.md. Both literal palette names and semantic
+// aliases (orpheus/corvitae/nullpoint/cantor/halo) resolve here.
 Color colorByName(const std::string& n) {
     std::string s = toLower(trim(n));
+    // roles
     if (s == "white") return pal::white;
-    if (s == "cyan")  return pal::cyan;
-    if (s == "green") return pal::green;
-    if (s == "red")   return pal::red;
-    if (s == "blue")  return pal::blue;
-    if (s == "pale")  return pal::pale;
     if (s == "grey" || s == "gray") return pal::grey;
+    // AI voices
+    if (s == "cyan"  || s == "cantor") return pal::cyan;
+    if (s == "blue"  || s == "halo" || s == "halo9") return pal::blue;
+    if (s == "pale") return pal::pale;
+    // manufacturer terminals
+    if (s == "amber" || s == "orpheus") return pal::amber;
     if (s == "helion") return pal::helion;
     if (s == "argent") return pal::argent;
+    if (s == "green" || s == "corvitae" || s == "cor_vitae") return pal::green;
+    if (s == "red"   || s == "nullpoint") return pal::red;
+    if (s == "tess"  || s == "tessellate") return pal::tess;
+    // human name labels
+    if (s == "maru"  || s == "vell") return pal::maru;
+    if (s == "cassel") return pal::cassel;
+    if (s == "okonkwo") return pal::okonkwo;
     return pal::amber;
 }
 
@@ -302,8 +313,8 @@ void Game::run() {
                 advanceDeck(); continue;
             }
             if (a=="not yet"||a=="no"||a=="wait"||a=="stay"||a=="n") {
-                cur_ = pal::amber;
-                queueBeats("MARU: Alright.\nWhen you're ready.");
+                cur_ = pal::white;
+                queueBeats("@color maru\nMARU\n@color white\nAlright. When you're ready.");
                 cur_ = pal::amber; continue;
             }
             // otherwise: fall through and treat the input normally
@@ -408,17 +419,16 @@ std::string Game::deckTitle(const std::string& deck) const {
 }
 
 void Game::unknownHere() {
-    cur_ = pal::red;
-    queueBeats("unknown directive.\nthis system does not\nremember that word.\n"
-               "---\n@color grey\n/help for what this\nterminal understands.");
+    cur_ = pal::grey;
+    queueBeats("@color grey\nunknown directive.\nthis system does not\nremember that word.\n"
+               "---\n/help for what this\nterminal understands.");
     cur_ = pal::amber;
 }
 
 // Step off the airlock panel onto the first station deck.
 void Game::enterAct1() {
-    cur_ = pal::grey;
-    queueBeats("You leave the airlock\npanel behind.\n"
-               "---\n@color amber\nThe station opens\naround you.");
+    cur_ = pal::white;
+    queueBeats("@color white\nYou leave the airlock panel behind. The station opens around you.");
     cur_ = pal::amber;
     arriveDeck("helion");
 }
@@ -434,8 +444,8 @@ void Game::arriveDeck(const std::string& deck) {
         queueFile("act1/argent/arrive.txt");
         queueFile("act1/argent/cassel.txt");   // an unbidden transmission, not a file
     }
-    cur_ = pal::grey;
-    queueBeats("@color amber\nMARU: I'm on comms.\nLook around. Say\n/go when you want\nto move on.\n@color grey");
+    cur_ = pal::white;
+    queueBeats("@color maru\nMARU\n@color white\nI'm on comms. Look around. Say /go when you want to move on.");
     cur_ = pal::amber;
 }
 
@@ -447,8 +457,9 @@ void Game::resumeDeck(const std::string& deck) {
     cardLang_  = (deck == "argent" || deck == "act1_done");
     cardOkoro_ = (deck == "act1_done");
     arriveAt("cantor");
+    std::string acc = (deck == "helion") ? "helion" : (deck == "argent") ? "argent" : "grey";
     cur_ = pal::grey;
-    queueBeats("RESUME\n@color amber\n" + deckTitle(deck) +
+    queueBeats("@color grey\nRESUME\n@color " + acc + "\n" + deckTitle(deck) +
                "\n@color grey\n/look  where am I\n/help  orders");
     cur_ = pal::amber;
 }
@@ -497,23 +508,23 @@ void Game::solveEnergy(const std::string& arg) {
     std::string d = digitsOnly(arg);
     if (d.empty()) {
         cur_ = pal::grey;
-        queueBeats("solve: give a number.\n/solve <n>\n---\n@color grey\nbus total minus the\nknown draws.");
+        queueBeats("@color grey\nsolve: give a number.\n/solve <n>\n---\nbus total minus the\nknown draws.");
         cur_ = pal::amber; return;
     }
     p_->beep();
     if (d == "7") {
         cardLang_ = true;
-        cur_ = pal::green;
-        queueBeats("AUDIT RECONCILED\nunaccounted load: 7 kW\n"
-                   "---\n@color amber\nSomething the size of one habitation unit still draws power. In a dead city.\n"
-                   "---\n@color amber\nThe console decides the deck is not being tampered with, and releases the card seated in Lang's reader.\n"
-                   "---\n@color grey\nACCESS CARD:\n@color amber\nLANG, T.\n"
+        cur_ = pal::helion;
+        queueBeats("@color helion\nAUDIT RECONCILED\nunaccounted load: 7 kW\n"
+                   "---\n@color grey\nSomething the size of one habitation unit still draws power. In a dead city.\n"
+                   "---\n@color helion\nThe console decides the deck is not being tampered with, and releases the card seated in Lang's reader.\n"
+                   "ACCESS CARD:\nLANG, T.\n"
                    "---\n@color blue\n(7 is also the shift HALO-9 asked for.)\n"
                    "@color grey\n/go when ready.");
         cur_ = pal::amber;
     } else {
-        cur_ = pal::red;
-        queueBeats("LEDGER STILL OFF.\nthe interlock holds.\n---\n@color grey\nsum BOTH buses for\nthe total. convert\nthe MW line. then\nsubtract. try again.");
+        cur_ = pal::helion;
+        queueBeats("@color helion\nLEDGER STILL OFF.\nthe interlock holds.\n---\n@color grey\nsum BOTH buses for\nthe total. convert\nthe MW line. then\nsubtract. try again.");
         cur_ = pal::amber;
     }
 }
@@ -522,9 +533,9 @@ bool Game::argentCommand(const std::string& cmd, const std::string& arg) {
     (void)arg;
     if (cmd == "comms" || cmd == "ferryman" || cmd == "cassel" || cmd == "hail") {
         // Cassel already called on arrival; hailing back gets only static.
-        cur_ = pal::grey;
-        queueBeats("You hail FERRYMAN.\n---\n@color grey\nStatic. Cassel does\nnot answer.\n"
-                   "He said he would\nnot.");
+        cur_ = pal::white;
+        queueBeats("@color white\nYou hail FERRYMAN.\n---\n@color grey\nStatic. Cassel does\nnot answer.\n"
+                   "He said he would not.");
         cur_ = pal::amber; return true;
     }
     if (cmd == "archive" || cmd == "card") {
@@ -544,14 +555,14 @@ bool Game::argentCommand(const std::string& cmd, const std::string& arg) {
         bool solved = runStow();          // blocking sub-loop; paints its own frames
         if (solved) {
             cardOkoro_ = true;
-            cur_ = pal::green;
-            queueBeats("The aisle clears.\nThe loader arm swings.\n"
-                       "---\n@color grey\nACCESS CARD lifted:\n@color amber\nOKORO, S.\n"
-                       "---\n@color amber\nMARU: That's it.\n/go to slot it and\nmove on.");
+            cur_ = pal::white;
+            queueBeats("@color white\nThe aisle clears. The loader arm swings.\n"
+                       "---\n@color argent\nACCESS CARD lifted:\nOKORO, S.\n"
+                       "---\n@color maru\nMARU\n@color white\nThat's it. /go to slot it and move on.");
             cur_ = pal::amber;
         } else {
-            cur_ = pal::grey;
-            queueBeats("You step back from\nthe loader.\n@color grey\n/stow to try again.");
+            cur_ = pal::white;
+            queueBeats("@color white\nYou step back from the loader.\n@color grey\n/stow to try again.");
             cur_ = pal::amber;
         }
         return true;
@@ -568,15 +579,15 @@ void Game::deckLook() {
 
 void Game::deckDir() {
     if (deck_ == "helion") {
-        queueBeats("@color helion\nDOCUMENTS / H-2\n@color amber\n"
+        queueBeats("@color helion\nDOCUMENTS / H-2\n@color grey\n"
                    "log\n  Lang's engineering\n  logs\n"
                    "diary\n  scratched notes\n"
-                   "---\n@color grey\n/open <name>\n/mail for letters");
+                   "---\n/open <name>\n/mail for letters");
     } else if (deck_ == "argent") {
-        queueBeats("@color argent\nDOCUMENTS / A-5\n@color amber\n"
+        queueBeats("@color argent\nDOCUMENTS / A-5\n@color grey\n"
                    "ledger\n  ration issue log\n"
                    "notes\n  Emil's slips\n"
-                   "---\n@color grey\n/open <name>\n/mail for letters");
+                   "---\n/open <name>\n/mail for letters");
     } else {
         cur_ = pal::grey; queueBeats("no documents here.");
     }
@@ -606,19 +617,19 @@ void Game::deckMail() {
 
 void Game::helpDeck() {
     if (deck_ == "helion") {
-        queueBeats("@color helion\nHELION / H-2\n@color amber\n"
+        queueBeats("@color helion\nHELION / H-2\n@color grey\n"
                    "/look   the deck\n/dir    documents\n/open <name>\n"
                    "/mail   letters\n/power  load ledger\n/solve <n> answer\n"
-                   "---\n@color amber\n/c <w> CANTOR\n/h <w> HALO-9\n"
+                   "---\n/c <w> CANTOR\n/h <w> HALO-9\n"
                    "/notes  notebook\n/go     move on\n"
-                   "---\n@color grey\nplain words are\nspoken on the\nchannel.");
+                   "---\nplain words are\nspoken on the\nchannel.");
     } else if (deck_ == "argent") {
-        queueBeats("@color argent\nARGENT / A-5\n@color amber\n"
+        queueBeats("@color argent\nARGENT / A-5\n@color grey\n"
                    "/look   the deck\n/dir    documents\n/open <name>\n"
                    "/mail   letters\n/archive the card\n/stow   the loader\n"
-                   "---\n@color amber\n/comms  hail crew\n/c <w> CANTOR\n/h <w> HALO-9\n"
+                   "---\n/comms  hail crew\n/c <w> CANTOR\n/h <w> HALO-9\n"
                    "/notes  notebook\n/go     move on\n"
-                   "---\n@color grey\nplain words are\nspoken on the\nchannel.");
+                   "---\nplain words are\nspoken on the\nchannel.");
     } else {
         helpStation();
     }
@@ -630,7 +641,7 @@ void Game::deckStatus() {
     std::string halo = haloHailed_ ? "STIRRING" : "?";
     std::string acc = (deck_ == "helion") ? "helion" : (deck_ == "argent") ? "argent" : "grey";
     queueBeats("@color " + acc + "\n" + deckTitle(deck_) +
-               "\n@color amber\nnetwork   ONLINE\ncrew      NONE\n"
+               "\n@color grey\nnetwork   ONLINE\ncrew      NONE\n"
                "CANTOR    LISTENING\nHALO-9    " + halo);
     cur_ = pal::amber;
 }
@@ -643,19 +654,19 @@ void Game::askGoOn() {
                : (deck_ == "argent") ? cardOkoro_
                : true;
     if (!ready) {
-        cur_ = pal::amber;
+        cur_ = pal::white;
         if (deck_ == "helion")
-            queueBeats("MARU: The lift wants a\ncard we don't have.\n"
-                       "@color grey\nthat load ledger is\nnagging at me.\n(try /power, /solve)");
+            queueBeats("@color maru\nMARU\n@color white\nThe lift wants a card we don't have.\n"
+                       "@color grey\nthat load ledger is nagging at me.\n(try /power, /solve)");
         else
-            queueBeats("MARU: We can't leave\nwithout Okoro's card.\n"
+            queueBeats("@color maru\nMARU\n@color white\nWe can't leave without Okoro's card.\n"
                        "@color grey\nit's in the archive.\n(try /archive, /stow)");
         cur_ = pal::amber;
         return;
     }
     pendingGo_ = true;
-    cur_ = pal::amber;
-    queueBeats("MARU: Go on to the\nnext sector?\n"
+    cur_ = pal::white;
+    queueBeats("@color maru\nMARU\n@color white\nGo on to the next sector?\n"
                "@color grey\nyes  /  not yet");
     cur_ = pal::amber;
 }
@@ -1184,9 +1195,9 @@ void Game::finish() {
 
     arriveAt("cantor");           // his node: plain words reach him by default
     cur_ = pal::grey;
-    queueBeats("progress saved.\n"
-               "@color cyan\nCANTOR: I am still\nhere. Ask me.\n"
-               "@color amber\nMARU: A deck lock is\nahead. /proceed\nwhen you're ready.\n"
+    queueBeats("@color grey\nprogress saved.\n"
+               "@color cyan\nCANTOR: I am still here. Ask me.\n"
+               "@color maru\nMARU\n@color white\nA deck lock is ahead. /proceed when you're ready.\n"
                "@color grey\njust type to speak\n/help for orders");
     cur_ = pal::amber; typeIt_ = true;
 }

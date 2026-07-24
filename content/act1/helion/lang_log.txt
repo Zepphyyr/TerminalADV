@@ -1,22 +1,16 @@
-@color grey
+@color helion
 LANG / ENGINEERING LOG
-@color amber
 Cycle 118. Coils nominal. Drift inside tolerance. A good quiet number, the kind that lets a man sleep.
 ---
 Cycle 240. The residents report the usual second-week weather in the skull. Lights behind the eyes. I file it under environment and let the engine speak for itself.
 ---
 The engine says: excellent.
 ---
-@color grey
 LANG / LOG, later
-@color amber
-I have started rounding the resident count to the nearest ten. It reads cleaner. It is also easier, and I notice I prefer the easier thing now.
+Cycle rounding note. I have started rounding the resident count to the nearest ten. It reads cleaner. It is also easier, and I notice I prefer the easier thing now.
 ---
-@color grey
 LANG / LOG, last entry
-@color amber
 The fold data is the finest of my career. I could publish, if there were a season to publish into. A board. A spring somewhere with my name still on a door.
 ---
 I kept perfect records. I have begun to suspect that was a kind of hiding.
-@color grey
 - Lang

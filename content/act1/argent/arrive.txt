@@ -8,9 +8,7 @@ ARGENT & COLE
 PROVISION & LOGISTICS
 DECK A-5
 @color white
-The air here is faintly sweet.
-Synth-grain. Something is still baking bread nobody will eat.
+The air here is faintly sweet. Synth-grain. Something is still baking bread nobody will eat.
 ---
 A ledger terminal blinks under a hand-lettered sign:
-@color amber
 ISSUE FAIRLY.

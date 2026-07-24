@@ -2,7 +2,6 @@
 ARGENT & COLE
 RATION LEDGER
 heads on the roll
-@color amber
 FOUNDING.. 4,000
 GEN 2..... 4,300
 GEN 4..... 4,610
@@ -14,7 +13,6 @@ GEN 15....    18
 LAST.......     1
 CLOSED.....     0
 ---
-@color grey
 the roll only shrank
 after the seventh
 turning. the column
@@ -22,10 +20,8 @@ marked CAUSE was
 left blank every
 year.
 ---
-@color grey
 OKORO / QM
 last of the office
-@color amber
 I inherited a full roll and a good machine. I have spent a life subtracting.
 ---
 When there were still choices to make, I made them, and I kept the list.
@@ -33,5 +29,4 @@ When there were still choices to make, I made them, and I kept the list.
 I will not pretend the list was fair. I will only say it was mine.
 ---
 Toward the end there was more food than mouths. I set two places out of habit. One of them I ate. The other I cleared away.
-@color argent
 - Okoro

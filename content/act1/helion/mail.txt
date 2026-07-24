@@ -2,7 +2,6 @@
 HELION / INBOX (1)
 [1] Program Office
 SUBJ: attrition
-@color amber
 Dr. Lang,
 ---
 Your notes flag rising attrition in the resident sample.
@@ -12,5 +11,4 @@ Noted. It does not affect the fold data, which remains excellent.
 Continue. Do not editorialize in the logs. Numbers only.
 ---
 The board thanks you for your discretion.
-@color grey
 - Program Office

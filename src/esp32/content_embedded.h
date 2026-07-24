@@ -17,19 +17,18 @@ ARGENT & COLE
 PROVISION & LOGISTICS
 DECK A-5
 @color white
-The air here is faintly sweet.
-Synth-grain. Something is still baking bread nobody will eat.
+The air here is faintly sweet. Synth-grain. Something is still baking bread nobody will eat.
 ---
 A ledger terminal blinks under a hand-lettered sign:
-@color amber
 ISSUE FAIRLY.
 )KD"; return true; }
     else if (path == "act1/argent/cantor_reply.txt") { out = R"KD(@color cyan
 CANTOR: You have gone quiet. What did you find out there?
 ---
-@color amber
-> cantor you are not alone
-> in your own voice
+@color white
+you say it aloud:
+you are not alone
+in your own voice.
 ---
 @color cyan
 CANTOR: ...I do not understand.
@@ -46,18 +45,20 @@ that is the worst
 part of it.
 )KD"; return true; }
     else if (path == "act1/argent/cassel.txt") { out = R"KD(@color grey
-COMMS / FERRYMAN
-Cassel. weak signal.
-@color amber
-CASSEL: You feel it? Air's wrong down here.
+INCOMING / FERRYMAN
+weak signal
+@color cassel
+CASSEL
+@color white
+You feel it? Air's wrong down here.
 ---
 Head keeps filling up with someone else's ideas. Good ones, though.
 ---
-CASSEL: I'm not waiting on you. There's something deeper in the network and it makes sense when it talks.
+I'm not waiting on you. There's something deeper in the network, and it makes sense when it talks.
 ---
 Going to go listen properly.
 ---
-CASSEL: Don't trust the lit corridors. That's what it wants.
+Don't trust the lit corridors. That's what it wants.
 ---
 ...or maybe that's me wanting it. Hard to tell the difference now.
 @color grey
@@ -74,7 +75,7 @@ The bay smells of bread and of nothing else. It has for a very long time.
 ---
 Emil left his thinking on the backs of ration slips, in a small careful hand.
 ---
-@color amber
+@color argent
 "They built these mills to a number. So many calories, so much protein, and not one gram of joy in the spec."
 ---
 "The loaf comes out the colour of paper. It tastes the way a clean room smells."
@@ -90,7 +91,6 @@ He kept the mills turning long after the last tray went uncollected. The bay sti
 ARGENT / HELD MAIL
 [1] to: Okoro
 SUBJ: my daughter
-@color amber
 Please.
 ---
 She is seven. She has not had a full share in eleven days.
@@ -98,14 +98,12 @@ She is seven. She has not had a full share in eleven days.
 Take my name off the list. Put hers on twice. I will give her mine.
 ---
 I am not asking for me.
-@color grey
 [no reply on file]
 )KD"; return true; }
     else if (path == "act1/argent/okoro_ledger.txt") { out = R"KD(@color argent
 ARGENT & COLE
 RATION LEDGER
 heads on the roll
-@color amber
 FOUNDING.. 4,000
 GEN 2..... 4,300
 GEN 4..... 4,610
@@ -117,7 +115,6 @@ GEN 15....    18
 LAST.......     1
 CLOSED.....     0
 ---
-@color grey
 the roll only shrank
 after the seventh
 turning. the column
@@ -125,10 +122,8 @@ marked CAUSE was
 left blank every
 year.
 ---
-@color grey
 OKORO / QM
 last of the office
-@color amber
 I inherited a full roll and a good machine. I have spent a life subtracting.
 ---
 When there were still choices to make, I made them, and I kept the list.
@@ -136,7 +131,6 @@ When there were still choices to make, I made them, and I kept the list.
 I will not pretend the list was fair. I will only say it was mine.
 ---
 Toward the end there was more food than mouths. I set two places out of habit. One of them I ate. The other I cleared away.
-@color argent
 - Okoro
 )KD"; return true; }
     else if (path == "act1/argent/stow.txt") { out = R"KD(@color argent
@@ -148,20 +142,20 @@ Okoro's access card sits in a crate the arm cannot reach.
 ---
 The aisle is jammed. The arm is a coward: it will not move until every shelf and aisle carries its rated load.
 ---
-@color grey
+@color argent
 [ STOW ]
 restack the crates
 so every row and
 every column meets
 its number.
-@color amber
+@color grey
 type /stow to work
 the loader.
 )KD"; return true; }
     else if (path == "act1/argent/wake.txt") { out = R"KD(@color white
 The arm wakes, swings down the aisle, and lays a single card in your palm.
 ---
-@color grey
+@color argent
 CARD: OKORO, S.
 Quartermaster, ARGENT
 @color white
@@ -178,7 +172,6 @@ HALO-9: There.
 ---
 Now I can see you properly.
 ---
-@color blue
 HALO-9: Let us begin.
 ---
 @color grey
@@ -196,17 +189,15 @@ HELION DYNAMICS
 FOLD PROPULSION
 DECK H-2
 @color white
-The consoles are clean.
-Whoever left did not leave in a hurry.
+The consoles are clean. Whoever left did not leave in a hurry.
 ---
-One terminal is logged in under a name.
-@color amber
-LANG, T.  Lead Engineer
-@color grey
-His access card sits
-in the reader, held
-by a blinking
-AUDIT LOCK.
+One terminal is still logged in.
+@color helion
+LANG, T.
+Lead Engineer
+AUDIT LOCK: card held
+@color white
+His access card waits in the reader, behind a blinking light.
 )KD"; return true; }
     else if (path == "act1/helion/halo_hail.txt") { out = R"KD(@color grey
 CARRIER TONE
@@ -236,12 +227,11 @@ VDU CVPJL
 the channel goes
 quiet again.
 )KD"; return true; }
-    else if (path == "act1/helion/junia_diary.txt") { out = R"KD(@color grey
+    else if (path == "act1/helion/junia_diary.txt") { out = R"KD(@color helion
 [unauthorized terminal]
 scratched, not typed
-@color pale
 someone small was here
-@color white
+---
 The engine hums in a note Dad calls D. I have decided D is a colour. It is the colour of the corridor at the low hour.
 ---
 I collect quiets. The quiet after a door closes. The quiet Mum does now, in the place where answers used to go.
@@ -252,27 +242,21 @@ I keep a list of things I have only met in pictures. Rain. Dogs. The number of p
 ---
 If you are reading this, you came from Outside. Tell me what the wind does. I have theories.
 )KD"; return true; }
-    else if (path == "act1/helion/lang_log.txt") { out = R"KD(@color grey
+    else if (path == "act1/helion/lang_log.txt") { out = R"KD(@color helion
 LANG / ENGINEERING LOG
-@color amber
 Cycle 118. Coils nominal. Drift inside tolerance. A good quiet number, the kind that lets a man sleep.
 ---
 Cycle 240. The residents report the usual second-week weather in the skull. Lights behind the eyes. I file it under environment and let the engine speak for itself.
 ---
 The engine says: excellent.
 ---
-@color grey
 LANG / LOG, later
-@color amber
-I have started rounding the resident count to the nearest ten. It reads cleaner. It is also easier, and I notice I prefer the easier thing now.
+Cycle rounding note. I have started rounding the resident count to the nearest ten. It reads cleaner. It is also easier, and I notice I prefer the easier thing now.
 ---
-@color grey
 LANG / LOG, last entry
-@color amber
 The fold data is the finest of my career. I could publish, if there were a season to publish into. A board. A spring somewhere with my name still on a door.
 ---
 I kept perfect records. I have begun to suspect that was a kind of hiding.
-@color grey
 - Lang
 )KD"; return true; }
     else if (path == "act1/helion/lift.txt") { out = R"KD(@color grey
@@ -296,7 +280,6 @@ The doors open on ARGENT.
 HELION / INBOX (1)
 [1] Program Office
 SUBJ: attrition
-@color amber
 Dr. Lang,
 ---
 Your notes flag rising attrition in the resident sample.
@@ -306,19 +289,15 @@ Noted. It does not affect the fold data, which remains excellent.
 Continue. Do not editorialize in the logs. Numbers only.
 ---
 The board thanks you for your discretion.
-@color grey
 - Program Office
 )KD"; return true; }
     else if (path == "act1/helion/power.txt") { out = R"KD(@color helion
 HELION DYNAMICS
 POWER LEDGER
-@color amber
 BUS A....... 604 kW
 BUS B....... 396 kW
 ---
-@color grey
 KNOWN DRAWS
-@color amber
 LIFE SUPPORT 240 kW
 HAB LIGHTS.. 155 kW
 FOLD COILS. 0.30 MW
@@ -326,18 +305,16 @@ SYNTH-GRAIN. 88 kW
 NETWORK..... 60 kW
 THERMAL.... 150 kW
 ---
-@color grey
 AUDIT INTERLOCK
 Lang's card is held
 in the reader until
 this ledger
 reconciles.
-@color amber
 unaccounted load =
 bus total minus the
 known draws.
-@color grey
 (mind the units.)
+@color grey
 enter it:
 /solve <number>
 )KD"; return true; }

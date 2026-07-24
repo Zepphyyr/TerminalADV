@@ -1,9 +1,10 @@
 @color cyan
 CANTOR: You have gone quiet. What did you find out there?
 ---
-@color amber
-> cantor you are not alone
-> in your own voice
+@color white
+you say it aloud:
+you are not alone
+in your own voice.
 ---
 @color cyan
 CANTOR: ...I do not understand.

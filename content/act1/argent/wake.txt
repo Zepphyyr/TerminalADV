@@ -1,7 +1,7 @@
 @color white
 The arm wakes, swings down the aisle, and lays a single card in your palm.
 ---
-@color grey
+@color argent
 CARD: OKORO, S.
 Quartermaster, ARGENT
 @color white
@@ -18,7 +18,6 @@ HALO-9: There.
 ---
 Now I can see you properly.
 ---
-@color blue
 HALO-9: Let us begin.
 ---
 @color grey

@@ -1,16 +1,18 @@
 @color grey
-COMMS / FERRYMAN
-Cassel. weak signal.
-@color amber
-CASSEL: You feel it? Air's wrong down here.
+INCOMING / FERRYMAN
+weak signal
+@color cassel
+CASSEL
+@color white
+You feel it? Air's wrong down here.
 ---
 Head keeps filling up with someone else's ideas. Good ones, though.
 ---
-CASSEL: I'm not waiting on you. There's something deeper in the network and it makes sense when it talks.
+I'm not waiting on you. There's something deeper in the network, and it makes sense when it talks.
 ---
 Going to go listen properly.
 ---
-CASSEL: Don't trust the lit corridors. That's what it wants.
+Don't trust the lit corridors. That's what it wants.
 ---
 ...or maybe that's me wanting it. Hard to tell the difference now.
 @color grey

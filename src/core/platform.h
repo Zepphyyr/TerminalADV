@@ -20,19 +20,35 @@ struct Screen {
 //  M5GFX reads that value as RGB565, not RGB888.)
 struct Color { uint8_t r, g, b; };
 
-// Palette — different terminals and different voices get different colors.
+// Palette — the single source of truth is docs/PALETTE.md. Keep them in sync.
+// Rules (short form):
+//   grey  = the PLAYER'S own thoughts, and UI/system meta (prompts, menus).
+//   white = the WORLD outside any terminal: environment + human SPEECH text.
+//   Each AI has ONE colour and speaks entirely in it (name + words).
+//   Each manufacturer's TERMINAL text is EXCLUSIVELY that brand's colour,
+//     unless an AI is speaking through it.
+//   A human's NAME label takes that person's colour; their speech is white.
 namespace pal {
-constexpr Color amber {255, 176,   0};  // ORPHEUS / player console (default)
-constexpr Color white {225, 225, 225};  // narration OUTSIDE the terminal
-constexpr Color cyan  {110, 220, 255};  // CANTOR — the caretaker AI
-constexpr Color green { 90, 255, 140};  // systems nominal / COR VITAE
-constexpr Color red   {255,  90,  70};  // alerts, rejections / NULLPOINT
-constexpr Color blue  {  8,   0, 255};  // HALO-9 "THE WARDEN" — hard police blue
-constexpr Color pale  {200, 140, 255};  // PALE SIGNAL — the thing they built
-constexpr Color grey  {150, 150, 150};  // headers, metadata, prompts
-// Corporate module identities — each deck's brand reads at a glance.
+constexpr Color white {225, 225, 225};  // world/environment + human speech
+constexpr Color grey  {150, 150, 150};  // player's thoughts + UI/system meta
+
+// --- AI voices (each speaks fully in its own colour) ---
+constexpr Color cyan  {110, 220, 255};  // CANTOR — light blue
+constexpr Color blue  {  8,   0, 255};  // HALO-9 — dark blue
+constexpr Color pale  {200, 140, 255};  // PALE SIGNAL — violet
+
+// --- Manufacturer terminal identities (exclusive on their own terminals) ---
+constexpr Color amber  {255, 176,   0};  // ORPHEUS INTERACTIVE — player's console
 constexpr Color helion {255, 105,   0};  // HELION DYNAMICS — reactor orange
 constexpr Color argent {176, 196, 222};  // ARGENT & COLE — silver / steel
+constexpr Color green  { 90, 255, 140};  // COR VITAE BIOSYSTEMS — bio green
+constexpr Color red    {255,  90,  70};  // NULLPOINT DEFENSE — security red
+constexpr Color tess   {225, 110, 180};  // TESSELLATE SYS — network magenta
+
+// --- Human name labels (name in colour, speech stays white) ---
+constexpr Color maru    {240, 150, 175}; // MARU / Vell — rose
+constexpr Color cassel  {220, 180,  90}; // CASSEL — gold
+constexpr Color okonkwo {120, 205, 175}; // OKONKWO — teal-green
 }
 
 class IPlatform {

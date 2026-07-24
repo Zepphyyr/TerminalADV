@@ -7,7 +7,7 @@ The bay smells of bread and of nothing else. It has for a very long time.
 ---
 Emil left his thinking on the backs of ration slips, in a small careful hand.
 ---
-@color amber
+@color argent
 "They built these mills to a number. So many calories, so much protein, and not one gram of joy in the spec."
 ---
 "The loaf comes out the colour of paper. It tastes the way a clean room smells."

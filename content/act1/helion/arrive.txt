@@ -10,14 +10,12 @@ HELION DYNAMICS
 FOLD PROPULSION
 DECK H-2
 @color white
-The consoles are clean.
-Whoever left did not leave in a hurry.
+The consoles are clean. Whoever left did not leave in a hurry.
 ---
-One terminal is logged in under a name.
-@color amber
-LANG, T.  Lead Engineer
-@color grey
-His access card sits
-in the reader, held
-by a blinking
-AUDIT LOCK.
+One terminal is still logged in.
+@color helion
+LANG, T.
+Lead Engineer
+AUDIT LOCK: card held
+@color white
+His access card waits in the reader, behind a blinking light.
