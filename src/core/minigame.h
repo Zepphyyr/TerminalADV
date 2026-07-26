@@ -7,6 +7,8 @@
 #include "platform.h"
 #include <cmath>
 #include <string>
+#include <vector>
+#include <algorithm>
 
 namespace kd {
 
@@ -89,6 +91,89 @@ inline bool runSineMatch(IPlatform* p) {
     }
     renderSine(p, g);
     p->delayMs(600);
+    return true;
+}
+
+// ---- MAZE ---------------------------------------------------------------
+// Top-down maze (STORY_BIBLE §12: crawl the station's guts to another
+// terminal, then back). A dot moves on the arrows; reach the exit. The layout
+// is data — content supplies it; a default is provided for testing/debug.
+//   '#' wall   '.' open   'S' start   'E' exit
+class Maze {
+public:
+    std::vector<std::string> grid;
+    int px = 1, py = 1, ex = 1, ey = 1;
+    bool solved_ = false;
+
+    void init(const std::vector<std::string>& g) {
+        grid = g; solved_ = false;
+        for (int y = 0; y < (int)grid.size(); ++y)
+            for (int x = 0; x < (int)grid[y].size(); ++x) {
+                if (grid[y][x] == 'S') { px = x; py = y; }
+                if (grid[y][x] == 'E') { ex = x; ey = y; }
+            }
+    }
+    bool wall(int x, int y) const {
+        if (y < 0 || y >= (int)grid.size() || x < 0 || x >= (int)grid[y].size()) return true;
+        return grid[y][x] == '#';
+    }
+    void step(Key k) {
+        if (solved_) return;
+        int nx = px, ny = py;
+        if      (k == K_UP)    ny--;
+        else if (k == K_DOWN)  ny++;
+        else if (k == K_LEFT)  nx--;
+        else if (k == K_RIGHT) nx++;
+        else return;
+        if (!wall(nx, ny)) { px = nx; py = ny; }
+        if (px == ex && py == ey) solved_ = true;
+    }
+    bool solved() const { return solved_; }
+    bool done()   const { return solved_; }
+};
+
+inline std::vector<std::string> defaultMaze() {
+    return {
+        "###############",
+        "#S............#",
+        "#.###########.#",
+        "#.###########.#",
+        "#.###########.#",
+        "#.###########.#",
+        "#.###########.#",
+        "#............E#",
+        "###############",
+    };
+}
+
+inline void renderMaze(IPlatform* p, const Maze& m) {
+    const int W = p->gfxW(), H = p->gfxH();
+    int rows = (int)m.grid.size(), cols = 0;
+    for (size_t i = 0; i < m.grid.size(); ++i) cols = std::max(cols, (int)m.grid[i].size());
+    int cw = cols ? W / cols : 1, ch = rows ? (H - 2) / rows : 1;
+    int cell = std::min(cw, ch); if (cell < 1) cell = 1;
+    const int oy = 1;
+    p->gfxClear(kBlack);
+    for (int y = 0; y < rows; ++y)
+        for (int x = 0; x < (int)m.grid[y].size(); ++x) {
+            char c = m.grid[y][x];
+            if (c == '#')      p->gfxRect(x * cell, y * cell + oy, cell, cell, pal::grey);
+            else if (c == 'E') p->gfxRect(x * cell, y * cell + oy, cell, cell, pal::green);
+        }
+    p->gfxRect(m.px * cell, m.py * cell + oy, cell, cell, pal::amber);
+    p->gfxText(0, 0, "reach the exit   q: leave", pal::grey);
+    p->gfxPresent();
+}
+
+inline bool runMaze(IPlatform* p, const std::vector<std::string>& layout) {
+    Maze m; m.init(layout); renderMaze(p, m);
+    while (!m.done()) {
+        Key k = p->pollKey();
+        if (k == K_BACK) return false;
+        if (k != K_NONE) { m.step(k); renderMaze(p, m); }
+        p->delayMs(16);
+    }
+    renderMaze(p, m); p->delayMs(400);
     return true;
 }
 

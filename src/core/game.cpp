@@ -400,6 +400,13 @@ bool Game::handleCommand(const std::string& raw) {
         cur_ = pal::amber;
         return true;
     }
+    if (cmd == "maze") {                        // debug: top-down maze
+        bool ok = runMaze(p_, defaultMaze());
+        cur_ = pal::grey;
+        queueBeats(ok ? "MAZE: out." : "MAZE: left.");
+        cur_ = pal::amber;
+        return true;
+    }
     if (cmd == "shutdown" || cmd == "quit" || cmd == "exit") { cmdShutdown(); return true; }
     if (cmd == "save")  { cmdSave();  return true; }
     if (cmd == "reset") { cmdReset(); return true; }
