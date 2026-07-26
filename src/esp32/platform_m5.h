@@ -103,6 +103,46 @@ public:
 
     void delayMs(int ms) override { delay(ms); }
 
+    // ---- Minigame layer: real pixels on the 240x135 panel ---------------
+    int gfxW() const override { return M5Cardputer.Display.width(); }
+    int gfxH() const override { return M5Cardputer.Display.height(); }
+    void gfxClear(Color c) override { M5Cardputer.Display.fillScreen(rgb(c)); }
+    void gfxRect(int x, int y, int w, int h, Color c) override {
+        M5Cardputer.Display.fillRect(x, y, w, h, rgb(c));
+    }
+    void gfxLine(int x1, int y1, int x2, int y2, Color c) override {
+        M5Cardputer.Display.drawLine(x1, y1, x2, y2, rgb(c));
+    }
+    void gfxText(int x, int y, const std::string& s, Color c) override {
+        auto& d = M5Cardputer.Display;
+        d.setTextSize(1);
+        d.setTextColor(rgb(c), (uint16_t)0x0000);
+        d.setCursor(x, y);
+        d.print(s.c_str());
+        d.setTextSize(KD_TEXT_SIZE);
+    }
+    void gfxPresent() override {}   // M5GFX draws immediately
+
+    Key pollKey() override {
+        M5Cardputer.update();
+        if (M5Cardputer.Keyboard.isChange() && M5Cardputer.Keyboard.isPressed()) {
+            auto st = M5Cardputer.Keyboard.keysState();
+            if (st.enter) return K_OK;
+            for (auto c : st.word) {
+                switch (c) {
+                    case 'w': case ';': return K_UP;
+                    case 's': case '.': return K_DOWN;
+                    case 'a': case ',': return K_LEFT;
+                    case 'd': case '/': return K_RIGHT;
+                    case ' ': return K_OK;
+                    case '`': return K_BACK;
+                }
+            }
+        }
+        return K_NONE;
+    }
+    unsigned long nowMs() override { return millis(); }
+
     bool loadFile(const std::string& path, std::string& out) override {
         return getEmbeddedContent(path, out);
     }
@@ -122,6 +162,7 @@ public:
 private:
     void echo(char c) { M5Cardputer.Display.print(c); }
     void tick() { M5Cardputer.Speaker.tone(2200, 8); }
+    static uint16_t rgb(Color c) { return M5Cardputer.Display.color565(c.r, c.g, c.b); }
     Preferences prefs_;
 };
 

@@ -1,6 +1,7 @@
 // game.cpp — KODZIMIM engine. One thought per screen, prompt always at the bottom,
 // plus a persistent player notebook with IDE-style keyword highlighting.
 #include "game.h"
+#include "minigame.h"
 #include <cctype>
 #include <sstream>
 
@@ -389,6 +390,13 @@ bool Game::handleCommand(const std::string& raw) {
         cur_ = pal::grey;
         queueBeats(std::string("KODZIMIM\nbuild\n@color amber\n")
                    + __DATE__ + "\n" + __TIME__);
+        cur_ = pal::amber;
+        return true;
+    }
+    if (cmd == "sine") {                       // debug: try the Act II minigame
+        bool ok = runSineMatch(p_);
+        cur_ = pal::grey;
+        queueBeats(ok ? "SINE: locked." : "SINE: left.");
         cur_ = pal::amber;
         return true;
     }

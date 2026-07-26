@@ -20,6 +20,10 @@ struct Screen {
 //  M5GFX reads that value as RGB565, not RGB888.)
 struct Color { uint8_t r, g, b; };
 
+// Real-time input for minigames (non-blocking, per-frame). Text still uses the
+// line-based readLine(); this is only for the graphical minigame loops.
+enum Key { K_NONE = 0, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_OK, K_BACK };
+
 // Palette — the single source of truth is docs/PALETTE.md. Keep them in sync.
 // Rules (short form):
 //   grey  = the PLAYER'S own thoughts, and UI/system meta (prompts, menus).
@@ -71,6 +75,20 @@ public:
     virtual bool loadFile(const std::string& path, std::string& out) = 0;
     virtual void saveState(const std::string& key, const std::string& value) = 0;
     virtual std::string loadState(const std::string& key) = 0;
+
+    // ---- Minigame layer (graphics + real-time input + clock) -------------
+    // Default stubs so text-only builds/tests keep working; each platform
+    // overrides. Coordinates are in the platform's pixel space (gfxW x gfxH):
+    // the device is 240x135; the desktop uses a coarse ASCII canvas.
+    virtual int  gfxW() const { return 240; }
+    virtual int  gfxH() const { return 135; }
+    virtual void gfxClear(Color c) { (void)c; }
+    virtual void gfxRect(int x, int y, int w, int h, Color c) { (void)x;(void)y;(void)w;(void)h;(void)c; }
+    virtual void gfxLine(int x1, int y1, int x2, int y2, Color c) { (void)x1;(void)y1;(void)x2;(void)y2;(void)c; }
+    virtual void gfxText(int x, int y, const std::string& s, Color c) { (void)x;(void)y;(void)s;(void)c; }
+    virtual void gfxPresent() {}                 // flush a frame to the screen
+    virtual Key  pollKey() { return K_NONE; }     // a fresh keypress, or K_NONE
+    virtual unsigned long nowMs() { return 0; }   // monotonic milliseconds
 };
 
 } // namespace kd
