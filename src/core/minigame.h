@@ -177,5 +177,71 @@ inline bool runMaze(IPlatform* p, const std::vector<std::string>& layout) {
     return true;
 }
 
+// ---- QTE ----------------------------------------------------------------
+// Timing bar (STORY_BIBLE §12: unscrew a panel / disassemble a terminal). An
+// indicator sweeps a bar; press OK while it's over the (per-step, randomised)
+// target zone. Do it `steps` times. Overshoot-safe: zone width >= speed.
+class QTE {
+public:
+    int WIDTH = 120;
+    int steps = 3, done_steps = 0, misses = 0;
+    int pos = 0, dir = 1, speed = 4;
+    int zoneLo = 0, zoneHi = 0, zoneW = 18;
+    bool solved_ = false;
+    unsigned rng_ = 2463534242u;
+
+    unsigned rnd() { rng_ ^= rng_ << 13; rng_ ^= rng_ >> 17; rng_ ^= rng_ << 5; return rng_; }
+    void newZone() { zoneLo = (int)(rnd() % (unsigned)(WIDTH - zoneW + 1)); zoneHi = zoneLo + zoneW; }
+
+    void init(int nSteps, int zoneWidth, int spd) {
+        steps = nSteps; zoneW = zoneWidth; speed = spd;
+        done_steps = misses = 0; pos = 0; dir = 1; solved_ = false;
+        rng_ = 2463534242u; newZone();
+    }
+    void tick() {                              // one frame of indicator movement
+        if (solved_) return;
+        pos += dir * speed;
+        if (pos >= WIDTH) { pos = WIDTH; dir = -1; }
+        if (pos <= 0)     { pos = 0;     dir =  1; }
+    }
+    bool inZone() const { return pos >= zoneLo && pos <= zoneHi; }
+    void press() {
+        if (solved_) return;
+        if (inZone()) { if (++done_steps >= steps) solved_ = true; else newZone(); }
+        else misses++;
+    }
+    bool solved() const { return solved_; }
+    bool done()   const { return solved_; }
+};
+
+inline void renderQTE(IPlatform* p, const QTE& q, const char* label) {
+    const int W = p->gfxW(), H = p->gfxH(), mid = H / 2;
+    const int x0 = 6, x1 = W - 6, bw = x1 - x0;
+    #define KD_SX(v) (x0 + (v) * bw / q.WIDTH)
+    p->gfxClear(kBlack);
+    p->gfxRect(x0, mid, bw, 1, pal::grey);
+    p->gfxRect(KD_SX(q.zoneLo), mid - 4, KD_SX(q.zoneHi) - KD_SX(q.zoneLo) + 1, 9, pal::green);
+    p->gfxRect(KD_SX(q.pos), mid - 6, 1, 13, pal::amber);
+    #undef KD_SX
+    p->gfxText(0, 0, std::string(label) + "  " +
+               std::to_string(q.done_steps) + "/" + std::to_string(q.steps), pal::grey);
+    p->gfxText(0, H - 1, "space: hit   q: leave", pal::grey);
+    p->gfxPresent();
+}
+
+inline bool runQTE(IPlatform* p, const char* label, int steps) {
+    QTE q; q.init(steps, 18, 4);
+    while (!q.done()) {
+        Key k = p->pollKey();
+        if (k == K_BACK) return false;
+        if (k == K_OK)   q.press();
+        q.tick();
+        renderQTE(p, q, label);
+        p->delayMs(24);
+    }
+    renderQTE(p, q, label); p->delayMs(400);
+    return true;
+}
+
 } // namespace kd
 #endif

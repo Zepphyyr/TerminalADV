@@ -407,6 +407,13 @@ bool Game::handleCommand(const std::string& raw) {
         cur_ = pal::amber;
         return true;
     }
+    if (cmd == "qte") {                         // debug: timing bar
+        bool ok = runQTE(p_, "UNSCREW", 3);
+        cur_ = pal::grey;
+        queueBeats(ok ? "QTE: done." : "QTE: left.");
+        cur_ = pal::amber;
+        return true;
+    }
     if (cmd == "shutdown" || cmd == "quit" || cmd == "exit") { cmdShutdown(); return true; }
     if (cmd == "save")  { cmdSave();  return true; }
     if (cmd == "reset") { cmdReset(); return true; }
