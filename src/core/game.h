@@ -121,6 +121,11 @@ private:
     bool runStow();                             // ARGENT: STOW grid, returns solved
     bool decodedLine(const std::string& raw) const; // player spoke the decoded phrase
 
+    // Act II: sysadmin password recovery (text flow). Player fails the login,
+    // falls back to security questions (pet + child DOB from the read bio),
+    // then sets a personal admin password saved under "adminpw" for later use.
+    bool runPasswordFlow(const std::string& petName, const std::string& childDob);
+
     void cmdHelp();
     void cmdDir();
     void cmdOpen(const std::string& arg);

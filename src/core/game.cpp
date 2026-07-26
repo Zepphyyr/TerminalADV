@@ -421,6 +421,13 @@ bool Game::handleCommand(const std::string& raw) {
         cur_ = pal::amber;
         return true;
     }
+    if (cmd == "pw") {                           // debug: password recovery flow
+        bool ok = runPasswordFlow("rocket", "0412");
+        cur_ = pal::grey;
+        queueBeats(ok ? "PW: admin set." : "PW: aborted.");
+        cur_ = pal::amber;
+        return true;
+    }
     if (cmd == "shutdown" || cmd == "quit" || cmd == "exit") { cmdShutdown(); return true; }
     if (cmd == "save")  { cmdSave();  return true; }
     if (cmd == "reset") { cmdReset(); return true; }
@@ -748,6 +755,56 @@ void Game::advanceDeck() {
         cur_ = pal::amber;
         return;
     }
+}
+
+// Act II — sysadmin password recovery. The login is a dead end on purpose:
+// Maru suggests the obvious duds, they fail, and the way in is the "forgot
+// password" path — the security answers come from the sysadmin bio the player
+// read earlier. Ends by having the player SET a personal admin password, which
+// we persist under "adminpw" for reuse later in the game.
+bool Game::runPasswordFlow(const std::string& petName, const std::string& childDob) {
+    p_->clear();
+    p_->setColor(pal::grey); p_->print("SYS TERMINAL\nadmin locked\n\n");
+    int tries = 0;
+    for (;;) {
+        p_->setColor(pal::amber);
+        std::string pw = trim(toLower(p_->readLine("password> ")));
+        if (pw == "forgot" || pw == "reset" || pw == "?") break;
+        if (pw == "q" || pw == "quit") return false;
+        p_->setColor(pal::red); p_->print("access denied\n");
+        if (++tries == 1) {
+            p_->setColor(pal::maru);  p_->print("MARU\n");
+            p_->setColor(pal::white); p_->print("try admin, or 1234.\n");
+        } else {
+            p_->setColor(pal::grey);  p_->print("[forgot password? type 'forgot']\n");
+        }
+    }
+    for (;;) {                                   // security questions
+        p_->clear();
+        p_->setColor(pal::grey);  p_->print("RECOVERY\nsecurity check\n\n");
+        p_->setColor(pal::amber);
+        std::string pet = trim(toLower(p_->readLine("first pet> ")));
+        std::string dob = digitsOnly(p_->readLine("child dob (ddmm)> "));
+        if (pet == toLower(petName) && dob == digitsOnly(childDob)) break;
+        p_->setColor(pal::red);  p_->print("\nmismatch.\n");
+        p_->setColor(pal::grey); p_->print("it is in the file you read.\n");
+        p_->delayMs(800);
+    }
+    std::string np;                              // player sets a personal password
+    for (;;) {
+        p_->clear();
+        p_->setColor(pal::green); p_->print("VERIFIED\n\n");
+        p_->setColor(pal::amber);
+        np = trim(p_->readLine("set admin pw> "));
+        if (np.size() >= 3) break;
+        p_->setColor(pal::red); p_->print("min 3 chars.\n"); p_->delayMs(700);
+    }
+    p_->saveState("adminpw", np);
+    p_->clear();
+    p_->setColor(pal::grey);
+    p_->print("ADMIN PW SET\n\nremember it. it opens\nadmin terminals from\nhere on.\n\n");
+    p_->waitKey();
+    return true;
 }
 
 // Did the player speak HALO-9's decoded line? ("CANTOR IS NOT ALONE IN HIS OWN
