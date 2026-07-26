@@ -3,6 +3,7 @@
 #include "game.h"
 #include "minigame.h"
 #include <cctype>
+#include <cstdlib>
 #include <sstream>
 
 namespace kd {
@@ -428,6 +429,13 @@ bool Game::handleCommand(const std::string& raw) {
         cur_ = pal::amber;
         return true;
     }
+    if (cmd == "broken") {                        // debug: whole quest orchestrator
+        bool ok = runBrokenTerminal();
+        cur_ = pal::grey;
+        queueBeats(ok ? "QUEST: recovered." : "QUEST: paused (resume with /broken).");
+        cur_ = pal::amber;
+        return true;
+    }
     if (cmd == "shutdown" || cmd == "quit" || cmd == "exit") { cmdShutdown(); return true; }
     if (cmd == "save")  { cmdSave();  return true; }
     if (cmd == "reset") { cmdReset(); return true; }
@@ -807,6 +815,79 @@ bool Game::runPasswordFlow(const std::string& petName, const std::string& childD
     return true;
 }
 
+// Blocking text playback: reuse the pager (render + advance) but drive it here
+// with waitKey, so the quest orchestrator can put narrative between minigames.
+void Game::playBeats(const std::string& text) {
+    screens_.clear();
+    typeIt_ = true;
+    queueBeats(text);
+    while (!screens_.empty()) {
+        render();
+        p_->waitKey();
+        advance();
+    }
+}
+
+// The "Broken Terminal" set-piece (STORY_BIBLE §12). A linear stage machine:
+// each stage saves "bt_stage" on success, so a reboot resumes; leaving a
+// minigame (q) returns false WITHOUT advancing, so re-entry retries that stage.
+// Narrative is placeholder for now — real content is authored later and slots
+// straight into these playBeats() calls.
+bool Game::runBrokenTerminal() {
+    int stage = std::atoi(p_->loadState("bt_stage").c_str());
+    // pet/DOB are demo answers; content will supply the real ones from the bio.
+    const std::string pet = "rocket", dob = "0412";
+
+    if (stage < 1) {
+        playBeats("@color cassel\nCASSEL\n@color white\nWe're not supposed to know this. It's too dangerous.\n"
+                  "---\n@color white\nHe swings at the terminal. You pull him down. He goes limp.");
+        stage = 1; p_->saveState("bt_stage", "1");
+    }
+    if (stage < 2) {
+        playBeats("@color white\nThe casing is screwed shut. Get the disk out.");
+        if (!runQTE(p_, "UNSCREW", 3)) return false;
+        playBeats("@color grey\nThe disk pops free.");
+        stage = 2; p_->saveState("bt_stage", "2");
+    }
+    if (stage < 3) {
+        playBeats("@color white\nYou crawl the service ducts toward a live terminal.");
+        if (!runMaze(p_, defaultMaze())) return false;
+        stage = 3; p_->saveState("bt_stage", "3");
+    }
+    if (stage < 4) {
+        playBeats("@color white\nThe data is locked. Crack it.");
+        if (!runHack(p_, defaultHackWords(), 0)) return false;
+        playBeats("@color grey\nDecrypted. But it only points you elsewhere.");
+        stage = 4; p_->saveState("bt_stage", "4");
+    }
+    if (stage < 5) {
+        playBeats("@color white\nBack the other way, to a second terminal.");
+        if (!runMaze(p_, defaultMaze())) return false;
+        stage = 5; p_->saveState("bt_stage", "5");
+    }
+    if (stage < 6) {
+        playBeats("@color white\nThis one you take apart.");
+        if (!runQTE(p_, "DISASSEMBLE", 3)) return false;
+        stage = 6; p_->saveState("bt_stage", "6");
+    }
+    if (stage < 7) {
+        playBeats("@color white\nYou seat the disk. It clicks home.\n"
+                  "---\nYou put the panel back together.");
+        stage = 7; p_->saveState("bt_stage", "7");
+    }
+    if (stage < 8) {
+        playBeats("@color white\nThe rebuilt terminal wants an admin password.");
+        if (!runPasswordFlow(pet, dob)) return false;
+        stage = 8; p_->saveState("bt_stage", "8");
+    }
+    if (stage < 9) {
+        playBeats("@color grey\n[ recovered log — placeholder ]\n"
+                  "---\n@color grey\nWhatever HALO-9 is now, it did not start this way.");
+        stage = 9; p_->saveState("bt_stage", "9");
+    }
+    return true;
+}
+
 // Did the player speak HALO-9's decoded line? ("CANTOR IS NOT ALONE IN HIS OWN
 // VOICE") We match loosely on its load-bearing words so paraphrases still land.
 bool Game::decodedLine(const std::string& raw) const {
@@ -937,6 +1018,7 @@ void Game::cmdReset() {
     p_->saveState("progress", "");
     p_->saveState("notes", "");
     p_->saveState("deck", "");
+    p_->saveState("bt_stage", "");
     p_->clear(); p_->setColor(pal::grey); p_->print("\nsave erased.\nrebooting.\n");
     p_->delayMs(900); p_->reboot(); running_ = false;
 }

@@ -126,6 +126,15 @@ private:
     // then sets a personal admin password saved under "adminpw" for later use.
     bool runPasswordFlow(const std::string& petName, const std::string& childDob);
 
+    // Play text beats BLOCKING (one screen at a time, waitKey to advance), so a
+    // scripted quest can interleave narrative with the blocking minigames.
+    void playBeats(const std::string& text);
+
+    // Act II set-piece: chains the whole "Broken Terminal" quest, persisting the
+    // stage under "bt_stage" so a reboot resumes mid-quest. Returns true when
+    // the recovered data has been read; false if the player left a minigame.
+    bool runBrokenTerminal();
+
     void cmdHelp();
     void cmdDir();
     void cmdOpen(const std::string& arg);
