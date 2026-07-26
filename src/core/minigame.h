@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <cstdio>
 
 namespace kd {
 
@@ -75,7 +76,7 @@ inline void renderSine(IPlatform* p, const SineMatch& g) {
     plotWave(p, g.source, pal::pale);     // PALE's wave
     plotWave(p, g.player, pal::amber);    // yours
     p->gfxText(0, 0, g.msg, pal::grey);
-    p->gfxText(0, p->gfxH() - 1, "arrows: bend   q: leave", pal::grey);
+    p->gfxText(0, p->gfxRows() - 1, "arrows: bend   q: leave", pal::grey);
     p->gfxPresent();
 }
 
@@ -161,7 +162,7 @@ inline void renderMaze(IPlatform* p, const Maze& m) {
             else if (c == 'E') p->gfxRect(x * cell, y * cell + oy, cell, cell, pal::green);
         }
     p->gfxRect(m.px * cell, m.py * cell + oy, cell, cell, pal::amber);
-    p->gfxText(0, 0, "reach the exit   q: leave", pal::grey);
+    p->gfxText(0, 0, "reach the exit  q:leave", pal::grey);
     p->gfxPresent();
 }
 
@@ -225,7 +226,7 @@ inline void renderQTE(IPlatform* p, const QTE& q, const char* label) {
     #undef KD_SX
     p->gfxText(0, 0, std::string(label) + "  " +
                std::to_string(q.done_steps) + "/" + std::to_string(q.steps), pal::grey);
-    p->gfxText(0, H - 1, "space: hit   q: leave", pal::grey);
+    p->gfxText(0, p->gfxRows() - 1, "space: hit   q: leave", pal::grey);
     p->gfxPresent();
 }
 
@@ -241,6 +242,169 @@ inline bool runQTE(IPlatform* p, const char* label, int steps) {
     }
     renderQTE(p, q, label); p->delayMs(400);
     return true;
+}
+
+// ---- HACK (Fallout-style terminal) --------------------------------------
+// Decrypt slot (STORY_BIBLE §12). A memory dump of junk with candidate WORDS
+// (all same length) hidden in it; one is the password. Guessing a word costs
+// an attempt and reveals its "likeness" = letters in the correct position.
+// Matched bracket pairs ( ) [ ] { } < > can be selected once to remove a dud
+// (or, if none remain, replenish attempts). Board is generated from a word
+// list content supplies + a seed, so logic is deterministic and testable.
+enum EType { E_NONE = 0, E_WORD, E_BRACKET };
+struct Entity { EType type; int row, col0, col1, wordIdx; bool active; };
+
+class HackGame {
+public:
+    int R = 12, C = 16;
+    std::vector<std::string> grid;     // R rows, length C
+    std::vector<int> cell;             // R*C -> entity index or -1
+    std::vector<Entity> ents;
+    std::vector<std::string> words;
+    int passIdx = 0;
+    int attempts = 4, maxAttempts = 4;
+    int cursor = 0;
+    bool solved_ = false, failed_ = false;
+    int lastLikeness = -1;
+    std::string lastGuess, lastMsg;
+    unsigned rng_ = 2463534242u;
+
+    unsigned rnd() { rng_ ^= rng_ << 13; rng_ ^= rng_ >> 17; rng_ ^= rng_ << 5; return rng_; }
+    int wordLen() const { return words.empty() ? 0 : (int)words[0].size(); }
+
+    void init(const std::vector<std::string>& candidateWords, int correctIdx, unsigned seed) {
+        words = candidateWords; passIdx = correctIdx;
+        attempts = maxAttempts; solved_ = failed_ = false;
+        lastLikeness = -1; lastGuess.clear(); lastMsg.clear();
+        cursor = 0; rng_ = seed ? seed : 1u;
+        grid.assign(R, std::string(C, ' '));
+        cell.assign(R * C, -1);
+        ents.clear();
+        static const std::string junk = "!@#$%^&*-+=/|;:?_~";
+        for (int r = 0; r < R; ++r)
+            for (int c = 0; c < C; ++c) grid[r][c] = junk[rnd() % junk.size()];
+        int len = wordLen();
+        // place words
+        for (int i = 0; i < (int)words.size(); ++i) {
+            for (int t = 0; t < 300; ++t) {
+                int r = rnd() % R, c = (len < C) ? (int)(rnd() % (C - len + 1)) : 0;
+                bool ok = true;
+                for (int k = 0; k < len; ++k) if (cell[r * C + c + k] != -1) { ok = false; break; }
+                if (!ok) continue;
+                for (int k = 0; k < len; ++k) { grid[r][c + k] = words[i][k]; cell[r * C + c + k] = (int)ents.size(); }
+                Entity e; e.type = E_WORD; e.row = r; e.col0 = c; e.col1 = c + len - 1; e.wordIdx = i; e.active = true;
+                ents.push_back(e); break;
+            }
+        }
+        // place a few bracket pairs on free junk
+        static const std::string ob = "([{<", cb = ")]}>";
+        for (int b = 0; b < 3; ++b) {
+            for (int t = 0; t < 300; ++t) {
+                int g = 2 + (int)(rnd() % 4);
+                if (g >= C) continue;
+                int r = rnd() % R, c = (int)(rnd() % (C - g));
+                bool ok = true;
+                for (int k = 0; k <= g; ++k) if (cell[r * C + c + k] != -1) { ok = false; break; }
+                if (!ok) continue;
+                int bi = rnd() % 4;
+                grid[r][c] = ob[bi]; grid[r][c + g] = cb[bi];
+                cell[r * C + c] = (int)ents.size();     // trigger on the opening bracket
+                Entity e; e.type = E_BRACKET; e.row = r; e.col0 = c; e.col1 = c + g; e.wordIdx = -1; e.active = true;
+                ents.push_back(e); break;
+            }
+        }
+    }
+
+    int likeness(const std::string& a) const {
+        const std::string& pw = words[passIdx]; int n = 0;
+        for (size_t i = 0; i < a.size() && i < pw.size(); ++i) if (a[i] == pw[i]) n++;
+        return n;
+    }
+    int hovered() const { return cell[cursor]; }
+
+    void move(Key k) {
+        int r = cursor / C, c = cursor % C;
+        if      (k == K_UP    && r > 0)     cursor -= C;
+        else if (k == K_DOWN  && r < R - 1) cursor += C;
+        else if (k == K_LEFT  && c > 0)     cursor -= 1;
+        else if (k == K_RIGHT && c < C - 1) cursor += 1;
+    }
+
+    void pressOK() {
+        if (solved_ || failed_) return;
+        int e = cell[cursor];
+        if (e < 0) return;
+        Entity& en = ents[e];
+        if (en.type == E_WORD && en.active) {
+            lastGuess = words[en.wordIdx];
+            lastLikeness = likeness(lastGuess);
+            if (lastLikeness == wordLen()) { solved_ = true; lastMsg = "ACCESS GRANTED"; }
+            else { if (--attempts <= 0) failed_ = true; lastMsg = "denied"; }
+        } else if (en.type == E_BRACKET && en.active) {
+            en.active = false;
+            int dud = -1;
+            for (int i = 0; i < (int)ents.size(); ++i)
+                if (ents[i].type == E_WORD && ents[i].active && ents[i].wordIdx != passIdx) { dud = i; break; }
+            if (dud >= 0) {
+                ents[dud].active = false;
+                for (int c = ents[dud].col0; c <= ents[dud].col1; ++c) {
+                    grid[ents[dud].row][c] = '.'; cell[ents[dud].row * C + c] = -1;
+                }
+                lastMsg = "dud removed";
+            } else { attempts = maxAttempts; lastMsg = "allowance replenished"; }
+        }
+    }
+
+    bool solved() const { return solved_; }
+    bool failed() const { return failed_; }
+    bool done()   const { return solved_ || failed_; }
+};
+
+inline void renderHack(IPlatform* p, const HackGame& g) {
+    const int rows = p->gfxRows();
+    p->gfxClear(kBlack);
+    std::string att; for (int i = 0; i < g.attempts; ++i) att += '#';
+    p->gfxText(0, 0, "TERMINAL LOCKED  ATT:" + att, pal::red);
+    int hov = g.cell[g.cursor];
+    for (int r = 0; r < g.R; ++r) {
+        int y = 1 + r;
+        if (y >= rows - 2) break;
+        char adr[10]; std::snprintf(adr, sizeof(adr), "0x%04X ", (0xF900 + r * g.C) & 0xFFFF);
+        std::string a(adr); int rx = (int)a.size();
+        p->gfxText(0, y, a, pal::grey);
+        p->gfxText(rx, y, g.grid[r], pal::green);
+        if (hov >= 0 && g.ents[hov].row == r) {
+            const Entity& e = g.ents[hov];
+            p->gfxText(rx + e.col0, y, g.grid[r].substr(e.col0, e.col1 - e.col0 + 1), pal::amber);
+        }
+        if (g.cursor / g.C == r) {
+            int cc = g.cursor % g.C;
+            p->gfxText(rx + cc, y, std::string(1, g.grid[r][cc]), pal::white);
+        }
+    }
+    if (g.lastLikeness >= 0)
+        p->gfxText(0, rows - 2, "> " + g.lastGuess + "  " +
+                   std::to_string(g.lastLikeness) + "/" + std::to_string(g.wordLen()) + " " + g.lastMsg, pal::grey);
+    p->gfxText(0, rows - 1, "move:arrows  pick:space  q:leave", pal::grey);
+    p->gfxPresent();
+}
+
+inline bool runHack(IPlatform* p, const std::vector<std::string>& words, int correctIdx) {
+    HackGame g; g.init(words, correctIdx, 0x51ACE7u);  // seed
+    renderHack(p, g);
+    while (!g.done()) {
+        Key k = p->pollKey();
+        if (k == K_BACK) return false;
+        if (k == K_UP || k == K_DOWN || k == K_LEFT || k == K_RIGHT) { g.move(k); renderHack(p, g); }
+        else if (k == K_OK) { g.pressOK(); renderHack(p, g); }
+        p->delayMs(16);
+    }
+    renderHack(p, g); p->delayMs(700);
+    return g.solved();
+}
+
+inline std::vector<std::string> defaultHackWords() {
+    return {"SIGNAL","SILVER","SISTER","MASTER","MATTER","LETTER","BITTER","LATTER"};
 }
 
 } // namespace kd

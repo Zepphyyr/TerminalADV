@@ -106,6 +106,8 @@ public:
     // canvas so minigames are still visible (and scriptable) in a terminal.
     int gfxW() const override { return DW; }
     int gfxH() const override { return DH; }
+    int gfxCols() const override { return DW; }   // desktop: pixel == cell
+    int gfxRows() const override { return DH; }
 
     void gfxClear(Color c) override {
         for (int i = 0; i < DW * DH; ++i) { cbuf_[i] = ' '; colbuf_[i] = c; }

@@ -113,11 +113,14 @@ public:
     void gfxLine(int x1, int y1, int x2, int y2, Color c) override {
         M5Cardputer.Display.drawLine(x1, y1, x2, y2, rgb(c));
     }
-    void gfxText(int x, int y, const std::string& s, Color c) override {
+    // (col,row) in the size-1 6x8 text grid.
+    int gfxCols() const override { return M5Cardputer.Display.width() / 6; }
+    int gfxRows() const override { return M5Cardputer.Display.height() / 8; }
+    void gfxText(int col, int row, const std::string& s, Color c) override {
         auto& d = M5Cardputer.Display;
         d.setTextSize(1);
         d.setTextColor(rgb(c), (uint16_t)0x0000);
-        d.setCursor(x, y);
+        d.setCursor(col * 6, row * 8);
         d.print(s.c_str());
         d.setTextSize(KD_TEXT_SIZE);
     }

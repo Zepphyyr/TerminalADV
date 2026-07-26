@@ -80,12 +80,16 @@ public:
     // Default stubs so text-only builds/tests keep working; each platform
     // overrides. Coordinates are in the platform's pixel space (gfxW x gfxH):
     // the device is 240x135; the desktop uses a coarse ASCII canvas.
-    virtual int  gfxW() const { return 240; }
-    virtual int  gfxH() const { return 135; }
+    virtual int  gfxW() const { return 240; }              // pixel width
+    virtual int  gfxH() const { return 135; }              // pixel height
+    virtual int  gfxCols() const { return gfxW() / 6; }    // text grid width  (6x8 font)
+    virtual int  gfxRows() const { return gfxH() / 8; }    // text grid height
     virtual void gfxClear(Color c) { (void)c; }
+    // gfxRect/gfxLine use PIXEL coords; gfxText uses CHARACTER-CELL coords
+    // (col,row) so text lays out identically on device and desktop.
     virtual void gfxRect(int x, int y, int w, int h, Color c) { (void)x;(void)y;(void)w;(void)h;(void)c; }
     virtual void gfxLine(int x1, int y1, int x2, int y2, Color c) { (void)x1;(void)y1;(void)x2;(void)y2;(void)c; }
-    virtual void gfxText(int x, int y, const std::string& s, Color c) { (void)x;(void)y;(void)s;(void)c; }
+    virtual void gfxText(int col, int row, const std::string& s, Color c) { (void)col;(void)row;(void)s;(void)c; }
     virtual void gfxPresent() {}                 // flush a frame to the screen
     virtual Key  pollKey() { return K_NONE; }     // a fresh keypress, or K_NONE
     virtual unsigned long nowMs() { return 0; }   // monotonic milliseconds
