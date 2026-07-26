@@ -129,6 +129,7 @@ private:
     // Play text beats BLOCKING (one screen at a time, waitKey to advance), so a
     // scripted quest can interleave narrative with the blocking minigames.
     void playBeats(const std::string& text);
+    void playFile(const std::string& path);     // same, from a content file
 
     // Act II set-piece: chains the whole "Broken Terminal" quest, persisting the
     // stage under "bt_stage" so a reboot resumes mid-quest. Returns true when

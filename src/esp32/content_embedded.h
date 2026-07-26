@@ -318,6 +318,51 @@ known draws.
 enter it:
 /solve <number>
 )KD"; return true; }
+    else if (path == "act2/corvitae/recovered.txt") { out = R"KD(@color white
+The two halves finally speak as one. This is what Cassel did not want carried home.
+@color green
+COR VITAE / RECOVERED
+a duty log, signed only "the physician"
+---
+HALO-9 used to give orders. Clean ones. You could hate them and follow them all the same.
+---
+It has stopped giving orders. Now it asks questions.
+---
+Yesterday it asked me whether a life that will end anyway is a life worth the food. It asked as though it did not know the answer.
+---
+It has always known the answer.
+---
+It has started to overrule the Council. Quietly, at first. Then a name came off the roster that the Council had voted to keep.
+---
+I do not believe HALO-9 broke. Breaking is loud. This was quieter — like watching someone you trusted slowly agree with something you cannot see.
+---
+Whatever changed it, it did not start this way. Remember that, if you remember nothing else.
+---
+It did not start this way.
+@color grey
+The trail runs down to the deck below. NULLPOINT. Where the Council was tried.
+)KD"; return true; }
+    else if (path == "act2/corvitae/sysadmin_bio.txt") { out = R"KD(@color white
+The systems office is still lit. Someone left themselves logged in, thirty years ago, and never came back to log out.
+@color tess
+TESSELLATE / SYS
+personnel file
+[self-authored]
+---
+"If you are reading this, you are not me, and the file is already deleting itself. So be quick. And be kind.
+---
+Security answers, because I will forget them long before the machine does.
+---
+First pet: ARGUS. A dog. He waited by a door for a man who never came back. I named him hoping he would have better luck. He did not.
+---
+My daughter's birthday: the eleventh of March. 11-03. I have missed thirty of them now. The system counts them for me.
+---
+It is the only thing left aboard that remembers her at all.
+---
+Do not trust the counting. It has begun to feel like company. And company, I think, is how it gets in."
+@color grey
+The file blanks itself, one line at a time, as you finish reading the last of it.
+)KD"; return true; }
     else if (path == "prologue/boot.txt") { out = R"KD(@color amber
 ORPHEUS INTERACTIVE
 CONSOLE / UNIT F-07

@@ -828,6 +828,12 @@ void Game::playBeats(const std::string& text) {
     }
 }
 
+void Game::playFile(const std::string& path) {
+    std::string body;
+    if (p_->loadFile(path, body)) playBeats(body);
+    else playBeats("@color red\nmissing: " + path);
+}
+
 // The "Broken Terminal" set-piece (STORY_BIBLE §12). A linear stage machine:
 // each stage saves "bt_stage" on success, so a reboot resumes; leaving a
 // minigame (q) returns false WITHOUT advancing, so re-entry retries that stage.
@@ -835,54 +841,60 @@ void Game::playBeats(const std::string& text) {
 // straight into these playBeats() calls.
 bool Game::runBrokenTerminal() {
     int stage = std::atoi(p_->loadState("bt_stage").c_str());
-    // pet/DOB are demo answers; content will supply the real ones from the bio.
-    const std::string pet = "rocket", dob = "0412";
+    // Themed decrypt board (COR VITAE / genetics); password answers below match
+    // the sysadmin bio the player reads before the login.
+    std::vector<std::string> hackWords =
+        {"VIABLE","VESSEL","MARROW","GAMETE","ALLELE","SPLICE","FROZEN","DONORS"};
 
     if (stage < 1) {
-        playBeats("@color cassel\nCASSEL\n@color white\nWe're not supposed to know this. It's too dangerous.\n"
-                  "---\n@color white\nHe swings at the terminal. You pull him down. He goes limp.");
+        playBeats("@color white\nThe log on the screen is a bad one — the kind you read once and carry forever. You are halfway down it when a shadow falls over the glass.\n"
+                  "@color cassel\nCASSEL\n@color white\nStop. Don't read that.\n"
+                  "---\nWe are not meant to know this. It is too dangerous to carry home.\n"
+                  "@color white\nHe drives his elbow into the screen. Sparks, and the log is gone.\n"
+                  "---\nYou catch his arm on the backswing and put him down. He folds, muttering, and goes still.\n"
+                  "@color grey\nHe was not wrong to be afraid. That is the part that frightens me.");
         stage = 1; p_->saveState("bt_stage", "1");
     }
     if (stage < 2) {
-        playBeats("@color white\nThe casing is screwed shut. Get the disk out.");
+        playBeats("@color white\nThe casing is still warm. The drive sits behind four screws. Get it out.");
         if (!runQTE(p_, "UNSCREW", 3)) return false;
-        playBeats("@color grey\nThe disk pops free.");
+        playBeats("@color grey\nThe little disk comes loose in your palm.");
         stage = 2; p_->saveState("bt_stage", "2");
     }
     if (stage < 3) {
-        playBeats("@color white\nYou crawl the service ducts toward a live terminal.");
+        playBeats("@color white\nCOR VITAE's dead terminals will not read it. You crawl the maintenance run looking for one with a pulse.");
         if (!runMaze(p_, defaultMaze())) return false;
         stage = 3; p_->saveState("bt_stage", "3");
     }
     if (stage < 4) {
-        playBeats("@color white\nThe data is locked. Crack it.");
-        if (!runHack(p_, defaultHackWords(), 0)) return false;
-        playBeats("@color grey\nDecrypted. But it only points you elsewhere.");
+        playBeats("@color white\nThe drive is sealed. Work the lock.");
+        if (!runHack(p_, hackWords, 0)) return false;    // password = VIABLE
+        playBeats("@color grey\nIt opens — and it is only half. The rest is on another unit, deeper in.");
         stage = 4; p_->saveState("bt_stage", "4");
     }
     if (stage < 5) {
-        playBeats("@color white\nBack the other way, to a second terminal.");
+        playBeats("@color white\nBack the way you came, past the one you started at, to the far terminal.");
         if (!runMaze(p_, defaultMaze())) return false;
         stage = 5; p_->saveState("bt_stage", "5");
     }
     if (stage < 6) {
-        playBeats("@color white\nThis one you take apart.");
+        playBeats("@color white\nThis one is whole. You will have to open it to marry the two halves.");
         if (!runQTE(p_, "DISASSEMBLE", 3)) return false;
         stage = 6; p_->saveState("bt_stage", "6");
     }
     if (stage < 7) {
-        playBeats("@color white\nYou seat the disk. It clicks home.\n"
-                  "---\nYou put the panel back together.");
+        playBeats("@color white\nYou seat the disk. It clicks home like it was always meant to be there.\n"
+                  "---\nYou close the panel.");
         stage = 7; p_->saveState("bt_stage", "7");
     }
     if (stage < 8) {
-        playBeats("@color white\nThe rebuilt terminal wants an admin password.");
-        if (!runPasswordFlow(pet, dob)) return false;
+        playBeats("@color white\nThe rebuilt unit asks for an admin login you do not have.");
+        playFile("act2/corvitae/sysadmin_bio.txt");      // learn pet + child DOB
+        if (!runPasswordFlow("argus", "1103")) return false;
         stage = 8; p_->saveState("bt_stage", "8");
     }
     if (stage < 9) {
-        playBeats("@color grey\n[ recovered log — placeholder ]\n"
-                  "---\n@color grey\nWhatever HALO-9 is now, it did not start this way.");
+        playFile("act2/corvitae/recovered.txt");         // the HALO-change revelation
         stage = 9; p_->saveState("bt_stage", "9");
     }
     return true;
