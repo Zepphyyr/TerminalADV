@@ -115,6 +115,32 @@ void Game::pushLines(const std::vector<CLine>& lines) {
     }
 }
 
+// One "source" per screen. A screen never mixes, say, a terminal log with the
+// player's grey thoughts. Colours are grouped into sources: the WORLD (white +
+// human name/speech colours) is one source; grey (thoughts/UI) is one; every
+// manufacturer colour is its own; every AI colour is its own. When the source
+// changes mid-beat we start a new screen automatically — so authors never have
+// to remember a '---' at every voice change.
+static bool sameColor(const Color& a, const Color& b) {
+    return a.r == b.r && a.g == b.g && a.b == b.b;
+}
+static int sourceKey(const Color& c) {
+    // WORLD: environment + human dialogue (name label + white speech together)
+    if (sameColor(c, pal::white) || sameColor(c, pal::maru) ||
+        sameColor(c, pal::cassel) || sameColor(c, pal::okonkwo)) return 1;
+    if (sameColor(c, pal::grey))   return 2;   // thoughts / UI
+    if (sameColor(c, pal::amber))  return 3;   // ORPHEUS terminal
+    if (sameColor(c, pal::helion)) return 4;
+    if (sameColor(c, pal::argent)) return 5;
+    if (sameColor(c, pal::green))  return 6;
+    if (sameColor(c, pal::red))    return 7;
+    if (sameColor(c, pal::tess))   return 8;
+    if (sameColor(c, pal::cyan))   return 9;   // CANTOR
+    if (sameColor(c, pal::blue))   return 10;  // HALO-9
+    if (sameColor(c, pal::pale))   return 11;  // PALE
+    return 0;
+}
+
 void Game::queueBeats(const std::string& text) {
     Screen sc = p_->screen();
     ScreenBuf beat;
@@ -133,7 +159,13 @@ void Game::queueBeats(const std::string& text) {
         if (!line.empty() && line.back() == '\r') line.pop_back();
         std::string t = trim(line);
         if (t == "---") { flush(); continue; }
-        if (t.rfind("@color", 0) == 0) { cur_ = colorByName(t.substr(6)); continue; }
+        if (t.rfind("@color", 0) == 0) {
+            Color nc = colorByName(t.substr(6));
+            // new source => new screen (unless nothing is buffered yet)
+            if (!beat.empty() && sourceKey(nc) != sourceKey(cur_)) flush();
+            cur_ = nc;
+            continue;
+        }
         beat.push_back(CLine{cur_, line, false});
     }
     flush();
