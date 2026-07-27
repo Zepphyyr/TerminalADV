@@ -565,6 +565,7 @@ void Game::resumeDeck(const std::string& deck) {
     cardLang_  = (deck == "argent") || actII;
     cardOkoro_ = actII;
     haloHailed_ = actII || cardLang_;
+    btDone_ = (deck == "nullpoint") || (deck == "act2_done") || (btStage() >= 9);
     npSession_ = (p_->loadState("np_session") == "1");
     arriveAt("cantor");
     std::string acc = (deck == "helion") ? "helion"
@@ -692,7 +693,7 @@ bool Game::argentCommand(const std::string& cmd, const std::string& arg) {
 bool Game::corvitaeCommand(const std::string& cmd, const std::string& arg) {
     (void)arg;
     if (cmd == "records" || cmd == "record" || cmd == "sealed" || cmd == "incident") {
-        if (btStage() >= 9) {
+        if (btDone_ || btStage() >= 9) {
             cur_ = pal::grey;
             queueBeats("You already pulled that thread. It runs down to NULLPOINT.\n@color grey\n/go when ready.");
             cur_ = pal::amber; return true;
@@ -844,7 +845,7 @@ void Game::deckStatus() {
 void Game::askGoOn() {
     bool ready = (deck_ == "helion")   ? cardLang_
                : (deck_ == "argent")   ? cardOkoro_
-               : (deck_ == "corvitae") ? (btStage() >= 9)
+               : (deck_ == "corvitae") ? (btDone_ || btStage() >= 9)
                : (deck_ == "nullpoint")? npSession_
                : true;
     if (!ready) {
@@ -980,6 +981,7 @@ void Game::playFile(const std::string& path) {
 // straight into these playBeats() calls.
 bool Game::runBrokenTerminal() {
     int stage = std::atoi(p_->loadState("bt_stage").c_str());
+    if (stage >= 9) { btDone_ = true; return true; }
     // Themed decrypt board (COR VITAE / genetics); password answers below match
     // the sysadmin bio the player reads before the login.
     std::vector<std::string> hackWords =
@@ -1036,6 +1038,7 @@ bool Game::runBrokenTerminal() {
         playFile("act2/corvitae/recovered.txt");         // the HALO-change revelation
         stage = 9; p_->saveState("bt_stage", "9");
     }
+    btDone_ = true;   // remember completion in-session, even if NVS didn't persist
     return true;
 }
 
@@ -1172,6 +1175,7 @@ void Game::cmdReset() {
     p_->saveState("bt_stage", "");
     p_->saveState("np_session", "");
     p_->saveState("adminpw", "");
+    btDone_ = false; npSession_ = false;
     p_->clear(); p_->setColor(pal::grey); p_->print("\nsave erased.\nrebooting.\n");
     p_->delayMs(900); p_->reboot(); running_ = false;
 }

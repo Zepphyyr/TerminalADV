@@ -65,6 +65,7 @@ private:
     bool  cardOkoro_   = false;   // ARGENT: won by solving STOW
     bool  cantorConfronted_ = false; // decoded line brought to CANTOR (once)
     bool  glitchFired_ = false;   // PALE input glitch has fired (once, in STOW)
+    bool  btDone_      = false;   // COR VITAE: Broken Terminal quest finished
     bool  npSession_   = false;   // NULLPOINT: the Council's final session read
 
     // ---- conversation state -------------------------------------------
