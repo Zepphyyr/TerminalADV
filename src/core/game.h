@@ -65,6 +65,7 @@ private:
     bool  cardOkoro_   = false;   // ARGENT: won by solving STOW
     bool  cantorConfronted_ = false; // decoded line brought to CANTOR (once)
     bool  glitchFired_ = false;   // PALE input glitch has fired (once, in STOW)
+    bool  npSession_   = false;   // NULLPOINT: the Council's final session read
 
     // ---- conversation state -------------------------------------------
     // Who your plain words go to. Empty = nobody is on the channel.
@@ -105,6 +106,9 @@ private:
     bool handleDeckCommand(const std::string& cmd, const std::string& arg);
     bool helionCommand(const std::string& cmd, const std::string& arg);
     bool argentCommand(const std::string& cmd, const std::string& arg);
+    bool corvitaeCommand(const std::string& cmd, const std::string& arg);  // Act II
+    bool nullpointCommand(const std::string& cmd, const std::string& arg); // Act II
+    int  btStage();                                        // Broken Terminal stage
     void deckLook();                                    // /look — the room
     void deckDir();                                     // /dir  — list documents
     void deckOpen(const std::string& arg);              // /open <name> (o <name>)

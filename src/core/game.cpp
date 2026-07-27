@@ -304,7 +304,8 @@ void Game::run() {
         prologueDone_ = true;
         cinematic_    = false;
         deck_ = trim(p_->loadState("deck"));
-        if (!deck_.empty() && deck_ != "act1_done") {
+        if (deck_ == "act1_done") deck_ = "corvitae";   // legacy save: flow into Act II
+        if (!deck_.empty() && deck_ != "act2_done") {
             resumeDeck(deck_);
         } else {
             arriveAt("cantor");   // he is always there
@@ -505,11 +506,14 @@ bool Game::handleStationCommand(const std::string& cmd, const std::string& arg) 
 
 // ------------------------------------------------------------- Act I decks
 std::string Game::deckTitle(const std::string& deck) const {
-    if (deck == "helion") return "HELION / DECK H-2";
-    if (deck == "argent") return "ARGENT / DECK A-5";
-    if (deck == "act1_done") return "MERIDIAN DEEP";
+    if (deck == "helion")   return "HELION / DECK H-2";
+    if (deck == "argent")   return "ARGENT / DECK A-5";
+    if (deck == "corvitae") return "COR VITAE / DECK C-3";
+    if (deck == "nullpoint")return "NULLPOINT / DECK N-1";
     return "MERIDIAN DEEP";
 }
+
+int Game::btStage() { return std::atoi(p_->loadState("bt_stage").c_str()); }
 
 void Game::unknownHere() {
     cur_ = pal::grey;
@@ -536,6 +540,16 @@ void Game::arriveDeck(const std::string& deck) {
     } else if (deck == "argent") {
         queueFile("act1/argent/arrive.txt");
         queueFile("act1/argent/cassel.txt");   // an unbidden transmission, not a file
+    } else if (deck == "corvitae") {
+        queueFile("act2/corvitae/arrive.txt");
+        // HALO-9 is awake now, and it no longer gives orders — it asks.
+        cur_ = pal::blue;
+        queueBeats("@color blue\nHALO-9: You woke me. So answer me one thing.\n"
+                   "---\nOf all the dead on this deck, which would you have saved, if you could save only one?\n"
+                   "---\nTake your time. I have counted every one of them. I would like to know your method.");
+        cur_ = pal::amber;
+    } else if (deck == "nullpoint") {
+        queueFile("act2/nullpoint/arrive.txt");
     }
     cur_ = pal::white;
     queueBeats("@color maru\nMARU\n@color white\nI'm on comms. Look around. Say /go when you want to move on.");
@@ -545,12 +559,18 @@ void Game::arriveDeck(const std::string& deck) {
 // Reboot landed us mid-Act-I: re-orient without replaying the arrival cinematic.
 void Game::resumeDeck(const std::string& deck) {
     deck_ = deck;
-    // Reaching a later deck means the earlier cards were already earned; restore
-    // them so a reboot never strands the player behind a gate.
-    cardLang_  = (deck == "argent" || deck == "act1_done");
-    cardOkoro_ = (deck == "act1_done");
+    // Reaching a later deck means the earlier gates were already cleared; restore
+    // the flags so a reboot never strands the player behind one.
+    bool actII = (deck == "corvitae" || deck == "nullpoint");
+    cardLang_  = (deck == "argent") || actII;
+    cardOkoro_ = actII;
+    haloHailed_ = actII || cardLang_;
+    npSession_ = (p_->loadState("np_session") == "1");
     arriveAt("cantor");
-    std::string acc = (deck == "helion") ? "helion" : (deck == "argent") ? "argent" : "grey";
+    std::string acc = (deck == "helion") ? "helion"
+                    : (deck == "argent") ? "argent"
+                    : (deck == "corvitae") ? "green"
+                    : (deck == "nullpoint") ? "red" : "grey";
     cur_ = pal::grey;
     queueBeats("@color grey\nRESUME\n@color " + acc + "\n" + deckTitle(deck) +
                "\n@color grey\n/look  where am I\n/help  orders");
@@ -568,11 +588,13 @@ bool Game::handleDeckCommand(const std::string& cmd, const std::string& arg) {
     if (cmd == "dir")  { deckDir();  return true; }
     if (cmd == "open") { deckOpen(arg); return true; }
     if (cmd == "mail") { deckMail(); return true; }
-    if (deck_ == "helion") return helionCommand(cmd, arg);
-    if (deck_ == "argent") return argentCommand(cmd, arg);
-    // act1_done or unknown deck: end-of-content
+    if (deck_ == "helion")   return helionCommand(cmd, arg);
+    if (deck_ == "argent")   return argentCommand(cmd, arg);
+    if (deck_ == "corvitae") return corvitaeCommand(cmd, arg);
+    if (deck_ == "nullpoint")return nullpointCommand(cmd, arg);
+    // beyond NULLPOINT: end of built content
     cur_ = pal::grey;
-    queueBeats("END OF ACT I\n---\n@color amber\nThe decks beyond are\nnot yet built.\n"
+    queueBeats("[ END OF ACT II ]\n---\n@color amber\nThe way deeper is not\nbuilt yet. Your\nprogress is saved.\n"
                "@color grey\nTalk to CANTOR or\nHALO-9 in the\nmeantime.");
     cur_ = pal::amber;
     return true;
@@ -664,9 +686,51 @@ bool Game::argentCommand(const std::string& cmd, const std::string& arg) {
     return true;
 }
 
+// COR VITAE (Act II). Documents read freely; the SEALED record (/records) is the
+// set-piece: a PALE-scrambled signal lock (sine), then the Broken Terminal quest
+// when Cassel smashes it. Completing it recovers the HALO-change revelation.
+bool Game::corvitaeCommand(const std::string& cmd, const std::string& arg) {
+    (void)arg;
+    if (cmd == "records" || cmd == "record" || cmd == "sealed" || cmd == "incident") {
+        if (btStage() >= 9) {
+            cur_ = pal::grey;
+            queueBeats("You already pulled that thread. It runs down to NULLPOINT.\n@color grey\n/go when ready.");
+            cur_ = pal::amber; return true;
+        }
+        if (btStage() == 0) {   // first touch: the PALE-scrambled signal lock
+            playBeats("@color white\nOne record is sealed behind a signal lock. The waveform will not hold still.\n"
+                      "@color grey\n(align it — arrows.)");
+            if (!runSineMatch(p_)) {
+                cur_ = pal::grey; queueBeats("The signal writhes out of true. Try /records again.");
+                cur_ = pal::amber; return true;
+            }
+            playBeats("@color white\nThe lock gives. The record opens — and a shadow falls across the glass.");
+        }
+        runBrokenTerminal();     // resumable; plays its own beats + minigames
+        return true;
+    }
+    unknownHere();
+    return true;
+}
+
+// NULLPOINT (Act II). Tribunal roll and the Elders read freely; the Council's
+// FINAL SESSION (/session) is the point of no return — reading it opens /go.
+bool Game::nullpointCommand(const std::string& cmd, const std::string& arg) {
+    (void)arg;
+    if (cmd == "session" || cmd == "final" || cmd == "trial") {
+        queueFile("act2/nullpoint/council_fall.txt");
+        npSession_ = true; p_->saveState("np_session", "1");
+        return true;
+    }
+    unknownHere();
+    return true;
+}
+
 void Game::deckLook() {
-    if      (deck_ == "helion") queueFile("act1/helion/arrive.txt");
-    else if (deck_ == "argent") queueFile("act1/argent/arrive.txt");
+    if      (deck_ == "helion")   queueFile("act1/helion/arrive.txt");
+    else if (deck_ == "argent")   queueFile("act1/argent/arrive.txt");
+    else if (deck_ == "corvitae") queueFile("act2/corvitae/arrive.txt");
+    else if (deck_ == "nullpoint")queueFile("act2/nullpoint/arrive.txt");
     else { cur_ = pal::grey; queueBeats("nothing to see here\nyet."); cur_ = pal::amber; }
 }
 
@@ -681,6 +745,15 @@ void Game::deckDir() {
                    "ledger\n  ration issue log\n"
                    "notes\n  Emil's slips\n"
                    "---\n/open <name>\n/mail for letters");
+    } else if (deck_ == "corvitae") {
+        queueBeats("@color green\nDOCUMENTS / C-3\n@color grey\n"
+                   "genetics  Sorenson\nchildren  the school\n"
+                   "cryo      the pods\nscientist hidden log\n"
+                   "---\n/open <name>\n/records  the sealed one");
+    } else if (deck_ == "nullpoint") {
+        queueBeats("@color red\nDOCUMENTS / N-1\n@color grey\n"
+                   "tribunals the roll\nelders    the Council\n"
+                   "---\n/open <name>\n/session  the final trial");
     } else {
         cur_ = pal::grey; queueBeats("no documents here.");
     }
@@ -696,6 +769,14 @@ void Game::deckOpen(const std::string& arg) {
     } else if (deck_ == "argent") {
         if (a == "ledger" || a == "rations" || a == "okoro") { queueFile("act1/argent/okoro_ledger.txt"); return; }
         if (a == "notes"  || a == "emil" || a == "bay")      { queueFile("act1/argent/emil.txt"); return; }
+    } else if (deck_ == "corvitae") {
+        if (a == "genetics" || a == "sorenson" || a == "genes") { queueFile("act2/corvitae/genetics.txt"); return; }
+        if (a == "children" || a == "school" || a == "kids")    { queueFile("act2/corvitae/children.txt"); return; }
+        if (a == "cryo" || a == "pods" || a == "pod")           { queueFile("act2/corvitae/cryo.txt"); return; }
+        if (a == "scientist" || a == "hidden" || a == "private"){ queueFile("act2/corvitae/scientist.txt"); return; }
+    } else if (deck_ == "nullpoint") {
+        if (a == "tribunals" || a == "roll" || a == "cases")    { queueFile("act2/nullpoint/tribunals.txt"); return; }
+        if (a == "elders" || a == "council")                    { queueFile("act2/nullpoint/elders.txt"); return; }
     }
     cur_ = pal::red;
     queueBeats("no document named\n'" + arg + "'.\ntry /dir.");
@@ -723,6 +804,20 @@ void Game::helpDeck() {
                    "---\n/comms  hail crew\n/c <w> CANTOR\n/h <w> HALO-9\n"
                    "/notes  notebook\n/go     move on\n"
                    "---\nplain words are\nspoken on the\nchannel.");
+    } else if (deck_ == "corvitae") {
+        queueBeats("@color green\nCOR VITAE / C-3\n@color grey\n"
+                   "/look   the deck\n/dir    documents\n/open <name>\n"
+                   "/records the sealed log\n"
+                   "---\n/c <w> CANTOR\n/h <w> HALO-9\n"
+                   "/notes  notebook\n/go     move on\n"
+                   "---\nplain words are\nspoken on the\nchannel.");
+    } else if (deck_ == "nullpoint") {
+        queueBeats("@color red\nNULLPOINT / N-1\n@color grey\n"
+                   "/look   the deck\n/dir    documents\n/open <name>\n"
+                   "/session the final trial\n"
+                   "---\n/c <w> CANTOR\n/h <w> HALO-9\n"
+                   "/notes  notebook\n/go     move on\n"
+                   "---\nplain words are\nspoken on the\nchannel.");
     } else {
         helpStation();
     }
@@ -732,10 +827,14 @@ void Game::helpDeck() {
 void Game::deckStatus() {
     cur_ = pal::grey;
     std::string halo = haloHailed_ ? "STIRRING" : "?";
-    std::string acc = (deck_ == "helion") ? "helion" : (deck_ == "argent") ? "argent" : "grey";
+    std::string acc = (deck_ == "helion") ? "helion"
+                    : (deck_ == "argent") ? "argent"
+                    : (deck_ == "corvitae") ? "green"
+                    : (deck_ == "nullpoint") ? "red" : "grey";
+    std::string haloState = (deck_ == "corvitae" || deck_ == "nullpoint") ? "AWAKE" : halo;
     queueBeats("@color " + acc + "\n" + deckTitle(deck_) +
                "\n@color grey\nnetwork   ONLINE\ncrew      NONE\n"
-               "CANTOR    LISTENING\nHALO-9    " + halo);
+               "CANTOR    LISTENING\nHALO-9    " + haloState);
     cur_ = pal::amber;
 }
 
@@ -743,17 +842,25 @@ void Game::deckStatus() {
 // the real card/puzzle checks land: HELION needs the ledger seen, ARGENT the
 // archive. If not ready, Maru says so instead of arming the prompt.
 void Game::askGoOn() {
-    bool ready = (deck_ == "helion") ? cardLang_
-               : (deck_ == "argent") ? cardOkoro_
+    bool ready = (deck_ == "helion")   ? cardLang_
+               : (deck_ == "argent")   ? cardOkoro_
+               : (deck_ == "corvitae") ? (btStage() >= 9)
+               : (deck_ == "nullpoint")? npSession_
                : true;
     if (!ready) {
         cur_ = pal::white;
         if (deck_ == "helion")
             queueBeats("@color maru\nMARU\n@color white\nThe lift wants a card we don't have.\n"
                        "@color grey\nthat load ledger is nagging at me.\n(try /power, /solve)");
-        else
+        else if (deck_ == "argent")
             queueBeats("@color maru\nMARU\n@color white\nWe can't leave without Okoro's card.\n"
                        "@color grey\nit's in the archive.\n(try /archive, /stow)");
+        else if (deck_ == "corvitae")
+            queueBeats("@color maru\nMARU\n@color white\nThere's a sealed record here Cassel didn't want us to see. We're not leaving until we've read it.\n"
+                       "@color grey\n(try /records)");
+        else
+            queueBeats("@color maru\nMARU\n@color white\nRead the Council's last session first. We have to know how it ended.\n"
+                       "@color grey\n(try /session)");
         cur_ = pal::amber;
         return;
     }
@@ -764,7 +871,7 @@ void Game::askGoOn() {
     cur_ = pal::amber;
 }
 
-// helion -> (lift) -> argent -> (wake) -> act1_done
+// helion ->(lift)-> argent ->(wake)-> corvitae ->(descend)-> nullpoint -> end
 void Game::advanceDeck() {
     if (deck_ == "helion") {
         queueFile("act1/helion/lift.txt");     // CANTOR greets the dead Dr. Lang
@@ -773,10 +880,25 @@ void Game::advanceDeck() {
     }
     if (deck_ == "argent") {
         queueFile("act1/argent/wake.txt");     // power restored, HALO-9 wakes
-        deck_ = "act1_done";
+        cur_ = pal::grey;
+        queueBeats("[ ACT I COMPLETE ]\n---\n@color white\nThe station is fully awake now. It knows you are here.");
+        cur_ = pal::amber;
+        arriveDeck("corvitae");                // Act II begins
+        return;
+    }
+    if (deck_ == "corvitae") {
+        cur_ = pal::white;
+        queueBeats("@color white\nThe recovered trail runs down. You take the long stair to NULLPOINT, where the Council was tried.");
+        cur_ = pal::amber;
+        arriveDeck("nullpoint");
+        return;
+    }
+    if (deck_ == "nullpoint") {
+        deck_ = "act2_done";
         p_->saveState("deck", deck_);
         cur_ = pal::grey;
-        queueBeats("[ ACT I COMPLETE ]\n---\n@color amber\nAct II is not built\nyet. Your progress\nis saved.");
+        queueBeats("[ ACT II COMPLETE ]\n---\n@color white\nTwo AIs. One that lies and knows, one that is honest and wrong. And under both, something you still cannot see.\n"
+                   "@color grey\nAct III awaits. Your progress is saved.");
         cur_ = pal::amber;
         return;
     }
@@ -1048,6 +1170,8 @@ void Game::cmdReset() {
     p_->saveState("notes", "");
     p_->saveState("deck", "");
     p_->saveState("bt_stage", "");
+    p_->saveState("np_session", "");
+    p_->saveState("adminpw", "");
     p_->clear(); p_->setColor(pal::grey); p_->print("\nsave erased.\nrebooting.\n");
     p_->delayMs(900); p_->reboot(); running_ = false;
 }
@@ -1203,7 +1327,8 @@ bool Game::isKnownCommand(const std::string& c) {
                                  "diary","junia","lang","power","ledger","load",
                                  "rations","okoro","bay","emil","grain",
                                  "comms","ferryman","cassel","archive","stow","card",
-                                 "solve","balance","loader"};
+                                 "solve","balance","loader",
+                                 "records","record","sealed","incident","session","final","trial"};
     for (size_t i = 0; i < sizeof(cmds)/sizeof(cmds[0]); ++i)
         if (c == cmds[i]) return true;
     return false;
