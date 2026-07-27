@@ -6,10 +6,20 @@
 #include <M5Cardputer.h>
 #include <M5Unified.h>
 #include <Preferences.h>
+#include <SPI.h>
+#include <SD.h>
+#include <map>
 #include "../core/platform.h"
 #include "content_embedded.h"
 
 namespace kd {
+
+// Cardputer SD (SPI) pins. Same base as the original Cardputer.
+static const int KD_SD_SCK  = 40;
+static const int KD_SD_MISO = 39;
+static const int KD_SD_MOSI = 14;
+static const int KD_SD_CS   = 12;
+static const char* KD_SAVE_PATH = "/kodzimim.sav";
 
 // Screen: 240x135. Base font is 6x8; at size 2 that is 12x16 px
 // => 20 columns x 8 rows. Big enough to actually read in the hand.
@@ -28,6 +38,16 @@ public:
         d.fillScreen(0x0000);
         setColor(pal::amber);
         d.setCursor(0, 0);
+        initSave();
+    }
+
+    // Saves go to an SD file first (reliable even when launched from M5Launcher,
+    // where NVS writes have proved flaky) AND to NVS as a fallback. Reads prefer
+    // SD, then fall back to NVS.
+    void initSave() {
+        SPI.begin(KD_SD_SCK, KD_SD_MISO, KD_SD_MOSI, KD_SD_CS);
+        sdOk_ = SD.begin(KD_SD_CS, SPI);
+        if (sdOk_) loadSaveFromSd();
     }
 
     Screen screen() const override { Screen s; s.cols = 20; s.rows = 8; return s; }
@@ -151,11 +171,17 @@ public:
     }
 
     void saveState(const std::string& key, const std::string& value) override {
-        prefs_.begin("kodzimim", false);
+        mem_[key] = value;
+        if (sdOk_) writeSaveToSd();
+        prefs_.begin("kodzimim", false);   // also keep an NVS copy as a fallback
         prefs_.putString(key.c_str(), value.c_str());
         prefs_.end();
     }
     std::string loadState(const std::string& key) override {
+        if (sdOk_) {
+            std::map<std::string, std::string>::iterator it = mem_.find(key);
+            if (it != mem_.end()) return it->second;
+        }
         prefs_.begin("kodzimim", true);
         String v = prefs_.getString(key.c_str(), "");
         prefs_.end();
@@ -166,6 +192,38 @@ private:
     void echo(char c) { M5Cardputer.Display.print(c); }
     void tick() { M5Cardputer.Speaker.tone(2200, 8); }
     static uint16_t rgb(Color c) { return M5Cardputer.Display.color565(c.r, c.g, c.b); }
+
+    void loadSaveFromSd() {
+        mem_.clear();
+        File f = SD.open(KD_SAVE_PATH, FILE_READ);
+        if (!f) return;
+        while (f.available()) {
+            String line = f.readStringUntil('\n');
+            line.replace("\r", "");
+            int eq = line.indexOf('=');
+            if (eq > 0) {
+                String k = line.substring(0, eq);
+                String v = line.substring(eq + 1);
+                mem_[std::string(k.c_str())] = std::string(v.c_str());
+            }
+        }
+        f.close();
+    }
+    void writeSaveToSd() {
+        SD.remove(KD_SAVE_PATH);                    // rewrite whole file (no stale bytes)
+        File f = SD.open(KD_SAVE_PATH, FILE_WRITE);
+        if (!f) return;
+        for (std::map<std::string, std::string>::iterator it = mem_.begin();
+             it != mem_.end(); ++it) {
+            f.print(it->first.c_str());
+            f.print("=");
+            f.println(it->second.c_str());
+        }
+        f.close();
+    }
+
+    bool sdOk_ = false;
+    std::map<std::string, std::string> mem_;
     Preferences prefs_;
 };
 
