@@ -1382,11 +1382,23 @@ std::string Game::voiceName(const std::string& who) const {
     return up;
 }
 
-// Load a speaker's script once and keep it resident.
+// HALO-9 is a different character once the station wakes (end of Act I): from
+// then on he answers in questions. Different script file, same "who".
+bool Game::haloAwake() const {
+    return deck_ == "corvitae" || deck_ == "nullpoint" || deck_ == "act2_done";
+}
+std::string Game::dialoguePath(const std::string& who) const {
+    if (who == "halo" && haloAwake()) return "talk/halo_awake.txt";
+    return "talk/" + who + ".txt";
+}
+
+// Load a speaker's script once and keep it resident. Cache by PATH, so HALO's
+// silent and awakened scripts don't collide under the same "who".
 bool Game::ensureDialogue(const std::string& who) {
-    if (dlgLoaded_ == who) return true;
-    if (!loadDialogue("talk/" + who + ".txt")) return false;
-    dlgLoaded_ = who;
+    std::string path = dialoguePath(who);
+    if (dlgLoaded_ == path) return true;
+    if (!loadDialogue(path)) return false;
+    dlgLoaded_ = path;
     introShown_ = false;
     return true;
 }

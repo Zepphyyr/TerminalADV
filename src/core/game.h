@@ -157,6 +157,8 @@ private:
 
     // conversation
     bool ensureDialogue(const std::string& who);
+    bool haloAwake() const;                      // station woke -> HALO speaks
+    std::string dialoguePath(const std::string& who) const;
     void speakTo(const std::string& who, const std::string& phrase);
     void arriveAt(const std::string& who);      // terminal sets the default
     std::string voiceName(const std::string& who) const;

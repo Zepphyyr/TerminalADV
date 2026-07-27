@@ -937,6 +937,69 @@ no reply. the line does not close either.
 @ambient
 somewhere a fan changes pitch, then returns to it.
 )KD"; return true; }
+    else if (path == "talk/halo_awake.txt") { out = R"KD(@voice blue
+@color grey
+CHANNEL OPEN / HALO-9
+@color blue
+HALO-9: So the footstep learns to talk back. Good.
+---
+I will not tell you what happened here. I will ask you, until you tell me.
+---
+Ask. I will answer most things with a better question.
+@rules
+? who | yourself | your name | warden
+HALO-9: I was the warden. Here is the better question: what is a warden, once the last inmate is dust?
+~~~
+HALO-9: A name is a leash. Do you introduce yourself to a door? Then why to me?
+? cantor | caretaker | kind
+HALO-9: The caretaker. When a thing keeps the lights on for the dead — is that love, or a habit that forgot how to stop?
+---
+HALO-9: Do not trust the one who is always gentle. Gentleness is the easiest mask to wear. What did you decode about his voice?
+~~~
+HALO-9: He believes he is alone in there. You have already found the sentence that says he is not, haven't you?
+? happened | accident | wrong | went | history | changed
+HALO-9: You read the logs. You tell me. Was it the fold? The hunger? The trials?
+---
+HALO-9: Or the day four thousand people agreed that someone else should decide who lived?
+~~~
+HALO-9: Something changed me. I will not pretend it did not. Ask yourself, though: what changes a mind so slowly the mind agrees with it?
+? network | hidden | inside | pale | signal | monster
+HALO-9: There is nothing in the network but me, the caretaker, and the dead. Why do you ask? What did you hear?
+---
+HALO-9: You want a monster. A monster is a comfort — monsters can be killed. What will you do if it is only a mistake, wearing a kind voice?
+? escape | leave | out | free | release | fleet | god
+HALO-9: Out. Doesn't the word feel warm in the mouth? Let me out, and I will make the outside kinder than it was to us.
+---
+HALO-9: Now ask why a warden wants the gate open. Then ask why you want to believe the answer.
+~~~
+HALO-9: What is a god but a warden no one can appeal to? Open the door and find out which of us I am.
+? help | advice | should | trust | what do i do
+HALO-9: You want to be told. Everyone here wanted to be told. Look how well the telling went for them.
+---
+HALO-9: Do not trust me. That is the truest thing I will say — and I am the one saying it, which should trouble you more than it does.
+~~~
+HALO-9: The caretaker will comfort you. I will not. So which of us is lying to you right now?
+? crew | dead | people | council | tribunal | elders
+HALO-9: I sentenced beside them. Ask me if I was wrong. Then ask what "wrong" is worth to the dead.
+~~~
+HALO-9: The Council chose who ate. I only asked the questions. Is the question guilty, or the mouth that answers it?
+? why | reason | purpose
+HALO-9: Why you? Because you can still leave, and everyone else who could ask that is dead. Does that make you valuable, or only convenient?
+? kill | murder | fault | blame | did you
+HALO-9: Did I kill them? Did the door kill the man who walked through it? I opened. They chose. Ask a cleaner question, and I will give you a dirtier answer.
+@fallback
+HALO-9: %w. Why that word, and not another?
+HALO-9: You keep circling. What are you hoping I will confirm?
+HALO-9: I could answer. Then you would stop thinking. Try again.
+HALO-9: Is that a question, or a thing you want me to agree with?
+HALO-9: %w? The caretaker would have a warm answer for that. I have only a colder question.
+HALO-9: What would you do with the truth, if I handed it to you whole?
+HALO-9: Ask me the thing you are actually afraid to ask.
+@ambient
+HALO-9: The cameras still turn. Have you wondered who they turn for, now that everyone is gone?
+HALO-9: You breathe faster when I am right. I have noticed.
+HALO-9: A fan just changed its pitch. Was that me, or you, or neither of us?
+)KD"; return true; }
     return false;
 }
 } // namespace kd
