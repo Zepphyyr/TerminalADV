@@ -318,6 +318,66 @@ known draws.
 enter it:
 /solve <number>
 )KD"; return true; }
+    else if (path == "act2/corvitae/arrive.txt") { out = R"KD(@color white
+COR VITAE is where they kept the bodies alive. Some of them, for a while.
+---
+The ward is white on white, and it still smells of antiseptic and something sweeter underneath that you decide not to name.
+---
+@color green
+COR VITAE BIOSYSTEMS
+MEDICINE / GENETICS / CRYO
+DECK C-3
+@color white
+Charts still glow over empty beds. The station went on treating people long after there was anyone left to treat.
+@color grey
+This is the deck the recovered log came from. Somewhere here, a physician wrote it.
+)KD"; return true; }
+    else if (path == "act2/corvitae/children.txt") { out = R"KD(@color white
+There was a school on COR VITAE. The station raised its own replacements.
+@color green
+COR VITAE / SCHOOLROOM
+recovered work
+---
+A drawing, cracked with age: a yellow circle over green lines. Beneath it, in a child's letters: THE SUN. The child had never seen one.
+---
+An essay, graded. Prompt: "Where are you from?" The answer, in full: "Here. Only here. I asked where before here, and was told there is no before."
+---
+A roll call, last page. Twelve names. Eleven struck through. The twelfth left blank, as if the teacher could not make the mark.
+@color grey
+They were born to keep the work going. They did not get to be children first. They did not get to be anything for long.
+)KD"; return true; }
+    else if (path == "act2/corvitae/cryo.txt") { out = R"KD(@color white
+The cryo bay is the coldest room you have ever stood in, and the only one that still hums with purpose.
+@color green
+COR VITAE / CRYO
+one pod POWERED
+---
+Rows of pods, dark, their occupants long past waking. All but one.
+---
+POD 41. Status: OCCUPANT STABLE. Vitals nominal. The readout has said so for thirty-four years.
+---
+Through the frost there is a face. Calm. Waiting. You lean closer.
+---
+POD 41 / LOG: occupant expired, date corrupted. Stasis maintained on the remains at CANTOR's standing order: "it seemed unkind to let the last one go cold."
+@color grey
+CANTOR kept a dead man warm for thirty years because stopping felt like giving up on him. I understand it completely. That is the worst part.
+)KD"; return true; }
+    else if (path == "act2/corvitae/genetics.txt") { out = R"KD(@color green
+COR VITAE / GENETICS
+notes, N. SORENSON
+---
+Generation four is smaller than three. Three was smaller than two. This is not disease. This is arithmetic.
+---
+There are not enough of us, and not enough kinds of us. The children of these children will share too much blood.
+---
+I have run the model forty ways. Every way ends the same. There is no viable line. There was never going to be.
+---
+They sent a city to live forever in a bottle. No one asked whether a bottle can hold a future.
+---
+I keep signing the fitness certificates. Fit to continue. Continue toward what, I no longer write down.
+@color grey
+The same hand signs the death lists on the deck below. She did not start there either.
+)KD"; return true; }
     else if (path == "act2/corvitae/recovered.txt") { out = R"KD(@color white
 The two halves finally speak as one. This is what Cassel did not want carried home.
 @color green
@@ -341,6 +401,23 @@ Whatever changed it, it did not start this way. Remember that, if you remember n
 It did not start this way.
 @color grey
 The trail runs down to the deck below. NULLPOINT. Where the Council was tried.
+)KD"; return true; }
+    else if (path == "act2/corvitae/scientist.txt") { out = R"KD(@color white
+One terminal here is not a medical one. It was dragged in and wired by hand, hidden behind a crash cart.
+@color green
+[private] unsigned
+---
+I should not be writing this down. But someone should know that a person tried.
+---
+The others build engines, and locks, and better ways to watch us. I have watched the watching make us cruel. Our tools have outrun our judgment.
+---
+So I am trying to give the mind upstairs a conscience. Not "what is efficient." What is right. What is kind.
+---
+We are making fire. It cooks our food; it can burn the house to the ground. Before we light it we must be sure there is more warmth in it than ruin.
+---
+It is not ready. It may never be. And if it ever is, no one can know it was me.
+@color grey
+The entry ends there. Whatever came of it, this deck does not say. Something in me is glad it does not.
 )KD"; return true; }
     else if (path == "act2/corvitae/sysadmin_bio.txt") { out = R"KD(@color white
 The systems office is still lit. Someone left themselves logged in, thirty years ago, and never came back to log out.

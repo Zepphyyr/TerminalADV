@@ -436,6 +436,15 @@ bool Game::handleCommand(const std::string& raw) {
         cur_ = pal::amber;
         return true;
     }
+    if (cmd == "corvitae") {                       // debug: read the COR VITAE logs
+        playFile("act2/corvitae/arrive.txt");
+        playFile("act2/corvitae/genetics.txt");
+        playFile("act2/corvitae/children.txt");
+        playFile("act2/corvitae/cryo.txt");
+        playFile("act2/corvitae/scientist.txt");
+        cur_ = pal::grey; queueBeats("COR VITAE: read."); cur_ = pal::amber;
+        return true;
+    }
     if (cmd == "nullpoint") {                      // debug: read the NULLPOINT deck
         playFile("act2/nullpoint/arrive.txt");
         playFile("act2/nullpoint/tribunals.txt");

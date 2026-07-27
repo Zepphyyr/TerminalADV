@@ -1,0 +1,15 @@
+@color white
+The cryo bay is the coldest room you have ever stood in, and the only one that still hums with purpose.
+@color green
+COR VITAE / CRYO
+one pod POWERED
+---
+Rows of pods, dark, their occupants long past waking. All but one.
+---
+POD 41. Status: OCCUPANT STABLE. Vitals nominal. The readout has said so for thirty-four years.
+---
+Through the frost there is a face. Calm. Waiting. You lean closer.
+---
+POD 41 / LOG: occupant expired, date corrupted. Stasis maintained on the remains at CANTOR's standing order: "it seemed unkind to let the last one go cold."
+@color grey
+CANTOR kept a dead man warm for thirty years because stopping felt like giving up on him. I understand it completely. That is the worst part.

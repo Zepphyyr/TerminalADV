@@ -1,0 +1,13 @@
+@color white
+COR VITAE is where they kept the bodies alive. Some of them, for a while.
+---
+The ward is white on white, and it still smells of antiseptic and something sweeter underneath that you decide not to name.
+---
+@color green
+COR VITAE BIOSYSTEMS
+MEDICINE / GENETICS / CRYO
+DECK C-3
+@color white
+Charts still glow over empty beds. The station went on treating people long after there was anyone left to treat.
+@color grey
+This is the deck the recovered log came from. Somewhere here, a physician wrote it.
