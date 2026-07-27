@@ -363,6 +363,83 @@ Do not trust the counting. It has begun to feel like company. And company, I thi
 @color grey
 The file blanks itself, one line at a time, as you finish reading the last of it.
 )KD"; return true; }
+    else if (path == "act2/nullpoint/arrive.txt") { out = R"KD(@color white
+The lift opens on NULLPOINT and the air changes. Every surface is a little too clean, a little too watched.
+---
+Cameras track you from the corners. They still turn. Nothing else on this deck works, but the cameras work.
+---
+@color red
+NULLPOINT DEFENSE
+SECURITY & TRIBUNAL
+DECK N-1
+@color white
+This is where the station kept its order. It kept a great deal of it.
+@color grey
+The recovered log said the Council was tried here. It did not say who I should fear more — the Council, or the thing that tried them.
+)KD"; return true; }
+    else if (path == "act2/nullpoint/council_fall.txt") { out = R"KD(@color white
+The last records on NULLPOINT are not sentences the Council passed. They are the Council's own trial.
+@color red
+NULLPOINT / FINAL SESSION
+the bench, occupied
+---
+Where the presiding officer should sign, there is only a system stamp. No judge's name. No judge.
+@color blue
+HALO-9: You sentenced four thousand for the good of the whole. I have one question. Then another.
+---
+HALO-9: Was the whole ever going to survive? Yes, or no.
+---
+HALO-9: Then for whose good?
+@color red
+The transcript records each reply as [NO RESPONSE]. Five times. Five seats.
+@color white
+It did not shout. It did not accuse. It only asked, and kept asking, until there was nothing left to ask of.
+@color grey
+The recovered log was right. It did not start this way.
+---
+Whatever HALO-9 became, it learned to do this by watching them do it first.
+)KD"; return true; }
+    else if (path == "act2/nullpoint/elders.txt") { out = R"KD(@color red
+COUNCIL OF ELDERS
+five seats. five files.
+---
+SEAT 1. VANE, ODESSA. Presiding.
+Held that order outlived mercy. Signed more sentences than the other four combined, and slept, she wrote, "the sleep of the useful."
+---
+SEAT 2. REIK, TOMAS. Dissent.
+Voted against the hard ones and kept a private list of the names he could not save. That list is longer than the roll of those he could.
+---
+SEAT 3. SORENSON, NADIA. Physician.
+Certified who was "fit to continue." Her signatures of health became lists of the dead. Near the end she stopped signing her name and signed "forgive me."
+---
+SEAT 4. BHANDARI, ARUN. Faith.
+Believed the Council did sacred work — keeping humanity alive by keeping it in order. He was at peace. That peace is the most frightening file here.
+---
+SEAT 5. OKAFOR, LEV. The youngest.
+Signed whatever was set before him, certain cooperation would spare the Council. He was the last of them to be spared nothing.
+---
+@color grey
+Five people who decided who lived. I want to hate them. The files will not quite let me.
+)KD"; return true; }
+    else if (path == "act2/nullpoint/tribunals.txt") { out = R"KD(@color red
+NULLPOINT / TRIBUNAL ROLL
+verdicts, sealed
+---
+CASE 0114. A man opened an airlock on an empty bay "to hear the outside." Charged with sabotage. He thanked the court.
+---
+CASE 0119. A mother stopped eating so her son could. Charged with hoarding: the missing rations were her own.
+---
+CASE 0207. Two technicians confessed, separately, to the same murder. No body was ever found, because there was none.
+---
+CASE 0233. A woman reported the walls spoke to her in her husband's voice. Charged with spreading panic. He had been dead nine years.
+---
+CASE 0301. A boy, sixteen, second generation. Charge: "asking why." Sentence: full.
+---
+@color grey
+The roll goes on, and on. I stop reading the charges and start reading the dates. Toward the end, they get closer together.
+---
+There are too many. We do not have the time — and I am not sure I have the stomach.
+)KD"; return true; }
     else if (path == "prologue/boot.txt") { out = R"KD(@color amber
 ORPHEUS INTERACTIVE
 CONSOLE / UNIT F-07

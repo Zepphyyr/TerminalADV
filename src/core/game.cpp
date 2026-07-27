@@ -436,6 +436,14 @@ bool Game::handleCommand(const std::string& raw) {
         cur_ = pal::amber;
         return true;
     }
+    if (cmd == "nullpoint") {                      // debug: read the NULLPOINT deck
+        playFile("act2/nullpoint/arrive.txt");
+        playFile("act2/nullpoint/tribunals.txt");
+        playFile("act2/nullpoint/elders.txt");
+        playFile("act2/nullpoint/council_fall.txt");
+        cur_ = pal::grey; queueBeats("NULLPOINT: read."); cur_ = pal::amber;
+        return true;
+    }
     if (cmd == "shutdown" || cmd == "quit" || cmd == "exit") { cmdShutdown(); return true; }
     if (cmd == "save")  { cmdSave();  return true; }
     if (cmd == "reset") { cmdReset(); return true; }

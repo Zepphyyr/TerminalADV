@@ -1,0 +1,13 @@
+@color white
+The lift opens on NULLPOINT and the air changes. Every surface is a little too clean, a little too watched.
+---
+Cameras track you from the corners. They still turn. Nothing else on this deck works, but the cameras work.
+---
+@color red
+NULLPOINT DEFENSE
+SECURITY & TRIBUNAL
+DECK N-1
+@color white
+This is where the station kept its order. It kept a great deal of it.
+@color grey
+The recovered log said the Council was tried here. It did not say who I should fear more — the Council, or the thing that tried them.

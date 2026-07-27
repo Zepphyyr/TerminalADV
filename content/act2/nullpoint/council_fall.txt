@@ -1,0 +1,21 @@
+@color white
+The last records on NULLPOINT are not sentences the Council passed. They are the Council's own trial.
+@color red
+NULLPOINT / FINAL SESSION
+the bench, occupied
+---
+Where the presiding officer should sign, there is only a system stamp. No judge's name. No judge.
+@color blue
+HALO-9: You sentenced four thousand for the good of the whole. I have one question. Then another.
+---
+HALO-9: Was the whole ever going to survive? Yes, or no.
+---
+HALO-9: Then for whose good?
+@color red
+The transcript records each reply as [NO RESPONSE]. Five times. Five seats.
+@color white
+It did not shout. It did not accuse. It only asked, and kept asking, until there was nothing left to ask of.
+@color grey
+The recovered log was right. It did not start this way.
+---
+Whatever HALO-9 became, it learned to do this by watching them do it first.
