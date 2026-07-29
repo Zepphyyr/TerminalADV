@@ -1,72 +1,64 @@
-# KODZIMIM — пролог (MVP)
+# PALE SIGNAL (MVP)
 
-Текстово-интерактивная игра для M5Stack Cardputer-Adv. Ты — безымянный
-оператор спасательной группы FERRYMAN. Станция MERIDIAN DEEP вернулась из
-34-летнего исчезновения. Читай логи, взломай стыковку, услышь первый голос в
-сети. Это вертикальный срез: пролог целиком + движок, на котором строится вся
-игра.
+A text-based interactive game for the M5Stack Cardputer-Adv. 
+You are an unnamed operator for the FERRYMAN rescue team. The MERIDIAN DEEP station has returned after 34 years. 
+Read the logs, hack the docking system, and hear the first voice on the network. 
+This is a vertical slice: a prologue and the engine that powers the full game.
 
-Вдохновлено Marathon / SOMA / SIGNALIS / Zork / Lain. Оригинальный сеттинг.
-
-## Структура
+Inspired by Classic Marathon / SOMA / SIGNALIS / Zork. Original setting.
+## Structure
 
 ```
 kodzimim/
-  src/core/       переносимое ядро (движок, парсер, пейджер) — общее для ПК и железа
-    platform.h    интерфейс платформы (экран/клавиши/звук/файлы/сейв)
-    game.h/.cpp   логика пролога, команды, головоломка
-  src/desktop/    ПК-сборка для тестов (эмулирует экран 40x16 в терминале)
-  src/esp32/      сборка под Cardputer-Adv (M5Unified + M5Cardputer)
-  content/prologue/  тексты игры (.txt), редактируются без перекомпиляции
-  Makefile        сборка ПК-версии
-  platformio.ini  сборка/прошивка устройства
+  src/core/       portable core (engine, parser, pager) — shared between PC and hardware
+    platform.h    platform interface (screen/keys/sound/files/save)
+    game.h/.cpp   prologue logic, commands, puzzle
+  src/desktop/    PC build for testing (emulates a 40x16 screen in the terminal)
+  src/esp32/      Build for Cardputer-Adv (M5Unified + M5Cardputer)
+  content/prologue/  Game text files (.txt) can be edited without recompilation.
+  Makefile        PC version build
+  platformio.ini  device assembly/firmware flashing
 ```
 
-Принцип: **движок — это код, сюжет — это данные.** Тексты лежат отдельными
-файлами в `content/` и грузятся в рантайме (на устройстве — из LittleFS).
+The principle: **the engine is code, the story is data.** 
+Text files are stored separately in `content/` and loaded at runtime (from LittleFS on the device).
 
-## Тест на компьютере (без железа)
+## Computer-based test (without hardware)
 
-Нужен `g++` (или clang) и `make`.
-
-```
-make            # собрать
-make run        # играть в терминале
-```
-
-Переменные окружения для отладки:
-
-- `KD_DELAY=0` — отключить эффект печати (мгновенный вывод; удобно для тестов)
-- `KD_BEEP=1` — включить звуковой сигнал (bell) на «пиканье»
-- `KD_COLS`/`KD_ROWS` — переопределить размер эмулируемого экрана
-
-Пример быстрого прохождения: `KD_DELAY=0 ./kodzimim`
-
-## Прошивка на Cardputer-Adv
-
-Нужен [PlatformIO](https://platformio.org/).
+You need `g++` (or clang) and `make`.
 
 ```
-pio run -t upload      # собрать и прошить код
-pio run -t uploadfs    # залить тексты (content/) в LittleFS
+make            # build
+make run        # play in terminal
 ```
 
-`data_dir = content` в `platformio.ini` кладёт файлы в корень LittleFS, движок
-читает `/prologue/boot.txt` и т.д. Если PlatformIO не знает борду `m5stack-stamps3`
-для ADV — поправь `board` под свой core (StampS3/S3A).
+Environment variables for debugging:
 
-## Команды в игре
+- `KD_DELAY=0` — disable the typing effect (instant output; convenient for testing)
+- `KD_BEEP=1` — set the audible signal (bell) to "beep"
+- `KD_COLS`/`KD_ROWS` — resize the emulated screen
 
-`help  dir  open <имя>  mail  logs  status  unlock <код>  clear  shutdown`
-(сокращения: `o`=open, `h`/`?`=help, `l`=logs)
+Example of a quick walkthrough: `KD_DELAY=0 ./kodzimim`
 
-Головоломка пролога: код стыковки = дата (день рождения напарницы Vell). Он
-перекрёстно спрятан в `mail` и `open roster` (04-12 → `unlock 0412`). Это и есть
-базовая петля всей игры: читаешь логи → находишь ключ → открываешь следующее.
+## Firmware for Cardputer-Adv
 
-## Что дальше
+Need [PlatformIO]
 
-Пролог доказывает, что движок и петля работают. Следующий шаг — Акт I «The
-Quiet Decks» (терминалы HELION + ARGENT): новые бренды терминалов со своим
-стилем, ветвление, появление CANTOR как полноценного спутника. См. общий
-дизайн-документ игры.
+```
+pio run -t upload      # build and flash the code
+pio run -t uploadfs    # Upload text files (content/) to LittleFS.
+```
+
+Setting `data_dir = content` in `platformio.ini` places files at the root of LittleFS, 
+and the engine reads `/prologue/boot.txt`, etc. 
+If PlatformIO doesn't recognize the `m5stack-stamps3` board for the ADV, 
+adjust the `board` setting to match your specific core (StampS3/S3A).
+
+## In-game commands
+
+`help  dir  open <name>  mail  logs  status  unlock <code>  clear  shutdown`
+(abbreviations: `o`=open, `h`/`?`=help, `l`=logs)
+
+Prologue puzzle: the docking code is a date. It is
+cross-referenced between `mail` and `open roster` [REDACTED]. This
+is the core loop of the entire game: read logs → find the key → unlock the next step.
