@@ -454,6 +454,16 @@ bool Game::handleCommand(const std::string& raw) {
         cur_ = pal::grey; queueBeats("NULLPOINT: read."); cur_ = pal::amber;
         return true;
     }
+    if (cmd == "orpheus") {                        // debug: read ORPHEUS (Mercer)
+        playFile("act3/orpheus/arrive.txt");
+        playFile("act3/orpheus/mercer_1.txt");
+        playFile("act3/orpheus/mercer_2.txt");
+        playFile("act3/orpheus/mercer_3.txt");
+        playFile("act3/orpheus/mercer_4.txt");
+        playFile("act3/orpheus/quarters.txt");
+        cur_ = pal::grey; queueBeats("ORPHEUS: read."); cur_ = pal::amber;
+        return true;
+    }
     if (cmd == "shutdown" || cmd == "quit" || cmd == "exit") { cmdShutdown(); return true; }
     if (cmd == "save")  { cmdSave();  return true; }
     if (cmd == "reset") { cmdReset(); return true; }

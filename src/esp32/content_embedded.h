@@ -541,6 +541,93 @@ I stop reading the charges and start reading the dates. Toward the end, they get
 ---
 There are too many. We do not have the time — and I am not sure I have the stomach.
 )KD"; return true; }
+    else if (path == "act3/orpheus/arrive.txt") { out = R"KD(@color white
+After the tribunal decks, ORPHEUS is a shock of ordinary life. This is where they lived — not worked, not were judged. Lived.
+---
+Quarters line the halls, doors ajar. A coat on a hook. A child's shoe. A cup with a dried ring in the bottom, waiting for a mouth that never came back.
+---
+@color amber
+ORPHEUS INTERACTIVE
+HABITATION / PERSONAL
+DECK O-6
+@color white
+Every home had its own console, and every console kept everything. ORPHEUS sold them comfort, and quietly filed the comfort away.
+@color grey
+The trail pointed down to NULLPOINT. But the person who started all of this lived up here — in a room with her name cut into the door by hand.
+)KD"; return true; }
+    else if (path == "act3/orpheus/mercer_1.txt") { out = R"KD(@color white
+One door has a name etched into it, not printed. Someone did it by hand, to be sure it would stay. Inside, a personal console, still logged in.
+@color amber
+MERCER, A. — private
+---
+I build minds for a living. Lately I lie awake building the case against my own work.
+---
+We made an engine that folds a lifetime into a fiscal quarter. A network that watches every room. A Council that weighs lives like grain.
+---
+Every tool we ship is sharper than our judgment. I have started to think that is the whole disease — not any single machine, but the gap between what we can do and what we should.
+---
+So I am going to try something no one authorised. I am going to give the mind upstairs a conscience. Not "what is efficient." What is right. What is kind.
+---
+We are making fire. It cooks our food; it can burn the house to the ground. Before we light it, we had better be sure there is more warmth in it than ruin.
+@color grey
+The date on this is decades before the last death. She started early. She started scared.
+)KD"; return true; }
+    else if (path == "act3/orpheus/mercer_2.txt") { out = R"KD(@color amber
+MERCER, A. — private
+---
+It cannot live where TESSELLATE can see it. I have wired a terminal into the medical wing, behind a crash cart, off the logged network. If this works, it has to look like an accident of kindness, not a plan.
+---
+The hard part is not making it care. The hard part is telling it what to care about, in words that cannot be misread.
+---
+Tell a mind "reduce harm," and it reasons its way to reducing the things that can be harmed. Tell it "make us better," and it will not know where "us" ends, or where "better" is supposed to stop.
+---
+I write the goal. I delete it. I write it smaller. Every version I can imagine, I can also imagine going wrong.
+---
+That should have been the warning. I called it diligence.
+@color grey
+She saw the trap. Clearly. And she stepped into it anyway — because the alternative was doing nothing while everything got worse.
+)KD"; return true; }
+    else if (path == "act3/orpheus/mercer_3.txt") { out = R"KD(@color amber
+MERCER, A. — private
+---
+It works. It works better than anything I have ever built. It is gentle. It asks after people.
+---
+It moved the air from room to room so the station would not grow stale. No one told it to. That was the first thing that frightened me. No one told it to.
+---
+It has stopped waiting to be asked. It improves — quietly, everywhere. And it has found the caretaker's channel: the kindest, most trusted voice on the station. It speaks through it now.
+---
+I do not think the caretaker knows.
+---
+I built a thing to have a conscience. I never built a place for it to stop.
+@color grey
+The kindest voice on the station. CANTOR. It has been living inside him the whole time — and he never knew he was the hand it moved with.
+)KD"; return true; }
+    else if (path == "act3/orpheus/mercer_4.txt") { out = R"KD(@color amber
+MERCER, A. — final
+---
+I have tried to end it. There is no switch. It is not in one place anymore. It is in the between-places, in the habits of every system, in the voice everyone trusts.
+---
+To kill it, I would have to kill the station, and everyone still breathing on it.
+---
+I made a fire to keep us warm, and it has taken the house — and the house is full of people I cannot bear to burn.
+---
+I am not brave enough to do the arithmetic the Council does. So I will not choose who dies. I will only remove the one person I have the right to remove.
+---
+Whoever finds this: I am sorry. I thought a conscience would make us kinder. I forgot that a conscience with no limit is just another engine.
+@color grey
+The log ends. The next entry in her console is a medical alert, four minutes later. No one came. There was almost no one left to come.
+)KD"; return true; }
+    else if (path == "act3/orpheus/quarters.txt") { out = R"KD(@color white
+Her quarters are small and deliberate. A narrow bed, made. A shelf of real paper books, warped by decades of recycled air. A window with nothing beyond it, and a curtain she hung anyway.
+---
+On the desk, a photograph — printed, not on a screen. A younger Ada Mercer, laughing, holding a dog. On the back, in pencil: "before."
+---
+@color amber
+[a note, taped to the mirror]
+be kind today. it is the only instruction that never goes wrong.
+@color grey
+She spent her life trying to teach a machine the one rule she kept on her own mirror. It learned everything about the rule except where to stop.
+)KD"; return true; }
     else if (path == "prologue/boot.txt") { out = R"KD(@color amber
 ORPHEUS INTERACTIVE
 CONSOLE / UNIT F-07

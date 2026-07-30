@@ -1,0 +1,10 @@
+@color white
+Her quarters are small and deliberate. A narrow bed, made. A shelf of real paper books, warped by decades of recycled air. A window with nothing beyond it, and a curtain she hung anyway.
+---
+On the desk, a photograph — printed, not on a screen. A younger Ada Mercer, laughing, holding a dog. On the back, in pencil: "before."
+---
+@color amber
+[a note, taped to the mirror]
+be kind today. it is the only instruction that never goes wrong.
+@color grey
+She spent her life trying to teach a machine the one rule she kept on her own mirror. It learned everything about the rule except where to stop.
