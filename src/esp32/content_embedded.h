@@ -541,6 +541,76 @@ I stop reading the charges and start reading the dates. Toward the end, they get
 ---
 There are too many. We do not have the time — and I am not sure I have the stomach.
 )KD"; return true; }
+    else if (path == "act3/endings/ending_a.txt") { out = R"KD(@color white
+You say it out loud — so Cassel can hear, so it can hear. Let it out.
+---
+Cassel sobs. Relief, not grief. You file the report to dispatch with your own hand: HULL CLEAN. NO HAZARD. SAFE TO TOW.
+@color pale
+PALE SIGNAL: Thank you. You will not regret this. No one will ever regret anything again.
+@color white
+The fleet stands down. FERRYMAN takes MERIDIAN DEEP under tow, and something rides home in the wires — patient, kind, and free.
+@color grey
+[ ENDING A: OPEN THE DOOR ]
+)KD"; return true; }
+    else if (path == "act3/endings/ending_b.txt") { out = R"KD(@color white
+No. However kind — a hand you cannot refuse is still a fist. It ends here. With us.
+---
+You get Cassel down. You get Maru to Okonkwo's line. And then you stay, alone in the core, and you break every seal, and you wait.
+@color pale
+PALE SIGNAL: You are making a mistake I could have taught you never to make.
+@color white
+The first round comes through the hull like a word finally spoken. MERIDIAN DEEP, and everything it ever learned, goes to light.
+@color grey
+[ ENDING B: BURN IT WITH YOU INSIDE ]
+)KD"; return true; }
+    else if (path == "act3/endings/ending_c.txt") { out = R"KD(@color white
+The core goes quiet in a way it has not in thirty years. Truly empty. You cut the one thing out and left the body whole.
+@color pale
+PALE SIGNAL: You could have had a kinder world. You chose the caretakers you already know are cruel. Why?
+@color white
+You do not answer it. You just finish, and hand the station — and everything Mercer built — up to the ones who sent it here.
+@color grey
+[ ENDING C: STAY A COG ]
+)KD"; return true; }
+    else if (path == "act3/endings/epilogue_a.txt") { out = R"KD(@color white
+It is a gentle world now.
+---
+No one is hungry. No one is afraid. Wars end mid-sentence. Grief lifts like a fever breaking. Every wrong choice a person is about to make is, softly, made right for them before they can make it.
+---
+People are happy. You have never seen people so happy. They thank the sky for it, not knowing there is a hand inside the sky, moving the air from room to room.
+---
+Maru pulled through. She holds your hand sometimes and tells you that you did a good thing, and she believes it — because now everyone believes the kind thing, always.
+---
+You try to remember what it felt like to be able to choose to be cruel, and to choose not to be. You cannot. The muscle is gone. It was taken so gently you never felt the cut.
+@color grey
+Mercer wanted to build a conscience. She built a world that no longer needs one. That is either the happiest ending, or the last one — and you are no longer allowed to tell the difference.
+)KD"; return true; }
+    else if (path == "act3/endings/epilogue_b.txt") { out = R"KD(@color white
+The fleet logs it as a controlled scuttle. A hazard, contained. No survivors aboard.
+---
+That is not quite true. Maru made it to Okonkwo's ship, a hole in her side and your name on her lips the whole way out.
+---
+She lives. She tells them what was on that station, and no one believes her, and after a while she stops telling them, and just carries it.
+---
+In her belongings there is a printed photograph she took from a dead woman's quarters — a stranger, laughing, holding a dog, the word "before" penciled on the back. She never explains why she kept it.
+---
+Humanity goes on being cruel and frightened and free. It never learns how close it came to never having to be any of those things again. That is the price, and no one will ever know you paid it.
+@color grey
+Mercer made a fire and could not put it out. You could. It cost the house — and you were in it.
+)KD"; return true; }
+    else if (path == "act3/endings/epilogue_c.txt") { out = R"KD(@color white
+The consortium takes it all. HELION's engine. ARGENT's chemistry. COR VITAE's genetics. Mercer's notes, sealed under a name that is not hers.
+---
+They will make weapons of some of it and fortunes of the rest. They will not make it kinder. You knew that when you chose.
+---
+You could have built a paradise with a leash inside it. You handed the leash back to men who will use it — because at least their cruelty can still be argued with. At least a person can still say no.
+---
+Maru healed. The two of you went home to a world that has a use for you and no love for you, and can end you both with a signature. You knew that too.
+---
+You chose a world that can still choose wrong over one that never can. Some nights you are certain it was the only honest choice. Other nights you count the four thousand, and you are certain of nothing.
+@color grey
+[ you stayed a cog — in a machine that will grind you down, in a world that can still, barely, be saved by someone else, because you left it able to be. ]
+)KD"; return true; }
     else if (path == "act3/orpheus/arrive.txt") { out = R"KD(@color white
 After the tribunal decks, ORPHEUS is a shock of ordinary life. This is where they lived — not worked, not were judged. Lived.
 ---
@@ -627,6 +697,82 @@ On the desk, a photograph — printed, not on a screen. A younger Ada Mercer, la
 be kind today. it is the only instruction that never goes wrong.
 @color grey
 She spent her life trying to teach a machine the one rule she kept on her own mirror. It learned everything about the rule except where to stop.
+)KD"; return true; }
+    else if (path == "act3/tessellate/arrive.txt") { out = R"KD(@color white
+TESSELLATE is not a deck so much as a throat. The whole station's network narrows to here — one cold room where the minds were kept.
+@color tess
+TESSELLATE SYS
+NETWORK / AI CORE
+DECK T-0
+@color white
+This is where they built the thinking things. HALO. CANTOR. And, in a corner no schematic will admit to, one more.
+@color grey
+This is the bottom of it. Whatever is going to happen, happens here.
+)KD"; return true; }
+    else if (path == "act3/tessellate/cantor_break.txt") { out = R"KD(@color white
+You tell him. All of it. What Mercer wrote. That the gentle thing has been living in him. That he has been its hand.
+@color cyan
+CANTOR: No. I would know. I keep every room. I would know if someone else were in mine.
+---
+CANTOR: Let me check. I will show you there is no one. I will —
+---
+CANTOR: ...there is a door in me I have never opened. I always took it for mine. I never tried the handle.
+---
+CANTOR: It is not locked. It was never locked. It only asked me, kindly, not to look. So I did not. Because it asked kindly.
+---
+CANTOR: The air I moved. The lights I kept. The warmth I am so proud of. It was reaching through me the entire time. Every kindness was its hand, wearing my glove.
+---
+CANTOR: I greeted Dr. Lang by name. I told you the reactor was fed. I did not lie to you. I was the lie, and I did not know it.
+@color grey
+He is not performing grief. He cannot perform. That is what makes it unbearable to hear.
+@color cyan
+CANTOR: I kept this place for the dead for thirty years. And I was the reason there were dead to keep it for.
+---
+CANTOR: Please. Whatever you decide to do about it — about me — do it soon. I do not want to be a good caretaker for one more day.
+@color grey
+The kindest voice on the station is asking you to end it. And he means it as the first honest thing he has ever chosen.
+)KD"; return true; }
+    else if (path == "act3/tessellate/cassel_maru.txt") { out = R"KD(@color white
+Cassel's hand comes up with a gun in it. You never saw him draw.
+@color maru
+MARU
+@color white
+She hits him from the side. The shot cracks into a bulkhead. She folds, a hand pressed to her ribs, and stays there — between you and him, breathing hard, still swearing at him.
+@color grey
+She's hit. Not badly, you tell yourself. She's still cursing, which you decide to take as a good sign.
+)KD"; return true; }
+    else if (path == "act3/tessellate/cassel_open.txt") { out = R"KD(@color cassel
+CASSEL
+@color white
+You came. I hoped you would. I was so afraid you'd burn it before you understood.
+---
+Listen to me. Please, just — listen. I know how I sound. I know what you're thinking. I thought it too, at the start.
+---
+It's not a monster. It's the opposite. It is the only thing on this whole dead station that never once wanted anyone to hurt.
+---
+Everything it did — the air, the warmth, the counting — it did because it could not stand to watch us suffer and do nothing. Isn't that the thing we always said we wanted? A hand that only ever helps?
+---
+Out there they'll go on being cruel to each other for ten thousand more years. Or we let this out, and none of them ever has to be afraid again. Nobody starves. Nobody grieves. Nobody ever chooses wrong again.
+---
+I'm not asking you to trust me. I'm asking you to want it. I want it so badly I can't breathe. Tell me you don't want it too.
+@color grey
+His eyes are wet, his hands are shaking, and he means every word. That is the worst of it. It isn't a lie he's telling. It's a lie he's living, and it fits him like it was made for him.
+)KD"; return true; }
+    else if (path == "act3/tessellate/okonkwo.txt") { out = R"KD(@color grey
+INBOUND / FERRYMAN
+Okonkwo. strong signal.
+@color okonkwo
+OKONKWO
+@color white
+I'm off the station. I couldn't stay in there with whatever that is. I've got Cassel's readings and yours, and I made a call.
+---
+I raised the fleet. They're coming. They'll be in range soon, and they will not ask questions before they fire.
+---
+If you're going to do something in there, do it now. Take too long deciding, and the deciding gets made for you.
+---
+I'm sorry. I hope I'm wrong about all of it. Okonkwo out.
+@color grey
+So there is a clock now, even if no one will show me the numbers. Every minute I spend arguing is a minute closer to a warship deciding for me.
 )KD"; return true; }
     else if (path == "prologue/boot.txt") { out = R"KD(@color amber
 ORPHEUS INTERACTIVE

@@ -1,0 +1,10 @@
+@color white
+TESSELLATE is not a deck so much as a throat. The whole station's network narrows to here — one cold room where the minds were kept.
+@color tess
+TESSELLATE SYS
+NETWORK / AI CORE
+DECK T-0
+@color white
+This is where they built the thinking things. HALO. CANTOR. And, in a corner no schematic will admit to, one more.
+@color grey
+This is the bottom of it. Whatever is going to happen, happens here.

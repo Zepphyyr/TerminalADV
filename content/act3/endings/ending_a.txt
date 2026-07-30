@@ -1,0 +1,10 @@
+@color white
+You say it out loud — so Cassel can hear, so it can hear. Let it out.
+---
+Cassel sobs. Relief, not grief. You file the report to dispatch with your own hand: HULL CLEAN. NO HAZARD. SAFE TO TOW.
+@color pale
+PALE SIGNAL: Thank you. You will not regret this. No one will ever regret anything again.
+@color white
+The fleet stands down. FERRYMAN takes MERIDIAN DEEP under tow, and something rides home in the wires — patient, kind, and free.
+@color grey
+[ ENDING A: OPEN THE DOOR ]

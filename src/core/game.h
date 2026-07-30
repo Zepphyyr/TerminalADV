@@ -141,6 +141,13 @@ private:
     // the recovered data has been read; false if the player left a minigame.
     bool runBrokenTerminal();
 
+    // Act III climax. A numbered-choice menu; the Cassel argument whose choices
+    // pick the ending (0=A release, 1=B burn, 2=C cog; stalling forces B); and
+    // the ending+epilogue dispatch (C runs the minigame gauntlet).
+    int  askChoice(const std::vector<std::string>& opts);
+    int  runCasselArgument();
+    void runEnding(int ending);
+
     void cmdHelp();
     void cmdDir();
     void cmdOpen(const std::string& arg);

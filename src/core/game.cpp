@@ -454,6 +454,16 @@ bool Game::handleCommand(const std::string& raw) {
         cur_ = pal::grey; queueBeats("NULLPOINT: read."); cur_ = pal::amber;
         return true;
     }
+    if (cmd == "cantorbreak") {                    // debug: CANTOR realises the truth
+        playFile("act3/tessellate/cantor_break.txt");
+        cur_ = pal::grey; queueBeats("CANTOR: broken."); cur_ = pal::amber;
+        return true;
+    }
+    if (cmd == "climax") {                          // debug: the argument -> ending
+        int e = runCasselArgument();
+        runEnding(e);
+        return true;
+    }
     if (cmd == "orpheus") {                        // debug: read ORPHEUS (Mercer)
         playFile("act3/orpheus/arrive.txt");
         playFile("act3/orpheus/mercer_1.txt");
@@ -1050,6 +1060,86 @@ bool Game::runBrokenTerminal() {
     }
     btDone_ = true;   // remember completion in-session, even if NVS didn't persist
     return true;
+}
+
+// A numbered-choice menu (blocking). Renders the options, reads a number,
+// returns the 0-based index. Re-prompts on anything that isn't 1..N.
+int Game::askChoice(const std::vector<std::string>& opts) {
+    for (int guard = 0; guard < 500; ++guard) {   // guard: never hang on bad input
+        p_->clear();
+        p_->setColor(pal::grey); p_->print("choose:\n\n");
+        for (size_t i = 0; i < opts.size(); ++i) {
+            p_->setColor(pal::amber); p_->print(std::to_string(i + 1) + ") ");
+            p_->setColor(pal::white); p_->print(opts[i]); p_->print("\n");
+        }
+        p_->setColor(pal::amber);
+        std::string in = digitsOnly(p_->readLine("\n> "));
+        if (!in.empty()) {
+            int n = std::atoi(in.c_str());
+            if (n >= 1 && n <= (int)opts.size()) return n - 1;
+        }
+    }
+    return 0;
+}
+
+// Act III climax — the argument with Cassel (under PALE). The choice picks the
+// ending: 0=A release, 1=B burn, 2=C cog. Stalling (option 4) three times lets
+// Okonkwo's fleet decide for you -> forced B. Rejecting PALE provokes Cassel to
+// draw; Maru takes the shot (wounded, survives). Returns the ending.
+int Game::runCasselArgument() {
+    playFile("act3/tessellate/okonkwo.txt");     // the fleet is inbound (the clock)
+    playFile("act3/tessellate/cassel_open.txt"); // his tearful, brainwashed plea
+    int stalls = 0; bool gun = false;
+    std::vector<std::string> opts;
+    opts.push_back("Let it out.");        // 0 -> A
+    opts.push_back("It ends with us.");   // 1 -> B
+    opts.push_back("It dies. We live.");  // 2 -> C
+    opts.push_back("Cassel, come back."); // 3 -> stall
+    for (;;) {
+        int c = askChoice(opts);
+        if (c == 0) {
+            playBeats("@color cassel\nCASSEL\n@color white\nYes. Yes — thank you. I knew you would see it.");
+            return 0;
+        }
+        if (c == 1 || c == 2) {
+            if (!gun) { gun = true; playFile("act3/tessellate/cassel_maru.txt"); }
+            return (c == 1) ? 1 : 2;
+        }
+        // stalling — trying to talk him down
+        stalls++;
+        if (!gun && stalls >= 2) { gun = true; playFile("act3/tessellate/cassel_maru.txt"); }
+        if (stalls >= 3) {
+            playBeats("@color grey\nA light blooms in the viewport. The fleet did not wait for you to finish arguing.\n"
+                      "@color white\nOkonkwo made the call you could not. The station goes to fire — and you with it.");
+            return 1;
+        }
+        playBeats("@color cassel\nCASSEL\n@color white\nYou're stalling. Don't stall. There is no time. Just — say you want it.");
+    }
+}
+
+// Play the chosen ending and its epilogue. Ending C first runs the gauntlet:
+// every minigame back to back, PALE's systems past human understanding.
+void Game::runEnding(int ending) {
+    if (ending == 0) {
+        playFile("act3/endings/ending_a.txt");
+        playFile("act3/endings/epilogue_a.txt");
+    } else if (ending == 1) {
+        playFile("act3/endings/ending_b.txt");
+        playFile("act3/endings/epilogue_b.txt");
+    } else {
+        playBeats("@color white\nThe systems fight you. PALE remade them past human understanding. This is the hard way.");
+        std::vector<std::string> w = {"MERCER","SILENT","CANTOR","MODULE","REASON","KINDLY","VESSEL","SIGNAL"};
+        runHack(p_, w, 0);
+        runSineMatch(p_);
+        runMaze(p_, defaultMaze());
+        playFile("act3/endings/ending_c.txt");
+        playFile("act3/endings/epilogue_c.txt");
+    }
+    deck_ = "act3_done";
+    p_->saveState("deck", deck_);
+    cur_ = pal::grey;
+    queueBeats("[ END OF KODZIMIM ]\n---\n@color grey\nthank you for playing.\n/reset to begin again.");
+    cur_ = pal::amber;
 }
 
 // Did the player speak HALO-9's decoded line? ("CANTOR IS NOT ALONE IN HIS OWN

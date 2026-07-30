@@ -1,0 +1,15 @@
+@color grey
+INBOUND / FERRYMAN
+Okonkwo. strong signal.
+@color okonkwo
+OKONKWO
+@color white
+I'm off the station. I couldn't stay in there with whatever that is. I've got Cassel's readings and yours, and I made a call.
+---
+I raised the fleet. They're coming. They'll be in range soon, and they will not ask questions before they fire.
+---
+If you're going to do something in there, do it now. Take too long deciding, and the deciding gets made for you.
+---
+I'm sorry. I hope I'm wrong about all of it. Okonkwo out.
+@color grey
+So there is a clock now, even if no one will show me the numbers. Every minute I spend arguing is a minute closer to a warship deciding for me.
